@@ -1,0 +1,10 @@
+{
+    "domain": "jebao_aqua",
+    "name": "Jebao Aqua Aquarium Pump",
+    "config_flow": true,
+    "documentation": "https://github.com/chrisc123/jebao_aqua-homeassistant",
+    "requirements": [],
+    "dependencies": [],
+    "codeowners": ["@chrisc123"],
+    "version": "0.0.1"
+}

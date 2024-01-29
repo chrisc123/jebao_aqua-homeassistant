@@ -1,0 +1,43 @@
+{
+  "config": {
+    "title": "Jebao Aquarium Pumps",
+    "step": {
+      "user": {
+        "title": "Log in to Jebao",
+        "description": "Please enter your Jebao credentials.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      "device_setup": {
+        "title": "Device Setup",
+        "description": "Enter the LAN IP Address for device: {device_name}.",
+        "data": {
+          "lan_ip": "LAN IP Address"
+        }
+      }
+    },
+    "error": {
+      "auth": "Failed to authenticate. Check your credentials.",
+      "no_devices": "No devices found. Make sure your devices are connected to Jebao.",
+      "cannot_connect": "Failed to connect to the device. Check the LAN IP address.",
+      "discovery_failed": "Automatic discovery failed. Please enter the LAN IP address manually."
+    },
+    "abort": {
+      "already_configured": "This account is already configured."
+    },
+    "success": {
+      "discovery_complete": "All devices discovered successfully."
+    }
+  },
+  "options": {
+    "title": "Jebao Aquarium Pumps Options",
+    "step": {
+      "init": {
+        "title": "Options",
+        "description": "Configure your Jebao Aquarium Pumps settings."
+      }
+    }
+  }
+}
