@@ -37,7 +37,9 @@ TODO:
 
 ### Configuration
 
-TODO - Explain how the JSON for each pump model needs to be obtained from Gizwits '/app/datapoint' endpoint and which Chinese strings need to be translated.
+* Review const.py - if you're based in the US you'll likely need to update the URLs to be usaepapp.gizwits.com / usapi.gizwits.com rather than euaepapp.gizwits.com and euapi.gizwits.com. 
+
+TODO - Explain how to create the JSON file for your specific pump model, explain how the JSON for each pump model needs to be obtained from Gizwits '/app/datapoint' endpoint and which Chinese strings need to be translated. Or perhaps we can just bulk download these - we do know what the app tries to check...
 
 
 ## Usage
