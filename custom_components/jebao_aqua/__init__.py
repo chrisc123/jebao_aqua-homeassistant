@@ -3,7 +3,6 @@ import json
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
-
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator, UpdateFailed
 )
@@ -12,6 +11,7 @@ from pathlib import Path
 
 from .const import DOMAIN, PLATFORMS, UPDATE_INTERVAL, LOGGER
 from .api import GizwitsApi
+from .discovery import discover_devices
 
 PLATFORMS = ["switch", "binary_sensor", "select", "number"]
 
@@ -53,14 +53,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
                 "attribute_models": attribute_models
             }
 
+        # Auto-discover devices and update config entry if needed
+        if entry.data.get("auto_discover"):
+            discovered_devices = await discover_devices()
+            if discovered_devices:
+                hass.data[DOMAIN][entry.entry_id]["discovered_devices"] = discovered_devices
+                LOGGER.debug(f"Discovered devices: {discovered_devices}")
+
         for platform in PLATFORMS:
             hass.async_create_task(
                 hass.config_entries.async_forward_entry_setup(entry, platform)
             )
 
     return True
-
-
 
 class GizwitsDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(self, hass, api):
@@ -111,9 +116,6 @@ class GizwitsDataUpdateCoordinator(DataUpdateCoordinator):
                 LOGGER.error(f"Error updating data for device {device_id}: {e}")
         return self.device_data
 
-
-
-        
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
     unload_ok = all(

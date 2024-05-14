@@ -1,10 +1,13 @@
+import logging
 import voluptuous as vol
-from homeassistant.helpers import config_validation as cv
+import homeassistant.helpers.config_validation as cv
 from homeassistant import config_entries
 from homeassistant.core import callback
 from .const import DOMAIN, LOGGER
 from .api import GizwitsApi
 from .discovery import discover_devices
+
+_LOGGER = logging.getLogger(__name__)
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -29,16 +32,25 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     if self._devices:
                         # Save the token in the configuration
                         self._config["token"] = self._token
-                        discovered_devices = await discover_devices(LOGGER, [d["did"] for d in self._devices['devices']])
-                        for device in self._devices['devices']:
-                            device_id = device["did"]
-                            if device_id in discovered_devices:
-                                device["lan_ip"] = discovered_devices[device_id]
-                            else:
-                                # Flag for manual IP entry if discovery failed
-                                device["lan_ip"] = None
 
-                        return await self.async_step_device_setup()
+                        # Call the discover_devices function and log the result
+                        _LOGGER.debug("Calling discover_devices()")
+                        discovered_devices = await discover_devices()
+                        _LOGGER.debug(f"Discovered devices: {discovered_devices}")
+
+                        if discovered_devices:
+                            for device in self._devices['devices']:
+                                device_id = device["did"]
+                                if device_id in discovered_devices:
+                                    device["lan_ip"] = discovered_devices[device_id]
+                                else:
+                                    # Flag for manual IP entry if discovery failed
+                                    device["lan_ip"] = None
+
+                            return await self.async_step_device_setup()
+
+                        else:
+                            errors["base"] = "no_devices"
                     else:
                         errors["base"] = "no_devices"
                 else:
@@ -52,7 +64,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             }),
             errors=errors
         )
-
 
     async def async_step_device_setup(self, user_input=None):
         errors = {}
@@ -80,13 +91,17 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         device_name = device.get("dev_alias") or device["did"]
         errors = {}
 
+        if device["lan_ip"]:
+            # If device already has a LAN IP from discovery, skip to the next device
+            return await self.async_step_device_setup({"lan_ip": device["lan_ip"]})
+
         if user_input is not None:
             # Validate the IP address
             try:
                 ip_address = user_input["lan_ip"]
                 valid_ip = cv.ipv4_address(ip_address)
                 # Process the valid IP address as needed
-                return self.async_create_entry(title="Device Setup", data=user_input)
+                return self.async_step_device_setup({"lan_ip": ip_address})
             except vol.Invalid:
                 errors["lan_ip"] = "invalid_ip"
 
@@ -103,3 +118,19 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry):
         return JebaoPumpOptionsFlowHandler(config_entry)
+
+class JebaoPumpOptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle an options flow for Jebao Pump integration."""
+
+    def __init__(self, config_entry):
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input=None):
+        """Manage the options."""
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema({
+                vol.Optional("option1", default=self.config_entry.options.get("option1", False)): bool,
+            })
+        )
