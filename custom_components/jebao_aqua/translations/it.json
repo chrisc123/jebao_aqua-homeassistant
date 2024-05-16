@@ -1,0 +1,43 @@
+{
+  "config": {
+    "title": "Pompe per acquario Jebao",
+    "step": {
+      "user": {
+        "title": "Accedi a Jebao",
+        "description": "Inserire le proprie credenziali Jebao.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      "device_setup": {
+        "title": "Impostazione del dispositivo",
+        "description": "Inserire l'indirizzo IP LAN del dispositivo: {device_name}.",
+        "data": {
+          "lan_ip": "Indirizzo IP LAN"
+        }
+      }
+    },
+    "error": {
+      "auth": "Autenticazione fallita. Verificare le credenziali.",
+      "no_devices": "Nessun dispositivo trovato. Assicurati che i dispositivi siano connessi a Jebao.",
+      "cannot_connect": "Impossibile connettersi al dispositivo. Controllare l'indirizzo IP della LAN.",
+      "discovery_failed": "Il rilevamento automatico non è riuscito. Inserire manualmente l'indirizzo IP."
+    },
+    "abort": {
+      "already_configured": "Questo account è già configurato."
+    },
+    "success": {
+      "discovery_complete": "Tutti i dispositivi sono stati rilevati con successo."
+    }
+  },
+  "options": {
+    "title": "Opzioni delle pompe per acquario Jebao.",
+    "step": {
+      "init": {
+        "title": "Opzioni",
+        "description": "Configurare le impostazioni delle pompe per acquari Jebao."
+      }
+    }
+  }
+}
