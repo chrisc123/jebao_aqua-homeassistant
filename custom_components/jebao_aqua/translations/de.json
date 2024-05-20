@@ -1,0 +1,43 @@
+{
+  "config": {
+    "title": "Jebao Aquariumpumpen",
+    "step": {
+      "user": {
+        "title": "Jebao Anemldung",
+        "description": "Bitte geben Sie Ihre Jebao-Anmeldedaten ein",
+        "data": {
+          "email": "Email",
+          "password": "Passwort"
+        }
+      },
+      "device_setup": {
+        "title": "Gerät einrichten",
+        "description": "Geben Sie die LAN-IP-Adresse für das Gerät ein: {device_name}.",
+        "data": {
+          "lan_ip": "LAN IP Addresse"
+        }
+      }
+    },
+    "error": {
+      "auth": "Authentifizierung fehlgeschlagen. Überprüfen Sie Ihre Anmeldeinformationen.",
+      "no_devices": "Keine Geräte gefunden. Stellen Sie sicher, dass Ihre Geräte mit Jebao verbunden sind.",
+      "cannot_connect": "Die Verbindung zum Gerät konnte nicht hergestellt werden. Überprüfen Sie die LAN-IP-Adresse.",
+      "discovery_failed": "Automatische Erkennung fehlgeschlagen. Bitte geben Sie die LAN-IP-Adresse manuell ein."
+    },
+    "abort": {
+      "already_configured": "Dieses Konto ist bereits konfiguriert."
+    },
+    "success": {
+      "discovery_complete": "Alle Geräte wurden erfolgreich erkannt."
+    }
+  },
+  "options": {
+    "title": "Jebao Aquarium Pumpen Optionen",
+    "step": {
+      "init": {
+        "title": "Optionen",
+        "description": "Konfigurieren Sie Ihre Jebao Aquarium Pumpen Einstellungen"
+      }
+    }
+  }
+}
