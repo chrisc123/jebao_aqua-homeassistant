@@ -8,6 +8,15 @@ The integration currently polls devices via the LAN for status updates but uses 
 
 _Note: I'm not a developer. This code was almost entirely written by ChatGPT based on my packet captures, the Gizwits documentation and some resources from the mobile app APK. I now realise it doesn't conform to established practices for Home Assistant to directly interface with the API from an integration, but it does work!_
 
+## Compatibility
+
+| Device Model            | Compatibility  |
+|-------------------------|----------------|
+| Jebao MCP Series Crossflow Wavemaker | ✅ Tested and working |
+| Jebao MLW Series Wavemaker      | ✅ Tested and working |
+| Jebao EP Series Pumps | ⚠️ Partially working - see: [This issue for a workaround](https://github.com/chrisc123/jebao_aqua-homeassistant/issues/) |
+| Other Jeabo Pumps | Not tested |
+
 
 ## Background
 * The pump control unit houses an Espressif ESP8266 microcontroller, this is running a version of the [Gizwits GAgent](https://docs.gizwits.com/en-us/DeviceDev/GAgent.html#Features) code.
