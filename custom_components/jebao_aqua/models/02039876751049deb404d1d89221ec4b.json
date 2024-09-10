@@ -1,0 +1,238 @@
+{
+    "product_key": "02039876751049deb404d1d89221ec4b.json",   
+   "attrs": [
+        {
+          "display_name": "Power On/Off",
+          "name": "SwitchON",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 0,
+          "desc": "Power on/off button"
+        },
+        {
+          "display_name": "Mode",
+          "name": "Mode",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 1
+          },
+          "type": "status_writable",
+          "id": 1,
+          "desc": "Mode switch, 0: AP control, 1: Wireless control"
+        },
+        {
+          "display_name": "Feed Switch",
+          "name": "FeedSwitch",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 2
+          },
+          "type": "status_writable",
+          "id": 2,
+          "desc": "Feed switch"
+        },
+        {
+          "display_name": "Timer Switch",
+          "name": "TimerON",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 3
+          },
+          "type": "status_writable",
+          "id": 3,
+          "desc": "0: Timer Off, 1: Timer On"
+        },
+        {
+          "display_name": "Current Timer Mode",
+          "name": "AutoMode",
+          "data_type": "enum",
+          "enum": [
+            "Stop",
+            "Automatic",
+            "Feed"
+          ],
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 2,
+            "bit_offset": 4
+          },
+          "type": "status_writable",
+          "id": 4,
+          "desc": "Current Timer Mode: 0: Stop; 1: Automatic; 2: Feed"
+        },
+        {
+          "display_name": "Set Motor Speed",
+          "name": "Motor_Speed",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 1,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 5,
+          "desc": "Motor speed setting, range is 30~100, 0 means motor is stopped"
+        },
+        {
+          "display_name": "Feed Duration",
+          "name": "FeedTime",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 2,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 60,
+            "ratio": 1,
+            "min": 1
+          },
+          "type": "status_writable",
+          "id": 6,
+          "desc": "Feed duration"
+        },
+        {
+          "display_name": "Current Timer Setting",
+          "name": "AutoGears",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 3,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 7,
+          "desc": "Current timer setting"
+        },
+        {
+          "display_name": "Motor Overcurrent",
+          "name": "Fault_Overcurrent",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 301,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "type": "fault",
+          "id": 59,
+          "desc": "Motor overcurrent, including short circuit fault"
+        },
+        {
+          "display_name": "Motor Overvoltage",
+          "name": "Fault_Overvoltage",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 301,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 1
+          },
+          "type": "fault",
+          "id": 60,
+          "desc": "Motor overvoltage"
+        },
+        {
+          "display_name": "Overtemperature",
+          "name": "Fault_OverTemp",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 301,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 2
+          },
+          "type": "fault",
+          "id": 61,
+          "desc": "Motor temperature too high"
+        },
+        {
+          "display_name": "Motor Undervoltage",
+          "name": "Fault_Undervoltage",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 301,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 3
+          },
+          "type": "fault",
+          "id": 62,
+          "desc": "Motor undervoltage"
+        },
+        {
+          "display_name": "Motor Locked Rotor",
+          "name": "Fault_Lockedrotor",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 301,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 4
+          },
+          "type": "fault",
+          "id": 63,
+          "desc": "Motor locked rotor"
+        },
+        {
+          "display_name": "No Load",
+          "name": "Fault_no_liveload",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 301,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 5
+          },
+          "type": "fault",
+          "id": 64,
+          "desc": "No load"
+        },
+        {
+          "display_name": "UART Connection Fault",
+          "name": "Fault_UART",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 301,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 6
+          },
+          "type": "fault",
+          "id": 65,
+          "desc": "Module cannot connect to the mainboard"
+        }
+      ]
+}
