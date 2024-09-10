@@ -162,6 +162,9 @@ class GizwitsApi:
                 await self._send_local_command(writer, b'\x00\x93', b'\x00\x00\x00\x02\x02')
                 response = await reader.read(1024)
 
+                # Debug log the response in hex format
+                LOGGER.debug("Response after sending command 0x93: %s", response.hex())
+
                 # Process the response
                 device_status_payload = self._extract_device_status_payload(response)
                 if device_status_payload:
@@ -187,6 +190,7 @@ class GizwitsApi:
             return None
 
 
+
     async def _send_local_command(self, writer, command, payload=b''):
         """Send a command to the local device."""
         try:
@@ -206,22 +210,45 @@ class GizwitsApi:
     def _extract_device_status_payload(self, response):
         """Extract the device status payload from the response."""
         try:
-            if len(response) > 6:
-                # The total length is in the 4th and 5th bytes (little endian) & 0x1FF
-                total_length = int.from_bytes(response[4:6], byteorder='little') & 0x1FF
-                N = total_length - 8  # Length of device status payload
+            # Find the pattern 0x00 0x00 0x00 0x03 in the response, this is marker for start of gizwits message
+            pattern = b'\x00\x00\x00\x03'
+            start_index = response.find(pattern)
+            if start_index == -1:
+                LOGGER.error("Pattern 0x00 0x00 0x00 0x03 not found in the device response")
+                return None
 
-                if N > 0 and N <= len(response):
-                    # Extract the last N bytes (device status payload)
-                    device_status_payload = response[-N:]
-                    # Convert payload to hex string and swap the endianness of the first two bytes
-                    return self._swap_endian(device_status_payload.hex())
+            # Start evaluating bytes after the pattern for LEB128 encoded length
+            leb128_bytes = response[start_index + len(pattern):]
+            length, leb128_length = self._decode_leb128(leb128_bytes)
+            if length is None:
+                LOGGER.error("Failed to decode LEB128 encoded payload length from device response")
+                return None
+
+            # Subtract 8 from the decoded length to get the device status payload length
+            N = length - 8
+
+            if N > 0 and N <= len(response):
+                # Extract the last N bytes as the device status payload
+                device_status_payload = response[-N:]
+                return device_status_payload
             else:
-                logging.warning("Response too short to extract device status payload")
+                LOGGER.error("Invalid device status payload length: %s", N)
+                return None
         except Exception as e:
-            logging.error(f"Error in extracting device status payload: {e}")
+            LOGGER.error(f"Error in extracting device status payload: {e}")
+            return None
 
-        return None
+    def _decode_leb128(self, data):
+        """Decode LEB128 encoded data and return the value and number of bytes read."""
+        result = 0
+        shift = 0
+        for i, byte in enumerate(data):
+            result |= ((byte & 0x7F) << shift)
+            if (byte & 0x80) == 0:
+                return result, i + 1
+            shift += 7
+        return None, 0
+
 
     def _swap_endian(self, hex_str):
         """ Swap the endianness of the first two bytes of the hex string. """
@@ -231,18 +258,24 @@ class GizwitsApi:
         return hex_str
 
     def _parse_device_status(self, payload, attribute_model):
-        """ Parse the device status payload based on the attribute model. """
+        """Parse the device status payload based on the attribute model."""
         status_data = {}
         try:
-            # Convert hex payload to byte array
-            payload = bytes.fromhex(payload)
+            # Check if the payload is a string, convert it to bytes if necessary
+            if isinstance(payload, str):
+                payload = bytes.fromhex(payload)
 
-            # Process each attribute in attribute model
+            # Determine if endianness swap is needed for any attribute
             for attr in attribute_model['attrs']:
                 byte_offset = attr['position']['byte_offset']
                 bit_offset = attr['position']['bit_offset']
                 length = attr['position']['len']
                 data_type = attr.get('data_type', 'unknown')
+
+                # Check if endianness swap is needed
+                if byte_offset == 0 and (bit_offset + length) > 8:
+                    # Swap endianness of the first two bytes
+                    payload = bytes.fromhex(self._swap_endian(payload.hex()))
 
                 # Extract value based on data type
                 if data_type == 'bool':
@@ -258,9 +291,10 @@ class GizwitsApi:
 
                 status_data[attr['name']] = value
         except Exception as e:
-            logging.error(f"Error parsing device status payload: {e}")
+            LOGGER.error(f"Error parsing device status payload: {e}")
 
         return status_data
+
 
     def _extract_bits(self, byte_val, bit_offset, length):
         """ Extract specific bits from a byte value. """
