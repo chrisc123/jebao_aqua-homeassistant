@@ -261,40 +261,47 @@ class GizwitsApi:
         """Parse the device status payload based on the attribute model."""
         status_data = {}
         try:
-            # Check if the payload is a string, convert it to bytes if necessary
-            if isinstance(payload, str):
-                payload = bytes.fromhex(payload)
+            # Convert bytes payload to a hexadecimal string if needed
+            if isinstance(payload, bytes):
+                payload = payload.hex()
 
-            # Determine if endianness swap is needed for any attribute
+            # Check if endianness swap is needed
+            swap_needed = any(
+                attr['position']['byte_offset'] == 0 and (attr['position']['bit_offset'] + attr['position']['len'] > 8)
+                for attr in attribute_model['attrs']
+            )
+
+            # Perform endianness swap only once if needed
+            if swap_needed:
+                payload = self._swap_endian(payload)
+
+            # Convert hex payload to a byte array
+            payload_bytes = bytes.fromhex(payload)
+
+            # Process each attribute in the attribute model
             for attr in attribute_model['attrs']:
                 byte_offset = attr['position']['byte_offset']
                 bit_offset = attr['position']['bit_offset']
                 length = attr['position']['len']
                 data_type = attr.get('data_type', 'unknown')
 
-                # Check if endianness swap is needed
-                if byte_offset == 0 and (bit_offset + length) > 8:
-                    # Swap endianness of the first two bytes
-                    payload = bytes.fromhex(self._swap_endian(payload.hex()))
-
                 # Extract value based on data type
                 if data_type == 'bool':
-                    value = bool(self._extract_bits(payload[byte_offset], bit_offset, length))
+                    value = bool(self._extract_bits(payload_bytes[byte_offset], bit_offset, length))
                 elif data_type == 'enum':
                     enum_values = attr.get('enum', [])
-                    enum_index = self._extract_bits(payload[byte_offset], bit_offset, length)
+                    enum_index = self._extract_bits(payload_bytes[byte_offset], bit_offset, length)
                     value = enum_values[enum_index] if enum_index < len(enum_values) else None
                 elif data_type == 'uint8':
-                    value = payload[byte_offset]
+                    value = payload_bytes[byte_offset]
                 elif data_type == 'binary':
-                    value = payload[byte_offset:byte_offset + length].hex()
+                    value = payload_bytes[byte_offset:byte_offset + length].hex()
 
                 status_data[attr['name']] = value
         except Exception as e:
             LOGGER.error(f"Error parsing device status payload: {e}")
 
         return status_data
-
 
     def _extract_bits(self, byte_val, bit_offset, length):
         """ Extract specific bits from a byte value. """
