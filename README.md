@@ -14,7 +14,8 @@ _Note: I'm not a developer. This code was almost entirely written by ChatGPT bas
 |-------------------------|----------------|
 | Jebao MCP Series Crossflow Wavemaker | ✅ Tested and working |
 | Jebao MLW Series Wavemaker      | ✅ Tested and working |
-| Jebao EP Series Pumps | ⚠️ Partially working - see: [This issue for a workaround](https://github.com/chrisc123/jebao_aqua-homeassistant/issues/) |
+| Jebao SLW Series Wavemaker      | ⚠️ Added but not confirmed working |
+| Jebao EP Series Pumps | ⚠️ Added but not confirmed working - see: [This issue for some notes ](https://github.com/chrisc123/jebao_aqua-homeassistant/issues/) |
 | Other Jeabo Pumps | Not tested |
 
 
