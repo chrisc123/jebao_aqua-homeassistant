@@ -16,20 +16,6 @@
             "desc": "Power on/off button"
         },
         {
-            "display_name": "Mode",
-            "name": "Mode",
-            "data_type": "bool",
-            "position": {
-                "byte_offset": 0,
-                "unit": "bit",
-                "len": 1,
-                "bit_offset": 1
-            },
-            "type": "status_writable",
-            "id": 1,
-            "desc": "Mode switch, 0: AP control, 1: Wireless control"
-        },
-        {
             "display_name": "Feed Switch",
             "name": "FeedSwitch",
             "data_type": "bool",
@@ -42,39 +28,6 @@
             "type": "status_writable",
             "id": 2,
             "desc": "Feed switch"
-        },
-        {
-            "display_name": "Timer Switch",
-            "name": "TimerON",
-            "data_type": "bool",
-            "position": {
-                "byte_offset": 0,
-                "unit": "bit",
-                "len": 1,
-                "bit_offset": 3
-            },
-            "type": "status_writable",
-            "id": 3,
-            "desc": "0: Timer Off, 1: Timer On"
-        },
-        {
-            "display_name": "Current Timer Mode",
-            "name": "AutoMode",
-            "data_type": "enum",
-            "enum": [
-                "Stop",
-                "Automatic",
-                "Feed"
-            ],
-            "position": {
-                "byte_offset": 0,
-                "unit": "bit",
-                "len": 2,
-                "bit_offset": 4
-            },
-            "type": "status_writable",
-            "id": 4,
-            "desc": "Current Timer Mode: 0: Stop; 1: Automatic; 2: Feed"
         },
         {
             "display_name": "Set Motor Speed",
@@ -90,7 +43,7 @@
                 "addition": 0,
                 "max": 100,
                 "ratio": 1,
-                "min": 0
+                "min": 30
             },
             "type": "status_writable",
             "id": 5,
@@ -115,26 +68,6 @@
             "type": "status_writable",
             "id": 6,
             "desc": "Feed duration"
-        },
-        {
-            "display_name": "Current Timer Setting",
-            "name": "AutoGears",
-            "data_type": "uint8",
-            "position": {
-                "byte_offset": 3,
-                "unit": "byte",
-                "len": 1,
-                "bit_offset": 0
-            },
-            "uint_spec": {
-                "addition": 0,
-                "max": 100,
-                "ratio": 1,
-                "min": 0
-            },
-            "type": "status_writable",
-            "id": 7,
-            "desc": "Current timer setting"
         },
         {
             "display_name": "Motor Overcurrent",
