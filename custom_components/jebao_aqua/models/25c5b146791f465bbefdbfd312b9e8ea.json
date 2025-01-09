@@ -1,0 +1,201 @@
+{
+  "product_key": "25c5b146791f465bbefdbfd312b9e8ea",
+  "name": "MD-4.4",
+  "attrs": [
+    {
+      "display_name": "Power Switch",
+      "name": "switch",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 0
+      },
+      "type": "status_writable",
+      "id": 0,
+      "desc": "Controls the power state of the pump."
+    },
+    {
+      "display_name": "Channel 1 Switch",
+      "name": "channe1",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 1
+      },
+      "type": "status_writable",
+      "id": 1,
+      "desc": "Manages Channel 1's manual switch."
+    },
+    {
+      "display_name": "Channel 2 Switch",
+      "name": "channe2",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 2
+      },
+      "type": "status_writable",
+      "id": 2,
+      "desc": "Manages Channel 2's manual switch."
+    },
+    {
+      "display_name": "Channel 3 Switch",
+      "name": "channe3",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 3
+      },
+      "type": "status_writable",
+      "id": 3,
+      "desc": "Manages Channel 3's manual switch."
+    },
+    {
+      "display_name": "Channel 4 Switch",
+      "name": "channe4",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 4
+      },
+      "type": "status_writable",
+      "id": 4,
+      "desc": "Manages Channel 4's manual switch."
+    },
+    {
+      "display_name": "Timer 1 Switch",
+      "name": "Timer1ON",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 5
+      },
+      "type": "status_writable",
+      "id": 5,
+      "desc": "Enables or disables Timer 1."
+    },
+    {
+      "display_name": "Timer 2 Switch",
+      "name": "Timer2ON",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 6
+      },
+      "type": "status_writable",
+      "id": 6,
+      "desc": "Enables or disables Timer 2."
+    },
+    {
+      "display_name": "Timer 3 Switch",
+      "name": "Timer3ON",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 7
+      },
+      "type": "status_writable",
+      "id": 7,
+      "desc": "Enables or disables Timer 3."
+    },
+    {
+      "display_name": "Timer 4 Switch",
+      "name": "Timer4ON",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 8
+      },
+      "type": "status_writable",
+      "id": 8,
+      "desc": "Enables or disables Timer 4."
+    },
+    {
+      "display_name": "Calibration Switch",
+      "name": "CALSW",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 9
+      },
+      "type": "status_writable",
+      "id": 9,
+      "desc": "Toggles the calibration switch."
+    },
+    {
+      "display_name": "Calibration Channel",
+      "name": "CALSet",
+      "data_type": "enum",
+      "enum": ["Calibration1", "Calibration2", "Calibration3", "Calibration4"],
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 2,
+        "bit_offset": 10
+      },
+      "type": "status_writable",
+      "id": 10,
+      "desc": "Selects the calibration channel."
+    },
+    {
+      "display_name": "Interval Time 1",
+      "name": "IntervalT1",
+      "data_type": "uint8",
+      "position": {
+        "byte_offset": 2,
+        "unit": "byte",
+        "len": 1,
+        "bit_offset": 0
+      },
+      "uint_spec": {
+        "addition": 0,
+        "max": 30,
+        "ratio": 1,
+        "min": 0
+      },
+      "type": "status_writable",
+      "id": 11,
+      "desc": "Interval time for Channel 1."
+    },
+    {
+      "display_name": "Interval Time 2",
+      "name": "IntervalT2",
+      "data_type": "uint8",
+      "position": {
+        "byte_offset": 3,
+        "unit": "byte",
+        "len": 1,
+        "bit_offset": 0
+      },
+      "uint_spec": {
+        "addition": 0,
+        "max": 30,
+        "ratio": 1,
+        "min": 0
+      },
+      "type": "status_writable",
+      "id": 12,
+      "desc": "Interval time for Channel 2."
+    }
+  ]
+}
