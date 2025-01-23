@@ -1,10 +1,7 @@
 {
   "name": "Jebao Aqua Integration",
-<<<<<<< HEAD
   "homeassistant": "2023.12.0",
-=======
   "country": "GB",
-  "homeassistant": "2023.12.0b0",
->>>>>>> f9caf21a771c956a62f030bddd8cab33d48add0d
+  "homeassistant": "2023.12.0",
   "persistent_directory": "models"
 }
