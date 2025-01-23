@@ -6,6 +6,8 @@ from .helpers import (
     create_entity_name,
     create_entity_id,
     create_unique_id,
+    is_device_data_valid,
+    get_attribute_value,
 )
 import asyncio
 
@@ -26,10 +28,16 @@ class JebaoPumpSwitch(CoordinatorEntity, SwitchEntity):
         self.entity_id = create_entity_id("switch", device_name, attribute["name"])
 
     @property
+    def available(self) -> bool:
+        """Return if entity is available."""
+        device_data = self.coordinator.device_data.get(self._device["did"])
+        return is_device_data_valid(device_data)
+
+    @property
     def is_on(self) -> bool:
         """Return the on/off state of the switch."""
-        device_data = self.coordinator.device_data.get(self._device["did"]) or {}
-        return device_data.get("attr", {}).get(self._attribute["name"], False)
+        device_data = self.coordinator.device_data.get(self._device["did"])
+        return get_attribute_value(device_data, self._attribute["name"]) or False
 
     async def async_turn_on(self, **kwargs):
         """Turn the switch on."""
@@ -51,6 +59,21 @@ class JebaoPumpSwitch(CoordinatorEntity, SwitchEntity):
     def device_info(self):
         """Return information about the device this entity belongs to."""
         return get_device_info(self._device)
+
+    @property
+    def name(self) -> str:
+        """Return the display name of this entity."""
+        return self._attr_name
+
+    @property
+    def has_entity_name(self) -> bool:
+        """Indicate that we are using the device name as the entity name."""
+        return True
+
+    @property
+    def translation_key(self) -> str:
+        """Return the translation key to use in logbook."""
+        return self._attribute["name"].lower()
 
 
 async def async_setup_entry(hass, entry, async_add_entities):

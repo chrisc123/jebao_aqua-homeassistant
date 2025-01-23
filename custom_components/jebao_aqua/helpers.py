@@ -51,7 +51,8 @@ async def load_attribute_models(hass: HomeAssistant) -> dict:
 
 def create_entity_name(device_name: str, attr_name: str) -> str:
     """Create standardized entity name."""
-    return f"{device_name} {attr_name}"
+    # Only return the attribute name since we're using has_entity_name = True
+    return attr_name
 
 
 def create_entity_id(platform: str, device_name: str, attr_name: str) -> str:
@@ -64,3 +65,24 @@ def create_entity_id(platform: str, device_name: str, attr_name: str) -> str:
 def create_unique_id(device_id: str, attr_name: str) -> str:
     """Create standardized unique ID."""
     return f"{device_id}_{attr_name.replace(' ', '_').lower()}"
+
+
+def is_device_data_valid(device_data: dict) -> bool:
+    """Check if device data is valid."""
+    LOGGER.debug(f"Checking device data validity: {device_data}")  # Add debug logging
+    if not device_data:
+        return False
+    if not isinstance(device_data, dict):
+        return False
+    if "attr" not in device_data:
+        return False
+    if not device_data.get("attr"):  # Add check for empty attr dict
+        return False
+    return True
+
+
+def get_attribute_value(device_data: dict, attribute: str):
+    """Safely get attribute value from device data."""
+    if not is_device_data_valid(device_data):
+        return None
+    return device_data.get("attr", {}).get(attribute)

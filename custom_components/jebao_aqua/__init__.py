@@ -13,6 +13,7 @@ from homeassistant.helpers.device_registry import async_get as async_get_device_
 from .const import DOMAIN, PLATFORMS, UPDATE_INTERVAL, LOGGER, GIZWITS_API_URLS
 from .api import GizwitsApi
 from .discovery import discover_devices
+from .helpers import is_device_data_valid  # Add this import
 
 PLATFORMS = ["switch", "binary_sensor", "select", "number"]
 
@@ -115,8 +116,9 @@ class GizwitsDataUpdateCoordinator(DataUpdateCoordinator):
         """Initialize."""
         super().__init__(hass, LOGGER, name=DOMAIN, update_interval=UPDATE_INTERVAL)
         self.api = api
-        self.device_inventory = []  # List of devices
-        self.device_data = {}  # Dictionary of device status data
+        self.device_inventory = []
+        self.device_data = {}
+        self._device_update_locks = {}  # Add locks per device
 
     async def fetch_initial_device_list(self, entry: ConfigEntry):
         """Fetch the initial list of devices and add LAN IPs."""
@@ -145,30 +147,96 @@ class GizwitsDataUpdateCoordinator(DataUpdateCoordinator):
             LOGGER.error(f"Error fetching initial device list: {e}")
 
     async def get_device_data(self, device_id):
-        """Get device data either locally or from the cloud."""
-        device_info = next(
-            (device for device in self.device_inventory if device["did"] == device_id),
-            None,
-        )
-        if device_info and "lan_ip" in device_info:
-            return await self.api.get_local_device_data(
-                device_info["lan_ip"], device_info["product_key"], device_id
+        """Get device data either locally or from the cloud with lock protection."""
+        # Get or create lock for this device
+        if device_id not in self._device_update_locks:
+            self._device_update_locks[device_id] = asyncio.Lock()
+
+        async with self._device_update_locks[device_id]:
+            device_info = next(
+                (
+                    device
+                    for device in self.device_inventory
+                    if device["did"] == device_id
+                ),
+                None,
             )
-        else:
-            return await self.api.get_device_data(device_id)
+            if device_info and "lan_ip" in device_info:
+                LOGGER.debug(
+                    f"Getting local data for device {device_id} at {device_info['lan_ip']}"
+                )
+                data = await self.api.get_local_device_data(
+                    device_info["lan_ip"], device_info["product_key"], device_id
+                )
+            else:
+                LOGGER.debug(f"Getting cloud data for device {device_id}")
+                data = await self.api.get_device_data(device_id)
+
+            if data:
+                LOGGER.debug(f"Got data for device {device_id}: {data}")
+            return data
 
     async def _async_update_data(self):
         """Fetch the latest status for each device."""
-        for device in self.device_inventory:
-            device_id = device.get("did")
+        new_data = {}
+
+        async def update_single_device(device_id: str):
+            """Update a single device's data."""
             try:
-                self.device_data[device_id] = await self.get_device_data(device_id)
-                LOGGER.debug(
-                    f"Coordinator ran _async_update_data and updated device data: {self.device_data[device_id]}"
-                )
+                device_data = await self.get_device_data(device_id)
+                if device_data and isinstance(device_data.get("attr"), dict):
+                    LOGGER.debug(
+                        f"Got fresh data for device {device_id}: {device_data}"
+                    )
+                    return device_id, device_data
+                elif device_id in self.device_data:
+                    LOGGER.warning(f"Using cached data for device {device_id}")
+                    return device_id, self.device_data[device_id]
+                else:
+                    LOGGER.warning(f"No valid data for device {device_id}")
+                    return None, None
             except Exception as e:
-                LOGGER.error(f"Error updating data for device {device_id}: {e}")
-        return self.device_data
+                LOGGER.error(f"Error updating device {device_id}: {e}")
+                if device_id in self.device_data:
+                    return device_id, self.device_data[device_id]
+                return None, None
+
+        # Create tasks for all devices
+        tasks = []
+        for device in self.device_inventory:
+            if device_id := device.get("did"):
+                tasks.append(update_single_device(device_id))
+
+        # Wait for all updates to complete
+        if tasks:
+            results = await asyncio.gather(*tasks, return_exceptions=False)
+
+            # Process results and log them
+            for device_id, data in results:
+                if device_id and data:
+                    new_data[device_id] = data
+                    LOGGER.debug(
+                        f"Successfully updated device {device_id} with data: {data}"
+                    )
+
+        if not new_data:
+            LOGGER.error("No device data was updated successfully")
+            # Instead of raising UpdateFailed, return last known good data if available
+            if self.device_data:
+                LOGGER.warning("Using last known good data")
+                return self.device_data
+            raise UpdateFailed("Failed to update any devices")
+
+        LOGGER.debug(f"Final update data for all devices: {new_data}")
+        self.device_data = new_data
+        return new_data
+
+    async def async_config_entry_first_refresh(self) -> None:
+        """Perform first refresh and make sure we get valid data."""
+        await self._async_refresh(log_failures=True)
+        # Verify we have valid data after first refresh
+        if not any(is_device_data_valid(data) for data in self.device_data.values()):
+            raise ConfigEntryNotReady("No valid device data received during setup")
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

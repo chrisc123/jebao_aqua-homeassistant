@@ -159,36 +159,32 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle device setup."""
         errors = {}
 
-        # Create a mapping of device aliases to IDs for form processing
+        # Create a mapping of device aliases to full device info for form processing
         device_map = {
-            device.get("dev_alias", device["did"]): device["did"]
+            device.get("dev_alias", device["did"]): device
             for device in self._devices["devices"]
         }
 
         if user_input is not None:
             try:
                 devices = []
-                # Map the alias back to device ID when processing input
-                for alias, device_id in device_map.items():
+                # Process each device while maintaining all original device information
+                for alias, device in device_map.items():
                     ip = user_input.get(alias, "")
-
-                    if ip:  # Only validate if IP is provided
-                        try:
-                            ipaddress.ip_address(ip)
-                        except ValueError:
-                            errors[alias] = "invalid_ip"
-                            continue
-
-                    devices.append({"did": device_id, "lan_ip": ip or None})
+                    device_data = device.copy()  # Preserve all original device data
+                    device_data["lan_ip"] = ip if ip else None
+                    devices.append(device_data)
 
                 if not errors:
                     self._config["devices"] = devices
+                    # Log the final configuration to verify device separation
+                    LOGGER.debug("Final device configuration: %s", devices)
                     return self.async_create_entry(
                         title="Jebao Aquarium Pumps", data=self._config
                     )
 
             except Exception as ex:
-                _LOGGER.error(f"Error processing device IPs: {ex}")
+                LOGGER.error(f"Error processing device IPs: {ex}")
                 errors["base"] = "unknown"
 
         # Create schema using aliases as field names
