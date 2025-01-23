@@ -4,38 +4,28 @@
     "step": {
       "user": {
         "title": "Log in to Jebao",
-        "description": "Please enter your Jebao credentials and select your country.",
+        "description": "Please enter your Jebao credentials.",
         "data": {
           "email": "Email",
-          "password": "Password",
-          "country": "Country"
+          "password": "Password"
         }
       },
       "device_setup": {
         "title": "Device Setup",
-        "description": "Configure IP addresses for {number_of_devices} devices. Leave empty for cloud-only mode.",
+        "description": "Enter the LAN IP Address for device: {device_name}.",
         "data": {
-          "device_ips": "Device IP Addresses"
+          "lan_ip": "LAN IP Address"
         }
       }
     },
     "error": {
       "auth": "Failed to authenticate. Check your credentials.",
-      "no_devices": "No devices found. Make sure your devices are registered in the Jebao App first.",
+      "no_devices": "No devices found. Make sure your devices are connected to Jebao.",
       "cannot_connect": "Failed to connect to the device. Check the LAN IP address.",
-      "discovery_failed": "Automatic discovery failed. Please enter the LAN IP address manually.",
-      "invalid_ip": "Invalid IP address format",
-      "user_not_exist": "User account does not exist",
-      "invalid_password": "Incorrect password",
-      "invalid_json": "Invalid response from server",
-      "invalid_response": "Unexpected response from server",
-      "connection_error": "Could not connect to server",
-      "unknown_error": "Unknown error occurred"
+      "discovery_failed": "Automatic discovery failed. Please enter the LAN IP address manually."
     },
     "abort": {
-      "already_configured": "This account is already configured.",
-      "no_devices": "No devices available for setup.",
-      "device_index_error": "Error accessing device information."
+      "already_configured": "This account is already configured."
     },
     "success": {
       "discovery_complete": "All devices discovered successfully."
@@ -45,44 +35,9 @@
     "title": "Jebao Aquarium Pumps Options",
     "step": {
       "init": {
-        "title": "Configure Jebao Aquarium Pumps",
-        "description": "Current settings:\nEmail: {current_email}\nRegion: {current_region}",
-        "data": {
-          "next_step": "Select an option"
-        }
-      },
-      "reconfigure": {
-        "title": "Update Credentials",
-        "description": "Update your Jebao credentials and rediscover devices.",
-        "data": {
-          "email": "Email",
-          "password": "Password",
-          "country": "Country"
-        }
-      },
-      "device_setup": {
-        "title": "Update Device Configuration",
-        "description": "Configure IP addresses for {number_of_devices} devices. Leave empty for cloud-only mode.",
-        "data": {
-          "device_ips": "Device IP Addresses"
-        }
+        "title": "Options",
+        "description": "Configure your Jebao Aquarium Pumps settings."
       }
-    },
-    "error": {
-      "auth": "Failed to authenticate. Check your credentials.",
-      "no_devices": "No devices found. Make sure your devices are registered in the Jebao App first.",
-      "cannot_connect": "Failed to connect to the device. Check the LAN IP address.",
-      "discovery_failed": "Automatic discovery failed. Please enter the LAN IP address manually.",
-      "invalid_ip": "Invalid IP address format",
-      "user_not_exist": "User account does not exist",
-      "invalid_password": "Incorrect password",
-      "invalid_json": "Invalid response from server",
-      "invalid_response": "Unexpected response from server",
-      "connection_error": "Could not connect to server",
-      "unknown_error": "Unknown error occurred"
-    },
-    "abort": {
-      "already_configured": "Device already configured"
     }
   }
 }

@@ -4,85 +4,40 @@
     "step": {
       "user": {
         "title": "Accedi a Jebao",
-        "description": "Inserisci le tue credenziali Jebao e seleziona il tuo paese.",
+        "description": "Inserire le proprie credenziali Jebao.",
         "data": {
           "email": "Email",
-          "password": "Password",
-          "country": "Paese"
+          "password": "Password"
         }
       },
       "device_setup": {
-        "title": "Configurazione dispositivo",
-        "description": "Configura gli indirizzi IP per {number_of_devices} dispositivi. Lascia vuoto per la modalità solo cloud.",
+        "title": "Impostazione del dispositivo",
+        "description": "Inserire l'indirizzo IP LAN del dispositivo: {device_name}.",
         "data": {
-          "device_ips": "Indirizzi IP dispositivi"
+          "lan_ip": "Indirizzo IP LAN"
         }
       }
     },
     "error": {
-      "auth": "Autenticazione fallita. Verifica le tue credenziali.",
-      "no_devices": "Nessun dispositivo trovato. Assicurati che i tuoi dispositivi siano registrati prima nell'app Jebao.",
-      "cannot_connect": "Impossibile connettersi al dispositivo. Verifica l'indirizzo IP LAN.",
-      "discovery_failed": "Rilevamento automatico fallito. Inserisci manualmente l'indirizzo IP LAN.",
-      "invalid_ip": "Formato indirizzo IP non valido",
-      "user_not_exist": "L'account utente non esiste",
-      "invalid_password": "Password non corretta",
-      "invalid_json": "Risposta del server non valida",
-      "invalid_response": "Risposta del server inattesa",
-      "connection_error": "Impossibile connettersi al server",
-      "unknown_error": "Si è verificato un errore sconosciuto"
+      "auth": "Autenticazione fallita. Verificare le credenziali.",
+      "no_devices": "Nessun dispositivo trovato. Assicurati che i dispositivi siano connessi a Jebao.",
+      "cannot_connect": "Impossibile connettersi al dispositivo. Controllare l'indirizzo IP della LAN.",
+      "discovery_failed": "Il rilevamento automatico non è riuscito. Inserire manualmente l'indirizzo IP."
     },
     "abort": {
-      "already_configured": "Questo account è già configurato",
-      "no_devices": "Nessun dispositivo disponibile per la configurazione",
-      "device_index_error": "Errore nell'accesso alle informazioni del dispositivo"
+      "already_configured": "Questo account è già configurato."
     },
     "success": {
       "discovery_complete": "Tutti i dispositivi sono stati rilevati con successo."
     }
   },
   "options": {
-    "title": "Opzioni Pompe Acquario Jebao",
+    "title": "Opzioni delle pompe per acquario Jebao.",
     "step": {
       "init": {
-        "title": "Configura Pompe Jebao",
-        "description": "Impostazioni attuali:\nEmail: {current_email}\nRegione: {current_region}",
-        "data": {
-          "next_step": "Seleziona un'azione"
-        }
-      },
-      "reconfigure": {
-        "title": "Aggiorna Credenziali",
-        "description": "Aggiorna le tue credenziali Jebao e riscopri i dispositivi.",
-        "data": {
-          "email": "Email",
-          "password": "Password",
-          "country": "Paese"
-        }
-      },
-      "device_setup": {
-        "title": "Aggiorna Configurazione Dispositivo",
-        "description": "Configura gli indirizzi IP per {number_of_devices} dispositivi. Lascia vuoto per la modalità solo cloud.",
-        "data": {
-          "device_ips": "Indirizzi IP dispositivi"
-        }
+        "title": "Opzioni",
+        "description": "Configurare le impostazioni delle pompe per acquari Jebao."
       }
-    },
-    "error": {
-      "auth": "Autenticazione fallita. Verifica le tue credenziali.",
-      "no_devices": "Nessun dispositivo trovato. Assicurati che i tuoi dispositivi siano registrati prima nell'app Jebao.",
-      "cannot_connect": "Impossibile connettersi al dispositivo. Verifica l'indirizzo IP LAN.",
-      "discovery_failed": "Rilevamento automatico fallito. Inserisci manualmente l'indirizzo IP LAN.",
-      "invalid_ip": "Formato indirizzo IP non valido",
-      "user_not_exist": "L'account utente non esiste",
-      "invalid_password": "Password non corretta",
-      "invalid_json": "Risposta del server non valida",
-      "invalid_response": "Risposta del server inattesa",
-      "connection_error": "Impossibile connettersi al server",
-      "unknown_error": "Si è verificato un errore sconosciuto"
-    },
-    "abort": {
-      "already_configured": "Dispositivo già configurato"
     }
   }
 }

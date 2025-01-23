@@ -1,6 +1,5 @@
 {
     "product_key": "1d8c63eaccac4205b92c84d77d5a08fb",
-    "name":"Wavemaker Pump",
     "attrs": [
         {
             "display_name": "Switch",
@@ -79,7 +78,7 @@
             "desc": [
                 "Square Wave",
                 "Sine Wave",
-                "Random Wave",
+                "Random Wave", 
                 "Constant Flow"]
         },
         {
@@ -119,7 +118,7 @@
                 "addition": 0,
                 "max": 100,
                 "ratio": 1,
-                "min": 30
+                "min": 30 
             },
             "type": "status_writable",
             "id": 8,
