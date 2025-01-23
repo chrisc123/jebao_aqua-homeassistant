@@ -49,8 +49,7 @@ TODO:
 1. The pumps must already be setup with the Jebao Aqua app and connected to a Wi-Fi network that is routable from your Home Assistant installation.
 2. Note down the local IP addresses of your pumps using the app (from the individual pump control interface enter the "Settings" menu via icon in top right, then view "Device Information")
 3. Use HACS or clone the repo locally to install the integration code to /custom_components/
-4. Review const.py - if you're based in the US you'll likely need to update the URLs to be usaepapp.gizwits.com / usapi.gizwits.com rather than euaepapp.gizwits.com and euapi.gizwits.com.
-5. Add the "Jebao Aqua Aquarium Pump" integration via Home Assistant integrations dashboard, you'll be prompted to enter the login details for the Jebao Aqua app. The integration should then discover the devices linked to your account and ask you to provide the local IP for each. 
+4. Add the "Jebao Aqua Aquarium Pump" integration via Home Assistant integrations dashboard, you'll be prompted to enter the login details for the Jebao Aqua app. The integration should then discover the devices linked to your account and ask you to provide the local IP for each. 
 
 ### Configuration
 
