@@ -9,7 +9,9 @@ The integration currently polls devices via the LAN for status updates but uses 
 _Note: I'm not a developer. This code was almost entirely written by ChatGPT based on my packet captures, the Gizwits documentation and some resources from the mobile app APK. I now realise it doesn't conform to established practices for Home Assistant to directly interface with the API from an integration, but it does work!_
 
 ## Compatibility
-[!IMPORTANT] As of late 2024, it seems two different hardware versions of some model series may be available. The newer versions include support for Bluetooth (BLE) in addition to WiFi and seem to be using an ESP32C3 rather than the legacy ESP8266. If you have a BLE enabled version of the model below and the integration does not work out of the box then raise a Github issue and it should be possible to add support fairly easily. The compatibilty table below currently applies to the original, WiFi only, version of each model series.
+> [!IMPORTANT]
+> As of late 2024, it seems two different hardware versions of some model series may be available. The newer versions include support for Bluetooth (BLE) in addition to WiFi. They use an ESP32C3 microcontroller rather than the legacy ESP8266.
+> If you have a BLE enabled version of the model below and the integration does not work out of the box then raise a Github issue and it should be possible to add support fairly easily. The compatibilty table below currently applies to the original, WiFi only, version of each model series.
 
 | Device Model            | Compatibility  |
 |-------------------------|----------------|
