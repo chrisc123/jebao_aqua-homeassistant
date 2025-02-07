@@ -10,8 +10,8 @@ _Note: I'm not a developer. This code was almost entirely written by ChatGPT bas
 
 ## Compatibility
 > [!IMPORTANT]
-> As of late 2024, it seems two different hardware versions of some model series may be available. The newer versions include support for Bluetooth (BLE) in addition to WiFi. They use an ESP32C3 microcontroller rather than the legacy ESP8266.
-> If you have a BLE enabled version of the model below and the integration does not work out of the box then raise a Github issue and it should be possible to add support fairly easily. The compatibilty table below currently applies to the original, WiFi only, version of each model series.
+> As of late 2024, it seems two different hardware versions of some model series may be available. The newer versions include support for Bluetooth (BLE) in addition to WiFi and use an ESP32C3 microcontroller rather than the legacy ESP8266.
+> The WiFi+BLE devices do not yet work with this plugin - I'm investigating what's changed in the communication protocol and hope to add support soon.
 
 | Device Model            | Compatibility  |
 |-------------------------|----------------|
@@ -19,9 +19,11 @@ _Note: I'm not a developer. This code was almost entirely written by ChatGPT bas
 | Jebao MCP Series Crossflow Wavemaker | ✅ Tested and working |
 | Jebao MLW Series Wavemaker      | ✅ Tested and working |
 | Jebao SLW Series Wavemaker      | ⚠️ Added but not confirmed working |
-| Jebao EP Series Pumps | ⚠️ Added but not confirmed working  |
+| Jebao EP Series Pump | ⚠️ Added but not confirmed working  |
 | Jebao Smart Doser 3.1 | ✅ Added by @jeffcybulski |
-| Jebao MD 4.4 Dosing Pumps | ✅ Added by @jeffcybulski |
+| Jebao MD 4.4 Dosing Pump | ✅ Added by @jeffcybulski |
+| Jebao MD 2.4 Dosing Pump | ✅ Added by @joluan01 |
+| Any WiFi+Bluetooth enabled Jebao device | ❌ Not working but under investigation | 
 | Other Jeabo Pumps | Not tested |
 
 
