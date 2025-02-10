@@ -1,4 +1,4 @@
-name: Validate with hassfest
+name: Validate with hassfest and HACS
 
 on:
   push:
@@ -12,3 +12,10 @@ jobs:
     steps:
         - uses: "actions/checkout@v4"
         - uses: "home-assistant/actions/hassfest@master"
+  validate-hacs:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: HACS validation
+        uses: "hacs/action@main"
+        with:
+          category: "integration"
