@@ -43,7 +43,6 @@
     }
   },
   "options": {
-    "title": "Jebao Aquariumpumpen Optionen",
     "step": {
       "init": {
         "title": "Jebao Pumpen konfigurieren",

@@ -43,7 +43,6 @@
         }
   },
   "options": {
-    "title": "Opciones del dispositivo Jebao Aqua",
     "step": {
       "init": {
         "title": "Configurar dispositivos Jebao Aqua",

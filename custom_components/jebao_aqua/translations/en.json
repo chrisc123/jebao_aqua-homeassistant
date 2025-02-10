@@ -39,7 +39,6 @@
         }
     },
     "options": {
-        "title": "Jebao Aqua Device Options",
         "step": {
             "init": {
                 "title": "Configure Jebao Aqua Devices",
