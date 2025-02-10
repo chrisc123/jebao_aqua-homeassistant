@@ -1,0 +1,269 @@
+{
+    "product_key": "54114ccdac1e41c0bb17e222887c07ba",
+    "name":"Wavemaker Pump (New BLE enabled MLW Series - TBC?)",
+    "attrs": [
+        {
+            "display_name": "Switch",
+            "name": "SwitchON",
+            "data_type": "bool",
+            "position": {
+                "byte_offset": 0,
+                "unit": "bit",
+                "len": 1,
+                "bit_offset": 0
+            },
+            "type": "status_writable",
+            "id": 0,
+            "desc": ""
+        },
+        {
+            "display_name": "Pulse Tide",
+            "name": "PulseTide",
+            "data_type": "bool",
+            "position": {
+                "byte_offset": 0,
+                "unit": "bit",
+                "len": 1,
+                "bit_offset": 1
+            },
+            "type": "status_writable",
+            "id": 1,
+            "desc": "Selection of pulse and tidal wave, 0: pulse wave, 1: tidal wave"
+        },
+        {
+            "display_name": "Feeding Switch",
+            "name": "FeedSwitch",
+            "data_type": "bool",
+            "position": {
+                "byte_offset": 0,
+                "unit": "bit",
+                "len": 1,
+                "bit_offset": 2
+            },
+            "type": "status_writable",
+            "id": 2,
+            "desc": "Feeding switch, 0: off, 1: on"
+        },
+        {
+            "display_name": "Timer Switch",
+            "name": "TimerON",
+            "data_type": "bool",
+            "position": {
+                "byte_offset": 0,
+                "unit": "bit",
+                "len": 1,
+                "bit_offset": 3
+            },
+            "type": "status_writable",
+            "id": 3,
+            "desc": "0: Timer off, 1: Timer on"
+        },
+        {
+            "display_name": "Mode",
+            "name": "Mode",
+            "data_type": "enum",
+            "enum": [
+                "\u7ecf\u5178\u9020\u6d6a",
+                "\u6b63\u5f26\u9020\u6d6a",
+                "\u968f\u673a\u9020\u6d6a",
+                "\u6052\u6d41\u9020\u6d6a"
+            ],
+            "position": {
+                "byte_offset": 0,
+                "unit": "bit",
+                "len": 2,
+                "bit_offset": 5
+            },
+            "type": "status_writable",
+            "id": 5,
+            "desc": [
+                "Square Wave",
+                "Sine Wave",
+                "Random Wave",
+                "Constant Flow"]
+        },
+        {
+            "display_name": "Linkage",
+            "name": "Linkage",
+            "data_type": "enum",
+            "enum": [
+                "\u72ec\u7acb",
+                "\u4e3b\u673a",
+                "\u4ece\u673a"
+            ],
+            "position": {
+                "byte_offset": 0,
+                "unit": "bit",
+                "len": 2,
+                "bit_offset": 7
+            },
+            "type": "status_writable",
+            "id": 6,
+            "desc": [
+                "Independent",
+                "Primary",
+                "Secondary"
+            ]
+        },
+        {
+            "display_name": "Flow",
+            "name": "Flow",
+            "data_type": "uint8",
+            "position": {
+                "byte_offset": 2,
+                "unit": "byte",
+                "len": 1,
+                "bit_offset": 0
+            },
+            "uint_spec": {
+                "addition": 0,
+                "max": 100,
+                "ratio": 1,
+                "min": 1
+            },
+            "type": "status_writable",
+            "id": 8,
+            "desc": "Flow value",
+            "unit": "%"
+        },
+        {
+            "display_name": "Frequency",
+            "name": "Frequency",
+            "data_type": "uint8",
+            "position": {
+                "byte_offset": 3,
+                "unit": "byte",
+                "len": 1,
+                "bit_offset": 0
+            },
+            "uint_spec": {
+                "addition": 0,
+                "max": 100,
+                "ratio": 1,
+                "min": 5
+            },
+            "type": "status_writable",
+            "id": 9,
+            "desc": "Frequency value"
+        },
+        {
+            "display_name": "Feeding Time",
+            "name": "FeedTime",
+            "data_type": "uint8",
+            "position": {
+                "byte_offset": 4,
+                "unit": "byte",
+                "len": 1,
+                "bit_offset": 0
+            },
+            "uint_spec": {
+                "addition": 0,
+                "max": 60,
+                "ratio": 1,
+                "min": 1
+            },
+            "type": "status_writable",
+            "id": 10,
+            "desc": "Feeding time",
+            "unit": "mins"
+        },
+        {
+            "display_name": "Motor Overcurrent",
+            "name": "Fault_Overcurrent",
+            "data_type": "bool",
+            "position": {
+                "byte_offset": 400,
+                "unit": "bit",
+                "len": 1,
+                "bit_offset": 0
+            },
+            "type": "fault",
+            "id": 64,
+            "desc": "Motor current overload, including short circuit fault"
+        },
+        {
+            "display_name": "Motor Overvoltage",
+            "name": "Fault_Overvoltage",
+            "data_type": "bool",
+            "position": {
+                "byte_offset": 400,
+                "unit": "bit",
+                "len": 1,
+                "bit_offset": 1
+            },
+            "type": "fault",
+            "id": 65,
+            "desc": "Motor overvoltage"
+        },
+        {
+            "display_name": "Temperature Overhigh",
+            "name": "Fault_OverTemp",
+            "data_type": "bool",
+            "position": {
+                "byte_offset": 400,
+                "unit": "bit",
+                "len": 1,
+                "bit_offset": 2
+            },
+            "type": "fault",
+            "id": 66,
+            "desc": "Motor temperature too high"
+        },
+        {
+            "display_name": "Motor Undervoltage",
+            "name": "Fault_Undervoltage",
+            "data_type": "bool",
+            "position": {
+                "byte_offset": 400,
+                "unit": "bit",
+                "len": 1,
+                "bit_offset": 3
+            },
+            "type": "fault",
+            "id": 67,
+            "desc": "Motor undervoltage"
+        },
+        {
+            "display_name": "Motor Locked Rotor",
+            "name": "Fault_Lockedrotor",
+            "data_type": "bool",
+            "position": {
+                "byte_offset": 400,
+                "unit": "bit",
+                "len": 1,
+                "bit_offset": 4
+            },
+            "type": "fault",
+            "id": 68,
+            "desc": "Motor locked rotor"
+        },
+        {
+            "display_name": "No Load",
+            "name": "Fault_no_liveload",
+            "data_type": "bool",
+            "position": {
+                "byte_offset": 400,
+                "unit": "bit",
+                "len": 1,
+                "bit_offset": 5
+            },
+            "type": "fault",
+            "id": 69,
+            "desc": "No load"
+        },
+        {
+            "display_name": "Serial Connection Fault",
+            "name": "Fault_UART",
+            "data_type": "bool",
+            "position": {
+                "byte_offset": 400,
+                "unit": "bit",
+                "len": 1,
+                "bit_offset": 6
+            },
+            "type": "fault",
+            "id": 70,
+            "desc": "Module and mainboard communication failure"
+        }
+    ]
+}

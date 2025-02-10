@@ -1,0 +1,90 @@
+{
+  "config": {
+    "title": "Jebao Aquariumpumpen",
+    "step": {
+      "user": {
+        "title": "Bei Jebao anmelden",
+        "description": "Bitte geben Sie Ihre Jebao-Anmeldedaten ein und wählen Sie Ihr Land aus.",
+        "data": {
+          "email": "E-Mail",
+          "password": "Passwort",
+          "country": "Land"
+        }
+      },
+      "device_setup": {
+        "title": "Geräteeinrichtung",
+        "description": "Konfigurieren Sie IP-Adressen für {number_of_devices} Geräte. Lassen Sie das Feld leer für Cloud-Modus.",
+        "data": {
+          "device_ips": "Geräte-IP-Adressen"
+        }
+      }
+    },
+    "error": {
+      "auth": "Authentifizierung fehlgeschlagen. Überprüfen Sie Ihre Anmeldedaten.",
+      "no_devices": "Keine Geräte gefunden. Stellen Sie sicher, dass Ihre Geräte zuerst in der Jebao-App registriert sind.",
+      "cannot_connect": "Verbindung zum Gerät fehlgeschlagen. Überprüfen Sie die LAN-IP-Adresse.",
+      "discovery_failed": "Automatische Erkennung fehlgeschlagen. Bitte geben Sie die LAN-IP-Adresse manuell ein.",
+      "invalid_ip": "Ungültiges IP-Adressformat",
+      "user_not_exist": "Benutzerkonto existiert nicht",
+      "invalid_password": "Falsches Passwort",
+      "invalid_json": "Ungültige Serverantwort",
+      "invalid_response": "Unerwartete Serverantwort",
+      "connection_error": "Keine Verbindung zum Server möglich",
+      "unknown_error": "Unbekannter Fehler aufgetreten",
+      "missing_model": "Unfortunately some or all of your Jebao devices are not yet supported. Unsupported devices: {unsupported_devices}. Please raise an issue at {issue_url} referencing the model ID(s) to add support for your device."
+    },
+    "abort": {
+      "already_configured": "Dieses Konto ist bereits konfiguriert",
+      "no_devices": "Keine Geräte zur Einrichtung verfügbar",
+      "device_index_error": "Fehler beim Zugriff auf Geräteinformationen"
+    },
+    "success": {
+      "discovery_complete": "Alle Geräte wurden erfolgreich erkannt."
+    }
+  },
+  "options": {
+    "title": "Jebao Aquariumpumpen Optionen",
+    "step": {
+      "init": {
+        "title": "Jebao Pumpen konfigurieren",
+        "description": "Aktuelle Einstellungen:\nE-Mail: {current_email}\nRegion: {current_region}",
+        "data": {
+          "next_step": "Aktion auswählen"
+        }
+      },
+      "reconfigure": {
+        "title": "Anmeldedaten aktualisieren",
+        "description": "Aktualisieren Sie Ihre Jebao-Anmeldedaten und entdecken Sie Geräte neu.",
+        "data": {
+          "email": "E-Mail",
+          "password": "Passwort",
+          "country": "Land"
+        }
+      },
+      "device_setup": {
+        "title": "Gerätekonfiguration aktualisieren",
+        "description": "Konfigurieren Sie IP-Adressen für {number_of_devices} Geräte. Lassen Sie das Feld leer für Cloud-Modus.",
+        "data": {
+          "device_ips": "Geräte-IP-Adressen"
+        }
+      }
+    },
+    "error": {
+      "auth": "Authentifizierung fehlgeschlagen. Überprüfen Sie Ihre Anmeldedaten.",
+      "no_devices": "Keine Geräte gefunden. Stellen Sie sicher, dass Ihre Geräte zuerst in der Jebao-App registriert sind.",
+      "cannot_connect": "Verbindung zum Gerät fehlgeschlagen. Überprüfen Sie die LAN-IP-Adresse.",
+      "discovery_failed": "Automatische Erkennung fehlgeschlagen. Bitte geben Sie die LAN-IP-Adresse manuell ein.",
+      "invalid_ip": "Ungültiges IP-Adressformat",
+      "user_not_exist": "Benutzerkonto existiert nicht",
+      "invalid_password": "Falsches Passwort",
+      "invalid_json": "Ungültige Serverantwort",
+      "invalid_response": "Unerwartete Serverantwort",
+      "connection_error": "Keine Verbindung zum Server möglich",
+      "unknown_error": "Unbekannter Fehler aufgetreten",
+      "missing_model": "Unfortunately some or all of your Jebao devices are not yet supported. Unsupported devices: {unsupported_devices}. Please raise an issue at {issue_url} referencing the model ID(s) to add support for your device."
+    },
+    "abort": {
+      "already_configured": "Gerät bereits konfiguriert"
+    }
+  }
+}

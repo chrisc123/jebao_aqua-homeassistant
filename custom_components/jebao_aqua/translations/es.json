@@ -1,0 +1,90 @@
+{
+  "config": {
+    "title": "Bombas para acuario Jebao",
+    "step": {
+      "user": {
+        "title": "Iniciar sesión en Jebao",
+        "description": "Por favor, introduce tus credenciales de Jebao y selecciona tu país.",
+        "data": {
+          "email": "Correo electrónico",
+          "password": "Contraseña",
+          "country": "País"
+        }
+      },
+      "device_setup": {
+        "title": "Configuración del dispositivo",
+        "description": "Configura las direcciones IP para {number_of_devices} dispositivos. Deja vacío para el modo solo en la nube.",
+        "data": {
+          "device_ips": "Direcciones IP del dispositivo"
+        }
+      }
+    },
+    "error": {
+      "auth": "Error al autenticar. Verifica tus credenciales.",
+      "no_devices": "No se encontraron dispositivos. Asegúrate de que tus dispositivos estén registrados primero en la aplicación Jebao.",
+      "cannot_connect": "Error al conectar con el dispositivo. Verifica la dirección IP de la LAN.",
+      "discovery_failed": "Error en la detección automática. Introduce la dirección IP de la LAN manualmente.",
+      "invalid_ip": "Formato de dirección IP no válido",
+      "user_not_exist": "La cuenta de usuario no existe",
+      "invalid_password": "Contraseña incorrecta",
+      "invalid_json": "Respuesta no válida del servidor",
+      "invalid_response": "Respuesta inesperada del servidor",
+      "connection_error": "No se pudo conectar al servidor",
+      "unknown_error": "Ocurrió un error desconocido",
+      "missing_model": "Desafortunadamente, algunos o todos tus dispositivos Jebao aún no son compatibles. Dispositivos no compatibles: {unsupported_devices}. Por favor, crea un problema en {issue_url} haciendo referencia a los ID(s) del modelo para añadir soporte para tu dispositivo."
+    },
+    "abort": {
+      "already_configured": "Esta cuenta ya está configurada.",
+      "no_devices": "No hay dispositivos disponibles para configurar.",
+      "device_index_error": "Error al acceder a la información del dispositivo."
+    },
+        "success": {
+            "discovery_complete": "Todos los dispositivos se han detectado con éxito."
+        }
+  },
+  "options": {
+    "title": "Opciones del dispositivo Jebao Aqua",
+    "step": {
+      "init": {
+        "title": "Configurar dispositivos Jebao Aqua",
+        "description": "Configuración actual:\nCorreo electrónico: {current_email}\nRegión: {current_region}",
+        "data": {
+          "next_step": "Selecciona una opción"
+        }
+      },
+      "reconfigure": {
+        "title": "Actualizar credenciales",
+        "description": "Actualiza tus credenciales de Jebao y vuelve a detectar los dispositivos.",
+        "data": {
+          "email": "Correo electrónico",
+          "password": "Contraseña",
+          "country": "País"
+        }
+      },
+      "device_setup": {
+        "title": "Actualizar la configuración del dispositivo",
+        "description": "Configura las direcciones IP para {number_of_devices} dispositivos. Consulta 'Información del dispositivo' en la aplicación Jebao si no estás seguro.",
+        "data": {
+          "device_ips": "Direcciones IP del dispositivo"
+        }
+      }
+    },
+    "error": {
+      "auth": "Error al autenticar. Verifica tus credenciales.",
+      "no_devices": "No se encontraron dispositivos. Asegúrate de que tus dispositivos estén registrados primero en la aplicación Jebao.",
+      "cannot_connect": "Error al conectar con el dispositivo. Verifica la dirección IP de la LAN.",
+      "discovery_failed": "Error en la detección automática. Introduce la dirección IP de la LAN manualmente.",
+      "invalid_ip": "Formato de dirección IP no válido",
+      "user_not_exist": "La cuenta de usuario no existe",
+      "invalid_password": "Contraseña incorrecta",
+      "invalid_json": "Respuesta no válida del servidor",
+      "invalid_response": "Respuesta inesperada del servidor",
+      "connection_error": "No se pudo conectar al servidor",
+      "unknown_error": "Ocurrió un error desconocido",
+      "missing_model": "Desafortunadamente, algunos o todos tus dispositivos Jebao aún no son compatibles. Dispositivos no compatibles: {unsupported_devices}. Por favor, crea un problema en {issue_url} haciendo referencia a los ID(s) del modelo para añadir soporte para tu dispositivo."
+    },
+    "abort": {
+      "already_configured": "Dispositivo ya configurado"
+    }
+  }
+}

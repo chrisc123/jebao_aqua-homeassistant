@@ -1,0 +1,227 @@
+{
+  "product_key": "031f8753d7ad47a4bf46d89b17f40282",
+  "name": "Single-head Titration Pump with AP Calibration (Jebao Smart Doser 3.1)",
+  "attrs": [
+    {
+      "display_name": "Power Switch",
+      "name": "switch",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 0
+      },
+      "type": "status_writable",
+      "id": 0,
+      "desc": "Controls the main power of the pump."
+    },
+    {
+      "display_name": "Channel 1 Switch",
+      "name": "channe1",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 1
+      },
+      "type": "status_writable",
+      "id": 1,
+      "desc": "Manages channel 1's manual switch."
+    },
+    {
+      "display_name": "Timer Switch",
+      "name": "Timer1ON",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 2
+      },
+      "type": "status_writable",
+      "id": 2,
+      "desc": "Enables or disables the timer for channel 1."
+    },
+    {
+      "display_name": "Calibration Switch",
+      "name": "CALSW",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 3
+      },
+      "type": "status_writable",
+      "id": 3,
+      "desc": "Toggles the calibration switch."
+    },
+    {
+      "display_name": "Calibration Channel",
+      "name": "CALSet",
+      "data_type": "enum",
+      "enum": ["Calibration1", "Calibration2", "Calibration3", "Calibration4"],
+      "position": {
+        "byte_offset": 0,
+        "unit": "bit",
+        "len": 2,
+        "bit_offset": 4
+      },
+      "type": "status_writable",
+      "id": 4,
+      "desc": "Selects the calibration channel."
+    },
+    {
+      "display_name": "Calibration Volume",
+      "name": "Calib1",
+      "data_type": "uint8",
+      "position": {
+        "byte_offset": 1,
+        "unit": "byte",
+        "len": 1,
+        "bit_offset": 0
+      },
+      "uint_spec": {
+        "addition": 0,
+        "max": 100,
+        "ratio": 1,
+        "min": 10
+      },
+      "type": "status_writable",
+      "id": 5,
+      "desc": "Defines the calibration volume for channel 1."
+    },
+    {
+      "display_name": "Interval Time",
+      "name": "IntervalT1",
+      "data_type": "uint8",
+      "position": {
+        "byte_offset": 2,
+        "unit": "byte",
+        "len": 1,
+        "bit_offset": 0
+      },
+      "uint_spec": {
+        "addition": 0,
+        "max": 30,
+        "ratio": 1,
+        "min": 0
+      },
+      "type": "status_writable",
+      "id": 6,
+      "desc": "Sets the interval time for channel 1."
+    },
+    {
+      "display_name": "Replenishment Volume",
+      "name": "liquid1",
+      "data_type": "uint16",
+      "position": {
+        "byte_offset": 3,
+        "unit": "byte",
+        "len": 2,
+        "bit_offset": 0
+      },
+      "uint_spec": {
+        "addition": 0,
+        "max": 2000,
+        "ratio": 1,
+        "min": 10
+      },
+      "type": "status_writable",
+      "id": 7,
+      "desc": "Specifies the replenishment volume for channel 1."
+    },
+    {
+      "display_name": "Channel 1 Scheduled Times",
+      "name": "CH1SWTime",
+      "data_type": "binary",
+      "position": {
+        "byte_offset": 5,
+        "unit": "byte",
+        "len": 96,
+        "bit_offset": 0
+      },
+      "type": "status_writable",
+      "id": 8,
+      "desc": "Represents the scheduled times and flow rates for channel 1."
+    },
+    {
+      "display_name": "Date Data",
+      "name": "YMDData",
+      "data_type": "binary",
+      "position": {
+        "byte_offset": 101,
+        "unit": "byte",
+        "len": 4,
+        "bit_offset": 0
+      },
+      "type": "status_writable",
+      "id": 9,
+      "desc": "Binary data indicating the date."
+    },
+    {
+      "display_name": "Time Data",
+      "name": "HMSData",
+      "data_type": "binary",
+      "position": {
+        "byte_offset": 105,
+        "unit": "byte",
+        "len": 4,
+        "bit_offset": 0
+      },
+      "type": "status_writable",
+      "id": 10,
+      "desc": "Binary data representing the time."
+    },
+    {
+      "display_name": "Calibration Time",
+      "name": "time1",
+      "data_type": "uint8",
+      "position": {
+        "byte_offset": 109,
+        "unit": "byte",
+        "len": 1,
+        "bit_offset": 0
+      },
+      "uint_spec": {
+        "addition": 0,
+        "max": 250,
+        "ratio": 1,
+        "min": 10
+      },
+      "type": "status_readonly",
+      "id": 11,
+      "desc": "Read-only attribute showing time required for calibration."
+    },
+    {
+      "display_name": "Open Circuit",
+      "name": "OpenCircuit",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 110,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 0
+      },
+      "type": "alert",
+      "id": 12,
+      "desc": "Indicates an open circuit."
+    },
+    {
+      "display_name": "UART Fault",
+      "name": "Fault_UART",
+      "data_type": "bool",
+      "position": {
+        "byte_offset": 111,
+        "unit": "bit",
+        "len": 1,
+        "bit_offset": 0
+      },
+      "type": "fault",
+      "id": 13,
+      "desc": "Indicates a UART communication fault."
+    }
+  ]
+}

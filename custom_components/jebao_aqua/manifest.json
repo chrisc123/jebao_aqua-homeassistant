@@ -1,0 +1,11 @@
+{
+    "domain": "jebao_aqua",
+    "name": "Jebao Aqua",
+    "config_flow": true,
+    "documentation": "https://github.com/chrisc123/jebao_aqua-homeassistant",
+    "requirements": [],
+    "dependencies": [],
+    "codeowners": ["@chrisc123"],
+    "version": "0.2",
+    "iot_class": "local_polling"
+}
