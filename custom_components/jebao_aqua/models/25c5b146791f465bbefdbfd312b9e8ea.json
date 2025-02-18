@@ -151,7 +151,12 @@
           "display_name": "校准通道",
           "name": "CALSet",
           "data_type": "enum",
-          "enum": ["校准1", "校准2", "校准3", "校准4"],
+          "enum": [
+            "校准1",
+            "校准2",
+            "校准3",
+            "校准4"
+          ],
           "position": {
             "byte_offset": 0,
             "unit": "bit",
@@ -411,7 +416,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.switch"],
+              "bind": [
+                "entity0.switch"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -422,7 +429,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.channe1"],
+              "bind": [
+                "entity0.channe1"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -433,7 +442,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.channe2"],
+              "bind": [
+                "entity0.channe2"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -444,7 +455,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.channe3"],
+              "bind": [
+                "entity0.channe3"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -455,7 +468,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.channe4"],
+              "bind": [
+                "entity0.channe4"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -466,7 +481,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.Timer1ON"],
+              "bind": [
+                "entity0.Timer1ON"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -477,7 +494,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.Timer2ON"],
+              "bind": [
+                "entity0.Timer2ON"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -488,7 +507,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.Timer3ON"],
+              "bind": [
+                "entity0.Timer3ON"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -499,7 +520,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.Timer4ON"],
+              "bind": [
+                "entity0.Timer4ON"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -510,7 +533,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.CALSW"],
+              "bind": [
+                "entity0.CALSW"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -518,10 +543,17 @@
             "title": "校准开关"
           },
           {
-            "items": ["校准1", "校准2", "校准3", "校准4"],
+            "items": [
+              "校准1",
+              "校准2",
+              "校准3",
+              "校准4"
+            ],
             "object": {
               "action": "entity0",
-              "bind": ["entity0.CALSet"],
+              "bind": [
+                "entity0.CALSet"
+              ],
               "perm": "W"
             },
             "type": "QRadioElement",
@@ -533,7 +565,9 @@
             "bind": "floatValue:float",
             "object": {
               "action": "entity0",
-              "bind": ["entity0.IntervalT1"],
+              "bind": [
+                "entity0.IntervalT1"
+              ],
               "uint_spec": {
                 "max": 30,
                 "step": 1,
@@ -552,7 +586,9 @@
             "bind": "floatValue:float",
             "object": {
               "action": "entity0",
-              "bind": ["entity0.IntervalT2"],
+              "bind": [
+                "entity0.IntervalT2"
+              ],
               "uint_spec": {
                 "max": 30,
                 "step": 1,
@@ -571,7 +607,9 @@
             "bind": "floatValue:float",
             "object": {
               "action": "entity0",
-              "bind": ["entity0.IntervalT3"],
+              "bind": [
+                "entity0.IntervalT3"
+              ],
               "uint_spec": {
                 "max": 30,
                 "step": 1,
@@ -590,7 +628,9 @@
             "bind": "floatValue:float",
             "object": {
               "action": "entity0",
-              "bind": ["entity0.IntervalT4"],
+              "bind": [
+                "entity0.IntervalT4"
+              ],
               "uint_spec": {
                 "max": 30,
                 "step": 1,
@@ -609,7 +649,9 @@
             "bind": "floatValue:float",
             "object": {
               "action": "entity0",
-              "bind": ["entity0.Calib1"],
+              "bind": [
+                "entity0.Calib1"
+              ],
               "uint_spec": {
                 "max": 100,
                 "step": 1,
@@ -628,7 +670,9 @@
             "title": "CH1SWTime",
             "object": {
               "action": "entity0",
-              "bind": ["entity0.CH1SWTime"],
+              "bind": [
+                "entity0.CH1SWTime"
+              ],
               "perm": "W"
             },
             "value": 0,
@@ -641,7 +685,9 @@
             "title": "CH2SWTime",
             "object": {
               "action": "entity0",
-              "bind": ["entity0.CH2SWTime"],
+              "bind": [
+                "entity0.CH2SWTime"
+              ],
               "perm": "W"
             },
             "value": 0,
@@ -654,7 +700,9 @@
             "title": "CH3SWTime",
             "object": {
               "action": "entity0",
-              "bind": ["entity0.CH3SWTime"],
+              "bind": [
+                "entity0.CH3SWTime"
+              ],
               "perm": "W"
             },
             "value": 0,
@@ -667,7 +715,9 @@
             "title": "CH4SWTime",
             "object": {
               "action": "entity0",
-              "bind": ["entity0.CH4SWTime"],
+              "bind": [
+                "entity0.CH4SWTime"
+              ],
               "perm": "W"
             },
             "value": 0,
@@ -680,7 +730,9 @@
             "title": "日期数据",
             "object": {
               "action": "entity0",
-              "bind": ["entity0.YMDData"],
+              "bind": [
+                "entity0.YMDData"
+              ],
               "perm": "W"
             },
             "value": 0,
@@ -693,7 +745,9 @@
             "title": "时间数据",
             "object": {
               "action": "entity0",
-              "bind": ["entity0.HMSData"],
+              "bind": [
+                "entity0.HMSData"
+              ],
               "perm": "W"
             },
             "value": 0,
@@ -704,7 +758,9 @@
           {
             "object": {
               "action": "entity0",
-              "bind": ["entity0.time1"],
+              "bind": [
+                "entity0.time1"
+              ],
               "uint_spec": {
                 "max": 250,
                 "step": 1,

@@ -232,7 +232,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.Switch"],
+              "bind": [
+                "entity0.Switch"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -243,7 +245,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.FeedSwitch"],
+              "bind": [
+                "entity0.FeedSwitch"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -254,7 +258,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.TimerON"],
+              "bind": [
+                "entity0.TimerON"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -265,7 +271,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.Timer"],
+              "bind": [
+                "entity0.Timer"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -276,7 +284,9 @@
             "boolValue": false,
             "object": {
               "action": "entity0",
-              "bind": ["entity0.FeedTimer"],
+              "bind": [
+                "entity0.FeedTimer"
+              ],
               "perm": "W"
             },
             "type": "QBooleanElement",
@@ -288,7 +298,9 @@
             "bind": "floatValue:float",
             "object": {
               "action": "entity0",
-              "bind": ["entity0.Motor_Speed"],
+              "bind": [
+                "entity0.Motor_Speed"
+              ],
               "uint_spec": {
                 "max": 100,
                 "step": 1,
@@ -307,7 +319,9 @@
             "bind": "floatValue:float",
             "object": {
               "action": "entity0",
-              "bind": ["entity0.FeedTime"],
+              "bind": [
+                "entity0.FeedTime"
+              ],
               "uint_spec": {
                 "max": 60,
                 "step": 1,
