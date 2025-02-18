@@ -54,7 +54,7 @@ async def async_discover_devices(
         ip="255.255.255.255",
         port=12414,
         timeout=timeout,
-        retry_count=3,
+        retry_count=10, # These things have naff antennas and are on 2.4GHz...
         retry_delay=0.3,
     )
     return found

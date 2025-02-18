@@ -60,49 +60,52 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_show_form(step_id="introduction")
 
         # Do discovery
-        self.discovered_devices = []
         discovered = await hub.async_discover_devices(self.hass, timeout=5.0)
 
+        # Get existing entries
+        existing_entry = next(
+            (entry for entry in self.hass.config_entries.async_entries(DOMAIN)
+             if entry.data.get("devices")), None)
+        
+        # Get set of existing UIDs
+        existing_uids = {
+            device["uid"]
+            for entry in self.hass.config_entries.async_entries(DOMAIN)
+            for device in entry.data.get("devices", [])
+            if "uid" in device
+        }
+
+        new_devices = []
         for dev in discovered:
             uid = dev.get("uid")
-            if not uid:
+            if not uid or uid in existing_uids:
                 continue
-
-            # Check if device is already configured
-            if await self.async_set_unique_id(uid, raise_on_progress=False):
-                continue  # Skip already configured devices
 
             mac = dev.get("mac")
             if mac:
                 mac = format_mac(mac)
 
-            self.discovered_devices.append(
-                DeviceCandidate(
-                    ip=dev["ip"],
-                    product_key=dev.get("product_key", ""),
-                    uid=uid,
-                    mac=mac,
-                    firmware_version=dev.get("firmware_version"),
-                )
-            )
+            new_devices.append({
+                "ip": dev["ip"],
+                "product_key": dev.get("product_key", ""),
+                "uid": uid,
+                "mac": mac,
+                "firmware_version": dev.get("firmware_version"),
+            })
 
-        if self.discovered_devices:
-            # Create single entry with all discovered devices
-            return self.async_create_entry(
-                title="Jebao Devices",
-                data={
-                    "devices": [
-                        {
-                            "ip": dev.ip,
-                            "product_key": dev.product_key,
-                            "uid": dev.uid,
-                            "mac": dev.mac,
-                            "firmware_version": dev.firmware_version,
-                        }
-                        for dev in self.discovered_devices
-                    ]
-                },
-            )
+        if new_devices:
+            if existing_entry:
+                # Add new devices to existing entry
+                new_data = dict(existing_entry.data)
+                new_data["devices"].extend(new_devices)
+                self.hass.config_entries.async_update_entry(existing_entry, data=new_data)
+                return self.async_abort(reason="devices_added")
+            else:
+                # Create new entry with discovered devices
+                return self.async_create_entry(
+                    title="Jebao Devices",
+                    data={"devices": new_devices},
+                )
 
         # If no new devices found, show manual entry form
         return self.async_show_form(
@@ -125,28 +128,42 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if not dev or not dev.get("uid"):
                     errors["base"] = "cannot_connect"
                 else:
-                    await self.async_set_unique_id(dev["uid"])
-                    self._abort_if_unique_id_configured()
+                    device_uid = dev["uid"]
+                    # Simply check if any entry contains this device UID
+                    existing_entry = None
+                    for entry in self.hass.config_entries.async_entries(DOMAIN):
+                        if any(d.get("uid") == device_uid for d in entry.data.get("devices", [])):
+                            errors["base"] = "already_configured"
+                            break
+                        if not existing_entry and entry.data.get("devices"):
+                            existing_entry = entry
 
-                    mac = dev.get("mac")
-                    if mac:
-                        mac = format_mac(mac)
+                    if not errors:
+                        mac = dev.get("mac")
+                        if mac:
+                            mac = format_mac(mac)
 
-                    # Create single entry with manually added device
-                    return self.async_create_entry(
-                        title=friendly_name or "Jebao Devices",
-                        data={
-                            "devices": [
-                                {
-                                    "ip": ip,
-                                    "product_key": dev.get("product_key", ""),
-                                    "uid": dev["uid"],
-                                    "mac": mac,
-                                    "firmware_version": dev.get("firmware_version"),
-                                }
-                            ]
-                        },
-                    )
+                        new_device = {
+                            "ip": ip,
+                            "product_key": dev.get("product_key", ""),
+                            "uid": device_uid,
+                            "mac": mac,
+                            "firmware_version": dev.get("firmware_version"),
+                        }
+
+                        if existing_entry:
+                            # Add to existing entry
+                            new_data = dict(existing_entry.data)
+                            new_data["devices"].append(new_device)
+                            self.hass.config_entries.async_update_entry(existing_entry, data=new_data)
+                            return self.async_abort(reason="device_added")
+                        else:
+                            # Create new entry
+                            return self.async_create_entry(
+                                title=friendly_name or "Jebao Devices",
+                                data={"devices": [new_device]},
+                            )
+
             except Exception:
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"

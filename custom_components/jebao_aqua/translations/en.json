@@ -3,10 +3,13 @@
         "abort": {
             "already_configured": "This device is already configured.",
             "auto_discovery_complete": "Auto-discovery complete; devices added.",
+            "device_added": "New Jebao device was added to your existing configuration",
+            "devices_added": "New Jebao devices were added to your existing configuration",
             "devices_already_configured": "All discovered devices are already configured."
         },
         "error": {
-            "cannot_connect": "Failed to connect to the device. Please check IP and try again."
+            "cannot_connect": "Failed to connect to the device. Please check IP and try again.",
+            "already_configured": "Device is already configured in your system. Please try a different IP."
         },
         "step": {
             "introduction": {
