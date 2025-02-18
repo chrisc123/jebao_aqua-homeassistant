@@ -1,0 +1,342 @@
+﻿{
+    "name":  "水泵",
+    "packetVersion":  "0x00000004",
+    "protocolType":  "standard",
+    "product_key":  "bd0febe99e724e3b8640ed955cd81972",
+    "entities":  [
+                     {
+                         "display_name":  "机智云开发套件",
+                         "attrs":  [
+                                       {
+                                           "display_name":  "开机/关机",
+                                           "name":  "Switch",
+                                           "data_type":  "bool",
+                                           "position":  {
+                                                            "byte_offset":  0,
+                                                            "unit":  "bit",
+                                                            "len":  1,
+                                                            "bit_offset":  0
+                                                        },
+                                           "type":  "status_writable",
+                                           "id":  0,
+                                           "desc":  "开/机按钮"
+                                       },
+                                       {
+                                           "display_name":  "喂食开关",
+                                           "name":  "FeedSwitch",
+                                           "data_type":  "bool",
+                                           "position":  {
+                                                            "byte_offset":  0,
+                                                            "unit":  "bit",
+                                                            "len":  1,
+                                                            "bit_offset":  1
+                                                        },
+                                           "type":  "status_writable",
+                                           "id":  1,
+                                           "desc":  "喂食开关"
+                                       },
+                                       {
+                                           "display_name":  "定时开关",
+                                           "name":  "TimerON",
+                                           "data_type":  "bool",
+                                           "position":  {
+                                                            "byte_offset":  0,
+                                                            "unit":  "bit",
+                                                            "len":  1,
+                                                            "bit_offset":  2
+                                                        },
+                                           "type":  "status_writable",
+                                           "id":  2,
+                                           "desc":  "0:定时关闭，1：定时打开"
+                                       },
+                                       {
+                                           "display_name":  "定时器发数据",
+                                           "name":  "Timer",
+                                           "data_type":  "bool",
+                                           "position":  {
+                                                            "byte_offset":  0,
+                                                            "unit":  "bit",
+                                                            "len":  1,
+                                                            "bit_offset":  3
+                                                        },
+                                           "type":  "status_writable",
+                                           "id":  3,
+                                           "desc":  "1：是定时器发送的数据,0:不是"
+                                       },
+                                       {
+                                           "display_name":  "喂食定时到发数据",
+                                           "name":  "FeedTimer",
+                                           "data_type":  "bool",
+                                           "position":  {
+                                                            "byte_offset":  0,
+                                                            "unit":  "bit",
+                                                            "len":  1,
+                                                            "bit_offset":  4
+                                                        },
+                                           "type":  "status_writable",
+                                           "id":  4,
+                                           "desc":  "1：是喂食定时到发送的数据,0:不是"
+                                       },
+                                       {
+                                           "display_name":  "设定电机转速",
+                                           "name":  "Motor_Speed",
+                                           "data_type":  "uint8",
+                                           "position":  {
+                                                            "byte_offset":  1,
+                                                            "unit":  "byte",
+                                                            "len":  1,
+                                                            "bit_offset":  0
+                                                        },
+                                           "uint_spec":  {
+                                                             "addition":  0,
+                                                             "max":  100,
+                                                             "ratio":  1,
+                                                             "min":  0
+                                                         },
+                                           "type":  "status_writable",
+                                           "id":  5,
+                                           "desc":  ""
+                                       },
+                                       {
+                                           "display_name":  "喂食时间",
+                                           "name":  "FeedTime",
+                                           "data_type":  "uint8",
+                                           "position":  {
+                                                            "byte_offset":  2,
+                                                            "unit":  "byte",
+                                                            "len":  1,
+                                                            "bit_offset":  0
+                                                        },
+                                           "uint_spec":  {
+                                                             "addition":  0,
+                                                             "max":  60,
+                                                             "ratio":  1,
+                                                             "min":  1
+                                                         },
+                                           "type":  "status_writable",
+                                           "id":  6,
+                                           "desc":  "喂食时间"
+                                       },
+                                       {
+                                           "display_name":  "电机过流",
+                                           "name":  "Fault_Overcurrent",
+                                           "data_type":  "bool",
+                                           "position":  {
+                                                            "byte_offset":  3,
+                                                            "unit":  "bit",
+                                                            "len":  1,
+                                                            "bit_offset":  0
+                                                        },
+                                           "type":  "fault",
+                                           "id":  7,
+                                           "desc":  "电机电流过大，包括短路故障"
+                                       },
+                                       {
+                                           "display_name":  "电机过压",
+                                           "name":  "Fault_Overvoltage",
+                                           "data_type":  "bool",
+                                           "position":  {
+                                                            "byte_offset":  3,
+                                                            "unit":  "bit",
+                                                            "len":  1,
+                                                            "bit_offset":  1
+                                                        },
+                                           "type":  "fault",
+                                           "id":  8,
+                                           "desc":  "电机过压"
+                                       },
+                                       {
+                                           "display_name":  "温度过高",
+                                           "name":  "Fault_OverTemp",
+                                           "data_type":  "bool",
+                                           "position":  {
+                                                            "byte_offset":  3,
+                                                            "unit":  "bit",
+                                                            "len":  1,
+                                                            "bit_offset":  2
+                                                        },
+                                           "type":  "fault",
+                                           "id":  9,
+                                           "desc":  "电机温度过高"
+                                       },
+                                       {
+                                           "display_name":  "电机欠压",
+                                           "name":  "Fault_Undervoltage",
+                                           "data_type":  "bool",
+                                           "position":  {
+                                                            "byte_offset":  3,
+                                                            "unit":  "bit",
+                                                            "len":  1,
+                                                            "bit_offset":  3
+                                                        },
+                                           "type":  "fault",
+                                           "id":  10,
+                                           "desc":  "电机欠压"
+                                       },
+                                       {
+                                           "display_name":  "电机堵转",
+                                           "name":  "Fault_Lockedrotor",
+                                           "data_type":  "bool",
+                                           "position":  {
+                                                            "byte_offset":  3,
+                                                            "unit":  "bit",
+                                                            "len":  1,
+                                                            "bit_offset":  4
+                                                        },
+                                           "type":  "fault",
+                                           "id":  11,
+                                           "desc":  "电机堵转"
+                                       },
+                                       {
+                                           "display_name":  "空载",
+                                           "name":  "Fault_no_liveload",
+                                           "data_type":  "bool",
+                                           "position":  {
+                                                            "byte_offset":  3,
+                                                            "unit":  "bit",
+                                                            "len":  1,
+                                                            "bit_offset":  5
+                                                        },
+                                           "type":  "fault",
+                                           "id":  12,
+                                           "desc":  "空载"
+                                       },
+                                       {
+                                           "display_name":  "串口连接故障",
+                                           "name":  "Fault_UART",
+                                           "data_type":  "bool",
+                                           "position":  {
+                                                            "byte_offset":  3,
+                                                            "unit":  "bit",
+                                                            "len":  1,
+                                                            "bit_offset":  6
+                                                        },
+                                           "type":  "fault",
+                                           "id":  13,
+                                           "desc":  "模块与主板连接不上"
+                                       }
+                                   ],
+                         "name":  "entity0",
+                         "id":  0
+                     }
+                 ],
+    "ui":  {
+               "object":  {
+                              "version":  4,
+                              "showEditButton":  false
+                          },
+               "sections":  [
+                                {
+                                    "elements":  [
+                                                     {
+                                                         "boolValue":  false,
+                                                         "object":  {
+                                                                        "action":  "entity0",
+                                                                        "bind":  [
+                                                                                     "entity0.Switch"
+                                                                                 ],
+                                                                        "perm":  "W"
+                                                                    },
+                                                         "type":  "QBooleanElement",
+                                                         "key":  "entity0.Switch",
+                                                         "title":  "开机/关机"
+                                                     },
+                                                     {
+                                                         "boolValue":  false,
+                                                         "object":  {
+                                                                        "action":  "entity0",
+                                                                        "bind":  [
+                                                                                     "entity0.FeedSwitch"
+                                                                                 ],
+                                                                        "perm":  "W"
+                                                                    },
+                                                         "type":  "QBooleanElement",
+                                                         "key":  "entity0.FeedSwitch",
+                                                         "title":  "喂食开关"
+                                                     },
+                                                     {
+                                                         "boolValue":  false,
+                                                         "object":  {
+                                                                        "action":  "entity0",
+                                                                        "bind":  [
+                                                                                     "entity0.TimerON"
+                                                                                 ],
+                                                                        "perm":  "W"
+                                                                    },
+                                                         "type":  "QBooleanElement",
+                                                         "key":  "entity0.TimerON",
+                                                         "title":  "定时开关"
+                                                     },
+                                                     {
+                                                         "boolValue":  false,
+                                                         "object":  {
+                                                                        "action":  "entity0",
+                                                                        "bind":  [
+                                                                                     "entity0.Timer"
+                                                                                 ],
+                                                                        "perm":  "W"
+                                                                    },
+                                                         "type":  "QBooleanElement",
+                                                         "key":  "entity0.Timer",
+                                                         "title":  "定时器发数据"
+                                                     },
+                                                     {
+                                                         "boolValue":  false,
+                                                         "object":  {
+                                                                        "action":  "entity0",
+                                                                        "bind":  [
+                                                                                     "entity0.FeedTimer"
+                                                                                 ],
+                                                                        "perm":  "W"
+                                                                    },
+                                                         "type":  "QBooleanElement",
+                                                         "key":  "entity0.FeedTimer",
+                                                         "title":  "喂食定时到发数据"
+                                                     },
+                                                     {
+                                                         "title":  "设定电机转速",
+                                                         "bind":  "floatValue:float",
+                                                         "object":  {
+                                                                        "action":  "entity0",
+                                                                        "bind":  [
+                                                                                     "entity0.Motor_Speed"
+                                                                                 ],
+                                                                        "uint_spec":  {
+                                                                                          "max":  100,
+                                                                                          "step":  1,
+                                                                                          "min":  0
+                                                                                      },
+                                                                        "perm":  "W"
+                                                                    },
+                                                         "value":  0,
+                                                         "key":  "entity0.Motor_Speed",
+                                                         "maximumValue":  100,
+                                                         "minimumValue":  0,
+                                                         "type":  "QFloatElement"
+                                                     },
+                                                     {
+                                                         "title":  "喂食时间",
+                                                         "bind":  "floatValue:float",
+                                                         "object":  {
+                                                                        "action":  "entity0",
+                                                                        "bind":  [
+                                                                                     "entity0.FeedTime"
+                                                                                 ],
+                                                                        "uint_spec":  {
+                                                                                          "max":  60,
+                                                                                          "step":  1,
+                                                                                          "min":  1
+                                                                                      },
+                                                                        "perm":  "W"
+                                                                    },
+                                                         "value":  0,
+                                                         "key":  "entity0.FeedTime",
+                                                         "maximumValue":  60,
+                                                         "minimumValue":  1,
+                                                         "type":  "QFloatElement"
+                                                     }
+                                                 ]
+                                }
+                            ]
+           }
+}

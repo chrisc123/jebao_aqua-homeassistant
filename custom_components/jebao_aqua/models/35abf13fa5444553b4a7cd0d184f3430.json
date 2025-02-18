@@ -1,8 +1,8 @@
 ﻿{
-    "name":  "水族泵_有AP校时",
+    "name":  "水泵调速器WiFi_BLE",
     "packetVersion":  "0x00000004",
     "protocolType":  "standard",
-    "product_key":  "02039876751049deb404d1d89221ec4b",
+    "product_key":  "35abf13fa5444553b4a7cd0d184f3430",
     "entities":  [
                      {
                          "display_name":  "机智云开发套件",

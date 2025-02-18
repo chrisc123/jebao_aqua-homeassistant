@@ -1,85 +1,237 @@
 {
     "config": {
-        "step": {
-            "user": {
-                "title": "Log in to Jebao",
-                "description": "Please enter your Jebao credentials and select your country.",
-                "data": {
-                    "email": "Email",
-                    "password": "Password",
-                    "country": "Country"
-                }
-            },
-            "device_setup": {
-                "title": "Device Setup",
-                "description": "Configure IP addresses for {number_of_devices} devices. Leave empty for cloud-only mode.",
-                "data": {
-                    "device_ips": "Device IP Addresses"
-                }
-            }
+        "abort": {
+            "already_configured": "This device is already configured.",
+            "auto_discovery_complete": "Auto-discovery complete; devices added.",
+            "devices_already_configured": "All discovered devices are already configured."
         },
         "error": {
-            "auth": "Failed to authenticate. Check your credentials.",
-            "no_devices": "No devices found. Make sure your devices are registered in the Jebao App first.",
-            "cannot_connect": "Failed to connect to the device. Check the LAN IP address.",
-            "discovery_failed": "Automatic discovery failed. Please enter the LAN IP address manually.",
-            "invalid_ip": "Invalid IP address format",
-            "user_not_exist": "User account does not exist",
-            "invalid_password": "Incorrect password",
-            "invalid_json": "Invalid response from server",
-            "invalid_response": "Unexpected response from server",
-            "connection_error": "Could not connect to server",
-            "unknown_error": "Unknown error occurred",
-            "missing_model": "Some devices are missing model definitions. Unsupported devices: {unsupported_devices}. Please raise an issue at {issue_url} referencing this model ID to add support for your device."
+            "cannot_connect": "Failed to connect to the device. Please check IP and try again."
         },
-        "abort": {
-            "already_configured": "This account is already configured.",
-            "no_devices": "No devices available for setup.",
-            "device_index_error": "Error accessing device information."
+        "step": {
+            "introduction": {
+                "description": "The integration will attempt to automatically discover Jebao devices on your network. If no devices are found, you'll be able to configure one manually by providing an IP address.",
+                "title": "Jebao Device Setup"
+            },
+            "manual": {
+                "data": {
+                    "ip": "Device IP Address",
+                    "name": "Name (optional)"
+                },
+                "description": "No devices were found automatically. Enter the IP address of a Jebao device. Additional devices can then be added from the integration page in HA.",
+                "title": "Manual Configuration"
+            }
         }
     },
-    "options": {
-        "step": {
-            "init": {
-                "title": "Configure Jebao Aqua Devices",
-                "description": "Current settings:\nEmail: {current_email}\nRegion: {current_region}",
-                "data": {
-                    "next_step": "Select an option"
+    "entity": {
+        "binary_sensor": {
+            "fault_fan": {
+                "name": "Fan Fault"
+            },
+            "fault_lockedrotor": {
+                "name": "Motor Stall"
+            },
+            "fault_no_liveload": {
+                "name": "No Load"
+            },
+            "fault_overcurrent": {
+                "name": "Motor Overcurrent"
+            },
+            "fault_overtemp": {
+                "name": "Over Temperature"
+            },
+            "fault_overvoltage": {
+                "name": "Motor Overvoltage"
+            },
+            "fault_uart": {
+                "name": "Communication Error"
+            },
+            "fault_undervoltage": {
+                "name": "Motor Undervoltage"
+            },
+            "opencircuit": {
+                "name": "Open Circuit"
+            },
+            "overcurrent": {
+                "name": "Over Current"
+            },
+            "overtemp": {
+                "name": "Over Temperature"
+            }
+        },
+        "light": {
+            "color_blue1": {
+                "name": "Blue 1"
+            },
+            "color_blue2": {
+                "name": "Blue 2"
+            },
+            "color_green": {
+                "name": "Green"
+            },
+            "color_red": {
+                "name": "Red"
+            },
+            "color_white": {
+                "name": "White"
+            },
+            "volor_violet": {
+                "name": "Violet"
+            }
+        },
+        "number": {
+            "autoflow": {
+                "name": "Scheduled Flow"
+            },
+            "autofreq": {
+                "name": "Scheduled Frequency"
+            },
+            "feedtime": {
+                "name": "Feed duration"
+            },
+            "flow": {
+                "name": "Flow Rate"
+            },
+            "frequency": {
+                "name": "Frequency"
+            },
+            "intervalt1": {
+                "name": "Interval T1"
+            },
+            "intervalt2": {
+                "name": "Interval T2"
+            },
+            "intervalt3": {
+                "name": "Interval T3"
+            },
+            "intervalt4": {
+                "name": "Interval T4"
+            },
+            "motorspeed": {
+                "name": "Motor Speed"
+            },
+            "nightflow": {
+                "name": "Night Flow"
+            }
+        },
+        "select": {
+            "automode": {
+                "state": {
+                    "\u505c\u673a": "Off",
+                    "\u5582\u98df": "Feeding",
+                    "\u6052\u6d41\u9020\u6d6a": "Constant Flow",
+                    "\u6b63\u5f26\u9020\u6d6a": "Sine Wave",
+                    "\u7ecf\u5178\u9020\u6d6a": "Square Wave",
+                    "\u968f\u673a\u9020\u6d6a": "Random Wave"
                 }
             },
-            "reconfigure": {
-                "title": "Update Credentials",
-                "description": "Update your Jebao credentials and rediscover devices.",
-                "data": {
-                    "email": "Email",
-                    "password": "Password",
-                    "country": "Country"
+            "calset": {
+                "state": {
+                    "\u6821\u51c61": "Calibration 1",
+                    "\u6821\u51c62": "Calibration 2",
+                    "\u6821\u51c63": "Calibration 3",
+                    "\u6821\u51c64": "Calibration 4",
+                    "\u6821\u51c65": "Calibration 5",
+                    "\u6821\u51c66": "Calibration 6",
+                    "\u6821\u51c67": "Calibration 7",
+                    "\u6821\u51c68": "Calibration 8"
                 }
             },
-            "device_setup": {
-                "title": "Update Device Configuration",
-                "description": "Configure IP addresses for {number_of_devices} devices. Check 'Device Information' in the Jebao app if unsure.",
-                "data": {
-                    "device_ips": "Device IP Addresses"
+            "linkage": {
+                "state": {
+                    "\u4e3b\u673a": "Primary",
+                    "\u4ece\u673a": "Secondary",
+                    "\u72ec\u7acb": "Independent"
+                }
+            },
+            "mode": {
+                "state": {
+                    "\u591c\u665a": "Night",
+                    "\u5b9a\u65f6": "Timed",
+                    "\u6052\u6d41\u9020\u6d6a": "Constant Flow",
+                    "\u624b\u52a8": "Manual",
+                    "\u65e5\u51fa": "Sunrise",
+                    "\u65e5\u843d": "Sunset",
+                    "\u65e9\u6668": "Morning",
+                    "\u6b63\u5f26\u9020\u6d6a": "Sine Wave",
+                    "\u767d\u5929": "Daytime",
+                    "\u7ecf\u5178\u9020\u6d6a": "Square Wave",
+                    "\u968f\u673a\u9020\u6d6a": "Random Wave"
                 }
             }
         },
-        "error": {
-            "auth": "Failed to authenticate. Check your credentials.",
-            "no_devices": "No devices found. Make sure your devices are registered in the Jebao App first.",
-            "cannot_connect": "Failed to connect to the device. Check the LAN IP address.",
-            "discovery_failed": "Automatic discovery failed. Please enter the LAN IP address manually.",
-            "invalid_ip": "Invalid IP address format",
-            "user_not_exist": "User account does not exist",
-            "invalid_password": "Incorrect password",
-            "invalid_json": "Invalid response from server",
-            "invalid_response": "Unexpected response from server",
-            "connection_error": "Could not connect to server",
-            "unknown_error": "Unknown error occurred",
-            "missing_model": "Unfortunately some or all of your Jebao devices are not yet supported. Unsupported devices: {unsupported_devices}. Please raise an issue at {issue_url} referencing the model ID(s) to add support for your device."
+        "sensor": {
+            "color_blue1": {
+                "name": "Blue 1"
+            },
+            "color_blue2": {
+                "name": "Blue 2"
+            },
+            "color_green": {
+                "name": "Green"
+            },
+            "color_red": {
+                "name": "Red"
+            },
+            "color_white": {
+                "name": "White"
+            },
+            "volor_violet": {
+                "name": "Violet"
+            }
         },
-        "abort": {
-            "already_configured": "Device already configured"
+        "switch": {
+            "asyc": {
+                "name": "Async Control"
+            },
+            "channe1": {
+                "name": "Channel 1"
+            },
+            "channe2": {
+                "name": "Channel 2"
+            },
+            "channe3": {
+                "name": "Channel 3"
+            },
+            "channe4": {
+                "name": "Channel 4"
+            },
+            "feedswitch": {
+                "name": "Feeding"
+            },
+            "feedtimer": {
+                "name": "Feeding Timer"
+            },
+            "master": {
+                "name": "Master Control"
+            },
+            "pulsetide": {
+                "name": "Pulse"
+            },
+            "switch": {
+                "name": "Main Switch"
+            },
+            "switchon": {
+                "name": "Power"
+            },
+            "timer": {
+                "name": "Timer"
+            },
+            "timer1on": {
+                "name": "Timer 1"
+            },
+            "timer2on": {
+                "name": "Timer 2"
+            },
+            "timer3on": {
+                "name": "Timer 3"
+            },
+            "timer4on": {
+                "name": "Timer 4"
+            },
+            "timeron": {
+                "name": "Scheduler"
+            }
         }
     }
 }

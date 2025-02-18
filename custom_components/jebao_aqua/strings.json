@@ -1,0 +1,237 @@
+{
+    "config": {
+      "abort": {
+        "already_configured": "This device is already configured.",
+        "auto_discovery_complete": "Auto-discovery complete; devices added.",
+        "devices_already_configured": "All discovered devices are already configured."
+      },
+      "error": {
+        "cannot_connect": "Failed to connect to the device. Please check IP and try again."
+      },
+      "step": {
+        "introduction": {
+          "title": "Jebao Device Setup",
+          "description": "The integration will attempt to automatically discover Jebao devices on your network. If no devices are found, you'll be able to configure one manually by providing an IP address."
+        },
+        "manual": {
+          "title": "Manual Configuration",
+          "description": "No devices were found automatically. Enter the IP address of a Jebao device. Additional devices can then be added from the integration page in HA.",
+          "data": {
+            "ip": "Device IP Address",
+            "name": "Name (optional)"
+          }
+        }
+      }
+    },
+    "entity": {
+      "switch": {
+        "switchon": {
+          "name": "Power"
+        },
+        "pulsetide": {
+          "name": "Pulse"
+        },
+        "feedswitch": {
+          "name": "Feeding"
+        },
+        "timeron": {
+          "name": "Scheduler"
+        },
+        "switch": {
+          "name": "Main Switch"
+        },
+        "master": {
+          "name": "Master Control"
+        },
+        "asyc": {
+          "name": "Async Control"
+        },
+        "timer": {
+          "name": "Timer"
+        },
+        "feedtimer": {
+          "name": "Feeding Timer"
+        },
+        "timer1on": {
+          "name": "Timer 1"
+        },
+        "channe1": {
+          "name": "Channel 1"
+        },
+        "channe2": {
+          "name": "Channel 2"
+        },
+        "channe3": {
+          "name": "Channel 3"
+        },
+        "channe4": {
+          "name": "Channel 4"
+        },
+        "timer2on": {
+          "name": "Timer 2"
+        },
+        "timer3on": {
+          "name": "Timer 3"
+        },
+        "timer4on": {
+          "name": "Timer 4"
+        }
+      },
+      "binary_sensor": {
+        "fault_overcurrent": {
+          "name": "Motor Overcurrent"
+        },
+        "fault_overvoltage": {
+          "name": "Motor Overvoltage"
+        },
+        "fault_overtemp": {
+          "name": "Over Temperature"
+        },
+        "fault_undervoltage": {
+          "name": "Motor Undervoltage"
+        },
+        "fault_lockedrotor": {
+          "name": "Motor Stall"
+        },
+        "fault_no_liveload": {
+          "name": "No Load"
+        },
+        "fault_uart": {
+          "name": "Communication Error"
+        },
+        "overtemp": {
+          "name": "Over Temperature"
+        },
+        "overcurrent": {
+          "name": "Over Current"
+        },
+        "fault_fan": {
+          "name": "Fan Fault"
+        },
+        "opencircuit": {
+          "name": "Open Circuit"
+        }
+      },
+      "select": {
+        "mode": {
+          "state": {
+            "经典造浪": "Square Wave",
+            "正弦造浪": "Sine Wave",
+            "随机造浪": "Random Wave",
+            "恒流造浪": "Constant Flow",
+            "夜晚": "Night",
+            "定时": "Timed",
+            "手动": "Manual",
+            "日出": "Sunrise",
+            "日落": "Sunset",
+            "早晨": "Morning",
+            "白天": "Daytime"
+          }
+        },
+        "linkage": {
+          "state": {
+            "独立": "Independent",
+            "主机": "Primary",
+            "从机": "Secondary"
+          }
+        },
+        "automode": {
+          "state": {
+            "停机": "Off",
+            "经典造浪": "Square Wave",
+            "正弦造浪": "Sine Wave",
+            "随机造浪": "Random Wave",
+            "恒流造浪": "Constant Flow",
+            "喂食": "Feeding"
+          }
+        },
+        "calset": {
+          "state": {
+            "校准1": "Calibration 1",
+            "校准2": "Calibration 2",
+            "校准3": "Calibration 3",
+            "校准4": "Calibration 4",
+            "校准5": "Calibration 5",
+            "校准6": "Calibration 6",
+            "校准7": "Calibration 7",
+            "校准8": "Calibration 8"
+          }
+        }
+      },
+      "number": {
+        "autoflow": {
+          "name": "Scheduled Flow"
+        },
+        "flow": {
+          "name": "Flow Rate"
+        },
+        "autofreq": {
+          "name": "Scheduled Frequency"
+        },
+        "frequency": {
+          "name": "Frequency"
+        },
+        "feedtime": {
+          "name": "Feed duration"
+        },
+        "nightflow": {
+          "name": "Night Flow"
+        },
+        "motorspeed": {
+          "name": "Motor Speed"
+        },
+        "intervalt1": {
+          "name": "Interval T1"
+        },
+        "intervalt2": {
+          "name": "Interval T2"
+        },
+        "intervalt3": {
+          "name": "Interval T3"
+        },
+        "intervalt4": {
+          "name": "Interval T4"
+        }
+    },
+    "light": {
+        "color_blue1": {
+          "name": "Blue 1"
+        },
+        "color_white": {
+          "name": "White"
+        },
+        "color_blue2": {
+          "name": "Blue 2"
+        },
+        "color_green": {
+          "name": "Green"
+        },
+        "color_red": {
+          "name": "Red"
+        },
+        "volor_violet": {
+          "name": "Violet"
+        }
+      },
+      "sensor": {
+        "color_blue1": {
+          "name": "Blue 1"
+        },
+        "color_white": {
+          "name": "White"
+        },
+        "color_blue2": {
+          "name": "Blue 2"
+        },
+        "color_green": {
+          "name": "Green"
+        },
+        "color_red": {
+          "name": "Red"
+        },
+        "volor_violet": {
+          "name": "Violet"
+        }
+      }
+    }
+  }

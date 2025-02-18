@@ -1,14 +1,14 @@
 {
-    "name": "本地造浪泵_无AP校时",
+    "name": "水泵调速器",
     "packetVersion": "0x00000004",
     "protocolType": "standard",
-    "product_key": "f0d844ab0d4947ac9527a286160bc705",
+    "product_key": "954b3e52aa5141539dfcaa2fff6c9e7f",
     "entities": [
       {
         "display_name": "机智云开发套件",
         "attrs": [
           {
-            "display_name": "开关",
+            "display_name": "开机/关机",
             "name": "SwitchON",
             "data_type": "bool",
             "position": {
@@ -19,11 +19,11 @@
             },
             "type": "status_writable",
             "id": 0,
-            "desc": ""
+            "desc": "开/关机按钮"
           },
           {
-            "display_name": "脉冲潮汐",
-            "name": "PulseTide",
+            "display_name": "模式",
+            "name": "Mode",
             "data_type": "bool",
             "position": {
               "byte_offset": 0,
@@ -33,7 +33,7 @@
             },
             "type": "status_writable",
             "id": 1,
-            "desc": "脉冲和潮汐造浪选择,0：脉冲造浪，1:潮汐造浪"
+            "desc": "模式切换，0:AP控制，1：Wireless控制"
           },
           {
             "display_name": "喂食开关",
@@ -47,7 +47,7 @@
             },
             "type": "status_writable",
             "id": 2,
-            "desc": "喂食开关，0：关闭，1：打开"
+            "desc": "喂食开关"
           },
           {
             "display_name": "定时开关",
@@ -64,86 +64,30 @@
             "desc": "0:定时关闭，1：定时打开"
           },
           {
-            "display_name": "当前定时脉冲潮汐",
-            "name": "AutoPulseTide",
-            "data_type": "bool",
-            "position": {
-              "byte_offset": 0,
-              "unit": "bit",
-              "len": 1,
-              "bit_offset": 4
-            },
-            "type": "status_writable",
-            "id": 4,
-            "desc": "脉冲和潮汐造浪选择,0：脉冲造浪，1:潮汐造浪"
-          },
-          {
-            "display_name": "模式",
-            "name": "Mode",
-            "data_type": "enum",
-            "enum": [
-              "经典造浪",
-              "正弦造浪",
-              "随机造浪",
-              "恒流造浪"
-            ],
-            "position": {
-              "byte_offset": 0,
-              "unit": "bit",
-              "len": 2,
-              "bit_offset": 5
-            },
-            "type": "status_writable",
-            "id": 5,
-            "desc": "0.经典造浪 1.正弦造浪 2.随机造浪 3.恒流造浪"
-          },
-          {
-            "display_name": "联动",
-            "name": "Linkage",
-            "data_type": "enum",
-            "enum": [
-              "独立",
-              "主机",
-              "从机"
-            ],
-            "position": {
-              "byte_offset": 0,
-              "unit": "bit",
-              "len": 2,
-              "bit_offset": 7
-            },
-            "type": "status_writable",
-            "id": 6,
-            "desc": "设置为独立，主机，从机"
-          },
-          {
             "display_name": "当前定时模式",
             "name": "AutoMode",
             "data_type": "enum",
             "enum": [
               "停机",
-              "经典造浪",
-              "正弦造浪",
-              "随机造浪",
-              "恒流造浪",
+              "自动",
               "喂食"
             ],
             "position": {
               "byte_offset": 0,
               "unit": "bit",
-              "len": 3,
-              "bit_offset": 9
+              "len": 2,
+              "bit_offset": 4
             },
             "type": "status_writable",
-            "id": 7,
-            "desc": "当前定时模式：0:停机 1.经典造浪 2.正弦造浪 3.随机造浪 4.恒流造浪 5.喂食"
+            "id": 4,
+            "desc": "当前定时模式：0:停机;1:自动；2:喂食"
           },
           {
-            "display_name": "流量",
-            "name": "Flow",
+            "display_name": "设定电机转速",
+            "name": "Motor_Speed",
             "data_type": "uint8",
             "position": {
-              "byte_offset": 2,
+              "byte_offset": 1,
               "unit": "byte",
               "len": 1,
               "bit_offset": 0
@@ -155,12 +99,32 @@
               "min": 0
             },
             "type": "status_writable",
-            "id": 8,
-            "desc": "流量值"
+            "id": 5,
+            "desc": "电机档位，范围是30~100,为0时电机停机"
           },
           {
-            "display_name": "频率",
-            "name": "Frequency",
+            "display_name": "喂食时长",
+            "name": "FeedTime",
+            "data_type": "uint8",
+            "position": {
+              "byte_offset": 2,
+              "unit": "byte",
+              "len": 1,
+              "bit_offset": 0
+            },
+            "uint_spec": {
+              "addition": 0,
+              "max": 60,
+              "ratio": 1,
+              "min": 1
+            },
+            "type": "status_writable",
+            "id": 6,
+            "desc": "喂食时长"
+          },
+          {
+            "display_name": "当前定时档位",
+            "name": "AutoGears",
             "data_type": "uint8",
             "position": {
               "byte_offset": 3,
@@ -175,12 +139,12 @@
               "min": 0
             },
             "type": "status_writable",
-            "id": 9,
-            "desc": "频率值"
+            "id": 7,
+            "desc": "当前定时档位"
           },
           {
-            "display_name": "喂食时间",
-            "name": "FeedTime",
+            "display_name": "当前定时喂食时间",
+            "name": "AutoFeedTime",
             "data_type": "uint8",
             "position": {
               "byte_offset": 4,
@@ -195,753 +159,721 @@
               "min": 1
             },
             "type": "status_writable",
-            "id": 10,
-            "desc": "喂食时间"
+            "id": 8,
+            "desc": "当前定时喂食时间"
           },
           {
-            "display_name": "当前定时流量",
-            "name": "AutoFlow",
-            "data_type": "uint8",
+            "display_name": "日期数据",
+            "name": "YMDData",
+            "data_type": "binary",
             "position": {
               "byte_offset": 5,
               "unit": "byte",
-              "len": 1,
+              "len": 4,
               "bit_offset": 0
             },
-            "uint_spec": {
-              "addition": 0,
-              "max": 100,
-              "ratio": 1,
-              "min": 0
-            },
             "type": "status_writable",
-            "id": 11,
-            "desc": "当前定时流量"
+            "id": 9,
+            "desc": "日期，Byte1年千位百位，byte2年十位个位，byte3月，byte4日"
           },
           {
-            "display_name": "当前定时频率",
-            "name": "AutoFreq",
-            "data_type": "uint8",
+            "display_name": "时间数据",
+            "name": "HMSData",
+            "data_type": "binary",
             "position": {
-              "byte_offset": 6,
+              "byte_offset": 9,
               "unit": "byte",
-              "len": 1,
+              "len": 4,
               "bit_offset": 0
             },
-            "uint_spec": {
-              "addition": 0,
-              "max": 100,
-              "ratio": 1,
-              "min": 0
-            },
             "type": "status_writable",
-            "id": 12,
-            "desc": "当前定时频率"
-          },
-          {
-            "display_name": "当前定时喂食时间",
-            "name": "AutoFeedTime",
-            "data_type": "uint8",
-            "position": {
-              "byte_offset": 7,
-              "unit": "byte",
-              "len": 1,
-              "bit_offset": 0
-            },
-            "uint_spec": {
-              "addition": 0,
-              "max": 60,
-              "ratio": 1,
-              "min": 1
-            },
-            "type": "status_writable",
-            "id": 13,
-            "desc": "当前定时喂食时间"
+            "id": 10,
+            "desc": "时间，Byte1空，byte2时，byte3分，byte4秒"
           },
           {
             "display_name": "自动时间点00",
             "name": "AutoTime00",
             "data_type": "binary",
             "position": {
-              "byte_offset": 8,
+              "byte_offset": 13,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 14,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 11,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点01",
             "name": "AutoTime01",
             "data_type": "binary",
             "position": {
-              "byte_offset": 16,
+              "byte_offset": 19,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 15,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 12,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点02",
             "name": "AutoTime02",
             "data_type": "binary",
             "position": {
-              "byte_offset": 24,
+              "byte_offset": 25,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 16,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 13,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点03",
             "name": "AutoTime03",
             "data_type": "binary",
             "position": {
-              "byte_offset": 32,
+              "byte_offset": 31,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 17,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 14,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点04",
             "name": "AutoTime04",
             "data_type": "binary",
             "position": {
-              "byte_offset": 40,
+              "byte_offset": 37,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 18,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 15,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点05",
             "name": "AutoTime05",
             "data_type": "binary",
             "position": {
-              "byte_offset": 48,
+              "byte_offset": 43,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 19,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 16,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点06",
             "name": "AutoTime06",
             "data_type": "binary",
             "position": {
-              "byte_offset": 56,
+              "byte_offset": 49,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 20,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 17,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点07",
             "name": "AutoTime07",
             "data_type": "binary",
             "position": {
-              "byte_offset": 64,
+              "byte_offset": 55,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 21,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 18,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点08",
             "name": "AutoTime08",
             "data_type": "binary",
             "position": {
-              "byte_offset": 72,
+              "byte_offset": 61,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 22,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 19,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点09",
             "name": "AutoTime09",
             "data_type": "binary",
             "position": {
-              "byte_offset": 80,
+              "byte_offset": 67,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 23,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 20,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点10",
             "name": "AutoTime10",
             "data_type": "binary",
             "position": {
-              "byte_offset": 88,
+              "byte_offset": 73,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 24,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 21,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点11",
             "name": "AutoTime11",
             "data_type": "binary",
             "position": {
-              "byte_offset": 96,
+              "byte_offset": 79,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 25,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 22,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点12",
             "name": "AutoTime12",
             "data_type": "binary",
             "position": {
-              "byte_offset": 104,
+              "byte_offset": 85,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 26,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 23,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点13",
             "name": "AutoTime13",
             "data_type": "binary",
             "position": {
-              "byte_offset": 112,
+              "byte_offset": 91,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 27,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 24,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点14",
             "name": "AutoTime14",
             "data_type": "binary",
             "position": {
-              "byte_offset": 120,
+              "byte_offset": 97,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 28,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 25,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点15",
             "name": "AutoTime15",
             "data_type": "binary",
             "position": {
-              "byte_offset": 128,
+              "byte_offset": 103,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 29,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 26,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点16",
             "name": "AutoTime16",
             "data_type": "binary",
             "position": {
-              "byte_offset": 136,
+              "byte_offset": 109,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 30,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 27,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点17",
             "name": "AutoTime17",
             "data_type": "binary",
             "position": {
-              "byte_offset": 144,
+              "byte_offset": 115,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 31,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 28,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点18",
             "name": "AutoTime18",
             "data_type": "binary",
             "position": {
-              "byte_offset": 152,
+              "byte_offset": 121,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 32,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 29,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点19",
             "name": "AutoTime19",
             "data_type": "binary",
             "position": {
-              "byte_offset": 160,
+              "byte_offset": 127,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 33,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 30,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点20",
             "name": "AutoTime20",
             "data_type": "binary",
             "position": {
-              "byte_offset": 168,
+              "byte_offset": 133,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 34,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 31,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点21",
             "name": "AutoTime21",
             "data_type": "binary",
             "position": {
-              "byte_offset": 176,
+              "byte_offset": 139,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 35,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 32,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点22",
             "name": "AutoTime22",
             "data_type": "binary",
             "position": {
-              "byte_offset": 184,
+              "byte_offset": 145,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 36,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 33,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点23",
             "name": "AutoTime23",
             "data_type": "binary",
             "position": {
-              "byte_offset": 192,
+              "byte_offset": 151,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 37,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 34,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点24",
             "name": "AutoTime24",
             "data_type": "binary",
             "position": {
-              "byte_offset": 200,
+              "byte_offset": 157,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 38,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 35,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点25",
             "name": "AutoTime25",
             "data_type": "binary",
             "position": {
-              "byte_offset": 208,
+              "byte_offset": 163,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 39,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 36,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点26",
             "name": "AutoTime26",
             "data_type": "binary",
             "position": {
-              "byte_offset": 216,
+              "byte_offset": 169,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 40,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 37,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点27",
             "name": "AutoTime27",
             "data_type": "binary",
             "position": {
-              "byte_offset": 224,
+              "byte_offset": 175,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 41,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 38,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点28",
             "name": "AutoTime28",
             "data_type": "binary",
             "position": {
-              "byte_offset": 232,
+              "byte_offset": 181,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 42,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 39,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点29",
             "name": "AutoTime29",
             "data_type": "binary",
             "position": {
-              "byte_offset": 240,
+              "byte_offset": 187,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 43,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 40,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点30",
             "name": "AutoTime30",
             "data_type": "binary",
             "position": {
-              "byte_offset": 248,
+              "byte_offset": 193,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 44,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 41,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点31",
             "name": "AutoTime31",
             "data_type": "binary",
             "position": {
-              "byte_offset": 256,
+              "byte_offset": 199,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 45,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 42,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点32",
             "name": "AutoTime32",
             "data_type": "binary",
             "position": {
-              "byte_offset": 264,
+              "byte_offset": 205,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 46,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 43,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点33",
             "name": "AutoTime33",
             "data_type": "binary",
             "position": {
-              "byte_offset": 272,
+              "byte_offset": 211,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 47,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 44,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点34",
             "name": "AutoTime34",
             "data_type": "binary",
             "position": {
-              "byte_offset": 280,
+              "byte_offset": 217,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 48,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 45,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点35",
             "name": "AutoTime35",
             "data_type": "binary",
             "position": {
-              "byte_offset": 288,
+              "byte_offset": 223,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 49,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 46,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点36",
             "name": "AutoTime36",
             "data_type": "binary",
             "position": {
-              "byte_offset": 296,
+              "byte_offset": 229,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 50,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 47,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点37",
             "name": "AutoTime37",
             "data_type": "binary",
             "position": {
-              "byte_offset": 304,
+              "byte_offset": 235,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 51,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 48,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点38",
             "name": "AutoTime38",
             "data_type": "binary",
             "position": {
-              "byte_offset": 312,
+              "byte_offset": 241,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 52,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 49,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点39",
             "name": "AutoTime39",
             "data_type": "binary",
             "position": {
-              "byte_offset": 320,
+              "byte_offset": 247,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 53,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 50,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点40",
             "name": "AutoTime40",
             "data_type": "binary",
             "position": {
-              "byte_offset": 328,
+              "byte_offset": 253,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 54,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 51,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点41",
             "name": "AutoTime41",
             "data_type": "binary",
             "position": {
-              "byte_offset": 336,
+              "byte_offset": 259,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 55,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 52,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点42",
             "name": "AutoTime42",
             "data_type": "binary",
             "position": {
-              "byte_offset": 344,
+              "byte_offset": 265,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 56,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 53,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点43",
             "name": "AutoTime43",
             "data_type": "binary",
             "position": {
-              "byte_offset": 352,
+              "byte_offset": 271,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 57,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 54,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点44",
             "name": "AutoTime44",
             "data_type": "binary",
             "position": {
-              "byte_offset": 360,
+              "byte_offset": 277,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 58,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 55,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点45",
             "name": "AutoTime45",
             "data_type": "binary",
             "position": {
-              "byte_offset": 368,
+              "byte_offset": 283,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 59,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 56,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点46",
             "name": "AutoTime46",
             "data_type": "binary",
             "position": {
-              "byte_offset": 376,
+              "byte_offset": 289,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 60,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 57,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "自动时间点47",
             "name": "AutoTime47",
             "data_type": "binary",
             "position": {
-              "byte_offset": 384,
+              "byte_offset": 295,
               "unit": "byte",
-              "len": 8,
+              "len": 6,
               "bit_offset": 0
             },
             "type": "status_writable",
-            "id": 61,
-            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1.经典造浪， 2.正弦造浪， 3.随机造浪， 4.恒流造浪，5.喂食，Byte5：流量/喂食时间,停机时流量=0，Byte6:频率，Byte7：脉冲/潮汐"
+            "id": 58,
+            "desc": "Byte0：开始时，Byte1：开始分,Byte2:结束时，Byte3:结束分，Byte4：模式,0停机，1自动，2喂食，Byte5：档位/暂停时间,停机时档位=0"
           },
           {
             "display_name": "电机过流",
             "name": "Fault_Overcurrent",
             "data_type": "bool",
             "position": {
-              "byte_offset": 392,
+              "byte_offset": 301,
               "unit": "bit",
               "len": 1,
               "bit_offset": 0
             },
             "type": "fault",
-            "id": 62,
+            "id": 59,
             "desc": "电机电流过大，包括短路故障"
           },
           {
@@ -949,13 +881,13 @@
             "name": "Fault_Overvoltage",
             "data_type": "bool",
             "position": {
-              "byte_offset": 392,
+              "byte_offset": 301,
               "unit": "bit",
               "len": 1,
               "bit_offset": 1
             },
             "type": "fault",
-            "id": 63,
+            "id": 60,
             "desc": "电机过压"
           },
           {
@@ -963,13 +895,13 @@
             "name": "Fault_OverTemp",
             "data_type": "bool",
             "position": {
-              "byte_offset": 392,
+              "byte_offset": 301,
               "unit": "bit",
               "len": 1,
               "bit_offset": 2
             },
             "type": "fault",
-            "id": 64,
+            "id": 61,
             "desc": "电机温度过高"
           },
           {
@@ -977,13 +909,13 @@
             "name": "Fault_Undervoltage",
             "data_type": "bool",
             "position": {
-              "byte_offset": 392,
+              "byte_offset": 301,
               "unit": "bit",
               "len": 1,
               "bit_offset": 3
             },
             "type": "fault",
-            "id": 65,
+            "id": 62,
             "desc": "电机欠压"
           },
           {
@@ -991,13 +923,13 @@
             "name": "Fault_Lockedrotor",
             "data_type": "bool",
             "position": {
-              "byte_offset": 392,
+              "byte_offset": 301,
               "unit": "bit",
               "len": 1,
               "bit_offset": 4
             },
             "type": "fault",
-            "id": 66,
+            "id": 63,
             "desc": "电机堵转"
           },
           {
@@ -1005,13 +937,13 @@
             "name": "Fault_no_liveload",
             "data_type": "bool",
             "position": {
-              "byte_offset": 392,
+              "byte_offset": 301,
               "unit": "bit",
               "len": 1,
               "bit_offset": 5
             },
             "type": "fault",
-            "id": 67,
+            "id": 64,
             "desc": "空载"
           },
           {
@@ -1019,14 +951,14 @@
             "name": "Fault_UART",
             "data_type": "bool",
             "position": {
-              "byte_offset": 392,
+              "byte_offset": 301,
               "unit": "bit",
               "len": 1,
               "bit_offset": 6
             },
             "type": "fault",
-            "id": 68,
-            "desc": "模块与主板通讯不上"
+            "id": 65,
+            "desc": "模块与主板连接不上"
           }
         ],
         "name": "entity0",
@@ -1052,20 +984,20 @@
               },
               "type": "QBooleanElement",
               "key": "entity0.SwitchON",
-              "title": "开关"
+              "title": "开机/关机"
             },
             {
               "boolValue": false,
               "object": {
                 "action": "entity0",
                 "bind": [
-                  "entity0.PulseTide"
+                  "entity0.Mode"
                 ],
                 "perm": "W"
               },
               "type": "QBooleanElement",
-              "key": "entity0.PulseTide",
-              "title": "脉冲潮汐"
+              "key": "entity0.Mode",
+              "title": "模式"
             },
             {
               "boolValue": false,
@@ -1094,60 +1026,9 @@
               "title": "定时开关"
             },
             {
-              "boolValue": false,
-              "object": {
-                "action": "entity0",
-                "bind": [
-                  "entity0.AutoPulseTide"
-                ],
-                "perm": "W"
-              },
-              "type": "QBooleanElement",
-              "key": "entity0.AutoPulseTide",
-              "title": "当前定时脉冲潮汐"
-            },
-            {
-              "items": [
-                "经典造浪",
-                "正弦造浪",
-                "随机造浪",
-                "恒流造浪"
-              ],
-              "object": {
-                "action": "entity0",
-                "bind": [
-                  "entity0.Mode"
-                ],
-                "perm": "W"
-              },
-              "type": "QRadioElement",
-              "key": "entity0.Mode",
-              "title": "模式"
-            },
-            {
-              "items": [
-                "独立",
-                "主机",
-                "从机"
-              ],
-              "object": {
-                "action": "entity0",
-                "bind": [
-                  "entity0.Linkage"
-                ],
-                "perm": "W"
-              },
-              "type": "QRadioElement",
-              "key": "entity0.Linkage",
-              "title": "联动"
-            },
-            {
               "items": [
                 "停机",
-                "经典造浪",
-                "正弦造浪",
-                "随机造浪",
-                "恒流造浪",
+                "自动",
                 "喂食"
               ],
               "object": {
@@ -1162,12 +1043,12 @@
               "title": "当前定时模式"
             },
             {
-              "title": "流量",
+              "title": "设定电机转速",
               "bind": "floatValue:float",
               "object": {
                 "action": "entity0",
                 "bind": [
-                  "entity0.Flow"
+                  "entity0.Motor_Speed"
                 ],
                 "uint_spec": {
                   "max": 100,
@@ -1177,34 +1058,13 @@
                 "perm": "W"
               },
               "value": 0,
-              "key": "entity0.Flow",
+              "key": "entity0.Motor_Speed",
               "maximumValue": 100,
               "minimumValue": 0,
               "type": "QFloatElement"
             },
             {
-              "title": "频率",
-              "bind": "floatValue:float",
-              "object": {
-                "action": "entity0",
-                "bind": [
-                  "entity0.Frequency"
-                ],
-                "uint_spec": {
-                  "max": 100,
-                  "step": 1,
-                  "min": 0
-                },
-                "perm": "W"
-              },
-              "value": 0,
-              "key": "entity0.Frequency",
-              "maximumValue": 100,
-              "minimumValue": 0,
-              "type": "QFloatElement"
-            },
-            {
-              "title": "喂食时间",
+              "title": "喂食时长",
               "bind": "floatValue:float",
               "object": {
                 "action": "entity0",
@@ -1225,12 +1085,12 @@
               "type": "QFloatElement"
             },
             {
-              "title": "当前定时流量",
+              "title": "当前定时档位",
               "bind": "floatValue:float",
               "object": {
                 "action": "entity0",
                 "bind": [
-                  "entity0.AutoFlow"
+                  "entity0.AutoGears"
                 ],
                 "uint_spec": {
                   "max": 100,
@@ -1240,28 +1100,7 @@
                 "perm": "W"
               },
               "value": 0,
-              "key": "entity0.AutoFlow",
-              "maximumValue": 100,
-              "minimumValue": 0,
-              "type": "QFloatElement"
-            },
-            {
-              "title": "当前定时频率",
-              "bind": "floatValue:float",
-              "object": {
-                "action": "entity0",
-                "bind": [
-                  "entity0.AutoFreq"
-                ],
-                "uint_spec": {
-                  "max": 100,
-                  "step": 1,
-                  "min": 0
-                },
-                "perm": "W"
-              },
-              "value": 0,
-              "key": "entity0.AutoFreq",
+              "key": "entity0.AutoGears",
               "maximumValue": 100,
               "minimumValue": 0,
               "type": "QFloatElement"
@@ -1289,6 +1128,36 @@
             },
             {
               "keyboardType": "NumbersAndPunctuation",
+              "title": "日期数据",
+              "object": {
+                "action": "entity0",
+                "bind": [
+                  "entity0.YMDData"
+                ],
+                "perm": "W"
+              },
+              "value": 0,
+              "key": "entity0.YMDData",
+              "maxLength": 8,
+              "type": "QMultilineElement"
+            },
+            {
+              "keyboardType": "NumbersAndPunctuation",
+              "title": "时间数据",
+              "object": {
+                "action": "entity0",
+                "bind": [
+                  "entity0.HMSData"
+                ],
+                "perm": "W"
+              },
+              "value": 0,
+              "key": "entity0.HMSData",
+              "maxLength": 8,
+              "type": "QMultilineElement"
+            },
+            {
+              "keyboardType": "NumbersAndPunctuation",
               "title": "自动时间点00",
               "object": {
                 "action": "entity0",
@@ -1299,7 +1168,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime00",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1314,7 +1183,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime01",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1329,7 +1198,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime02",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1344,7 +1213,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime03",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1359,7 +1228,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime04",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1374,7 +1243,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime05",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1389,7 +1258,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime06",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1404,7 +1273,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime07",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1419,7 +1288,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime08",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1434,7 +1303,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime09",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1449,7 +1318,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime10",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1464,7 +1333,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime11",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1479,7 +1348,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime12",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1494,7 +1363,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime13",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1509,7 +1378,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime14",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1524,7 +1393,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime15",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1539,7 +1408,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime16",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1554,7 +1423,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime17",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1569,7 +1438,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime18",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1584,7 +1453,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime19",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1599,7 +1468,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime20",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1614,7 +1483,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime21",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1629,7 +1498,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime22",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1644,7 +1513,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime23",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1659,7 +1528,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime24",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1674,7 +1543,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime25",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1689,7 +1558,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime26",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1704,7 +1573,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime27",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1719,7 +1588,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime28",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1734,7 +1603,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime29",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1749,7 +1618,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime30",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1764,7 +1633,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime31",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1779,7 +1648,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime32",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1794,7 +1663,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime33",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1809,7 +1678,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime34",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1824,7 +1693,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime35",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1839,7 +1708,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime36",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1854,7 +1723,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime37",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1869,7 +1738,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime38",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1884,7 +1753,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime39",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1899,7 +1768,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime40",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1914,7 +1783,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime41",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1929,7 +1798,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime42",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1944,7 +1813,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime43",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1959,7 +1828,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime44",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1974,7 +1843,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime45",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -1989,7 +1858,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime46",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             },
             {
@@ -2004,7 +1873,7 @@
               },
               "value": 0,
               "key": "entity0.AutoTime47",
-              "maxLength": 16,
+              "maxLength": 12,
               "type": "QMultilineElement"
             }
           ]
