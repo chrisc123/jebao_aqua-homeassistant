@@ -1,16 +1,16 @@
 # gizwits_lan/__init__.py
 
-from .device import Device
 from .device_manager import DeviceManager
+from .device import Device
 from .device_status import DeviceStatus
-from .errors import GizwitsError, LoginError, PasscodeError, ProtocolError
+from .errors import GizwitsError, ProtocolError, PasscodeError, LoginError
 
 __all__ = [
-    "Device",
     "DeviceManager",
+    "Device",
     "DeviceStatus",
     "GizwitsError",
-    "LoginError",
-    "PasscodeError",
     "ProtocolError",
+    "PasscodeError",
+    "LoginError",
 ]
