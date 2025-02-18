@@ -1,30 +1,24 @@
 """Platform for select entities for Jebao Aqua integration."""
+
 from __future__ import annotations
 
 import logging
 from typing import Any
 
-from homeassistant.components.select import (
-    SelectEntity,
-    SelectEntityDescription,
-)
+from homeassistant.components.select import SelectEntity, SelectEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .gizwits_lan.device_status import DeviceStatus
-
-from .hub import JebaoDevice
-from .const import DOMAIN
 from .entity import JebaoEntity
+from .gizwits_lan.device_status import DeviceStatus
+from .hub import JebaoDevice
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up select entities for a given config entry."""
     devices: list[JebaoDevice] = entry.runtime_data  # type: ignore
@@ -63,7 +57,9 @@ async def async_setup_entry(
 class JebaoSelectEntity(JebaoEntity, SelectEntity):
     """A select entity for a writable enum attribute."""
 
-    def __init__(self, entry: ConfigEntry, device: JebaoDevice, attr_def: dict[str, Any]) -> None:
+    def __init__(
+        self, entry: ConfigEntry, device: JebaoDevice, attr_def: dict[str, Any]
+    ) -> None:
         """Initialize the select entity."""
         # Create the select specific entity description first
         self.entity_description = SelectEntityDescription(
@@ -102,7 +98,9 @@ class JebaoSelectEntity(JebaoEntity, SelectEntity):
         self._device.register_status_callback(self._update_state_from_device)
 
     async def async_will_remove_from_hass(self) -> None:
-        await super().async_will_remove_from_hass()  # Call parent to handle connection state
+        await (
+            super().async_will_remove_from_hass()
+        )  # Call parent to handle connection state
         self._device.remove_status_callback(self._update_state_from_device)
 
     @callback
@@ -110,11 +108,13 @@ class JebaoSelectEntity(JebaoEntity, SelectEntity):
         """Update state from device status."""
         if self._attribute_name not in status.data:
             return
-            
+
         try:
             int_val = int(status.data[self._attribute_name])
-            self._current_option = self._options[int_val] if 0 <= int_val < len(self._options) else None
+            self._current_option = (
+                self._options[int_val] if 0 <= int_val < len(self._options) else None
+            )
         except (TypeError, ValueError, IndexError):
             self._current_option = None
-            
+
         self.async_write_ha_state()

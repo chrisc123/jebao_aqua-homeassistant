@@ -5,14 +5,12 @@ from __future__ import annotations
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_NAME
-from homeassistant.helpers.entity import Entity, EntityDescription
-from homeassistant.helpers.device_registry import DeviceInfo, CONNECTION_NETWORK_MAC
-from homeassistant.helpers.translation import async_get_translations
 from homeassistant.core import callback
+from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
+from homeassistant.helpers.entity import Entity
 
-from .hub import JebaoDevice
 from .const import DOMAIN
+from .hub import JebaoDevice
 
 
 class JebaoEntity(Entity):

@@ -81,12 +81,7 @@
           "display_name": "模式",
           "name": "Mode",
           "data_type": "enum",
-          "enum": [
-            "经典造浪",
-            "正弦造浪",
-            "随机造浪",
-            "恒流造浪"
-          ],
+          "enum": ["经典造浪", "正弦造浪", "随机造浪", "恒流造浪"],
           "position": {
             "byte_offset": 0,
             "unit": "bit",
@@ -101,11 +96,7 @@
           "display_name": "联动",
           "name": "Linkage",
           "data_type": "enum",
-          "enum": [
-            "独立",
-            "主机",
-            "从机"
-          ],
+          "enum": ["独立", "主机", "从机"],
           "position": {
             "byte_offset": 0,
             "unit": "bit",

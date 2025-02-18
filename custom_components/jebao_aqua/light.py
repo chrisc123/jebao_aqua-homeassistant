@@ -1,24 +1,20 @@
 """Platform for light entities for Jebao Aqua integration."""
+
 from __future__ import annotations
 
 import logging
 from typing import Any
 
-from homeassistant.components.light import (
-    LightEntity,
-    LightEntityDescription,
-    ColorMode,
-)
+from homeassistant.components.light import ColorMode, LightEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util.color import value_to_brightness
 from homeassistant.util.percentage import percentage_to_ranged_value
 
-from .gizwits_lan.device_status import DeviceStatus
 from .entity import JebaoEntity
+from .gizwits_lan.device_status import DeviceStatus
 from .hub import JebaoDevice
-from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -72,7 +68,9 @@ class JebaoLightEntity(JebaoEntity, LightEntity):
     _attr_supported_color_modes = {ColorMode.BRIGHTNESS}
     _attr_color_mode = ColorMode.BRIGHTNESS
 
-    def __init__(self, entry: ConfigEntry, device: JebaoDevice, attr_def: dict[str, Any]) -> None:
+    def __init__(
+        self, entry: ConfigEntry, device: JebaoDevice, attr_def: dict[str, Any]
+    ) -> None:
         """Initialize the light entity."""
         super().__init__(entry, device, attr_def, "light")
         self._brightness = None
@@ -80,7 +78,9 @@ class JebaoLightEntity(JebaoEntity, LightEntity):
         # Get min/max from uint_spec if available
         uint_spec = attr_def.get("uint_spec") or {}
         self._value_min = uint_spec.get("min", 0)
-        self._value_max = uint_spec.get("max", 100)  # Default to 0-100 range if not specified
+        self._value_max = uint_spec.get(
+            "max", 100
+        )  # Default to 0-100 range if not specified
 
     @property
     def is_on(self) -> bool:
@@ -96,7 +96,11 @@ class JebaoLightEntity(JebaoEntity, LightEntity):
         """Turn the light on."""
         brightness = kwargs.get("brightness", 255)
         # Convert HA brightness (0-255) to device value range using percentage_to_ranged_value
-        device_value = round(percentage_to_ranged_value(self._value_min, self._value_max, (brightness / 255) * 100))
+        device_value = round(
+            percentage_to_ranged_value(
+                self._value_min, self._value_max, (brightness / 255) * 100
+            )
+        )
         await self._device.async_set_attribute(self._attribute_name, device_value)
 
     async def async_turn_off(self, **kwargs: Any) -> None:

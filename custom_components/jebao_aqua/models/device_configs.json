@@ -1,90 +1,164 @@
 {
-    "device_configs": {
-        "wavemaker_default": {
-            "device_type": "wavemaker",
-            "platforms": {
-                "switch": ["SwitchON", "PulseTide", "FeedSwitch", "TimerON"],
-                "number": ["Flow", "Frequency", "FeedTime"],
-                "select": ["Mode", "Linkage"],
-                "binary_sensor": ["Fault_Overcurrent", "Fault_Overvoltage", "Fault_OverTemp", "Fault_Undervoltage", "Fault_Lockedrotor", "Fault_no_liveload", "Fault_UART"]
-            }
-        },
-        "1d8c63eaccac4205b92c84d77d5a08fb": {
-            "inherits": "wavemaker_default"
-        },
-        "54114ccdac1e41c0bb17e222887c07ba": {
-            "inherits": "wavemaker_default"
-        },
-        "f0d844ab0d4947ac9527a286160bc705": {
-            "inherits": "wavemaker_default"
-        },
-        "f65982cb65da43baa0c722c84dd2740b": {
-            "device_type": "wavemaker",
-            "platforms": {
-                "switch": ["switch", "master", "ASYC", "TimerON", "Timer", "FeedSwitch","FeedTimer"],
-                "number": ["flow", "frequency", "FeedTime", "nightflow"],
-                "select": ["mode"],
-                "binary_sensor": ["Fault_Overcurrent", "Fault_Overvoltage", "Fault_OverTemp", "Fault_Undervoltage", "Fault_Lockedrotor", "Fault_no_liveload", "Fault_UART"]
-            }
-        },
-        "returnpump_default": {
-            "device_type": "returnpump",
-            "platforms": {
-                "switch": ["SwitchON","FeedSwitch","TimerON"],
-                "number": ["Motor_Speed","FeedTime"],
-                "binary_sensor": ["Fault_Overcurrent", "Fault_Overvoltage", "Fault_OverTemp", "Fault_Undervoltage", "Fault_Lockedrotor", "Fault_no_liveload", "Fault_UART"]
-            }
-        },
-        "6a5c47b3ea364ecb841b47f5997a1775": {
-            "inherits": "returnpump_default"
-        },
-        "02039876751049deb404d1d89221ec4b": {
-            "inherits": "returnpump_default"
-        },
-        "954b3e52aa5141539dfcaa2fff6c9e7f": {
-            "inherits": "returnpump_default"
-        },
-        "35abf13fa5444553b4a7cd0d184f3430": {
-            "inherits": "returnpump_default"
-        },
-        "bd0febe99e724e3b8640ed955cd81972": {
-            "switch": ["Switch","FeedSwitch","TimerON"],
-            "number": ["Motor_Speed","FeedTime"],
-            "binary_sensor": ["Fault_Overcurrent", "Fault_Overvoltage", "Fault_OverTemp", "Fault_Undervoltage", "Fault_Lockedrotor", "Fault_no_liveload", "Fault_UART"]
-        },
-        "cf4aaef856b84f6ea9cea29030eff19b": {
-            "device_type": "light",
-             "platforms": {
-                "switch": ["switch","Timer"],
-                "select": ["mode"],
-                "light": ["color_blue1","color_white","color_blue2","color_green","color_red","volor_violet"],
-                "sensor": ["color_blue1","color_white","color_blue2","color_green","color_red","volor_violet"],
-                "binary_sensor": ["OverTemp","OverCurrent","Fault_Fan","Fault_UART"]
-            }
-        },
-        "031f8753d7ad47a4bf46d89b17f40282": {
-            "device_type": "doser",
-            "platforms": {
-                "switch": ["switch","channe1","Timer1ON"],
-                "number": ["IntervalT1"],
-                "binary_sensor": ["OpenCircuit","Fault_UART"]
-            }
-        },
-        "25c5b146791f465bbefdbfd312b9e8ea": {
-            "device_type": "doser",
-            "platforms": {
-                "switch": ["switch","channe1","channe2","channe3","channe4","Timer1ON","Timer2ON","Timer3ON","Timer4ON"],
-                "number": ["IntervalT1","IntervalT2","IntervalT3","IntervalT4"],
-                "binary_sensor": ["OpenCircuit","Fault_UART"]
-            }
-        },
-        "5b3c136fd4b74f3fb2a366a254c76c9a":{
-            "device_type": "doser",
-            "platforms": {
-                "switch": ["switch","channe1","channe2","channe3","channe4","Timer1ON","Timer2ON","Timer3ON","Timer4ON"],
-                "number": ["IntervalT1","IntervalT2","IntervalT3","IntervalT4"],
-                "binary_sensor": ["OpenCircuit","Fault_UART"]
-            }
+  "device_configs": {
+    "wavemaker_default": {
+      "device_type": "wavemaker",
+      "platforms": {
+        "switch": ["SwitchON", "PulseTide", "FeedSwitch", "TimerON"],
+        "number": ["Flow", "Frequency", "FeedTime"],
+        "select": ["Mode", "Linkage"],
+        "binary_sensor": [
+          "Fault_Overcurrent",
+          "Fault_Overvoltage",
+          "Fault_OverTemp",
+          "Fault_Undervoltage",
+          "Fault_Lockedrotor",
+          "Fault_no_liveload",
+          "Fault_UART"
+        ]
+      }
+    },
+    "1d8c63eaccac4205b92c84d77d5a08fb": {
+      "inherits": "wavemaker_default"
+    },
+    "54114ccdac1e41c0bb17e222887c07ba": {
+      "inherits": "wavemaker_default"
+    },
+    "f0d844ab0d4947ac9527a286160bc705": {
+      "inherits": "wavemaker_default"
+    },
+    "f65982cb65da43baa0c722c84dd2740b": {
+      "device_type": "wavemaker",
+      "platforms": {
+        "switch": [
+          "switch",
+          "master",
+          "ASYC",
+          "TimerON",
+          "Timer",
+          "FeedSwitch",
+          "FeedTimer"
+        ],
+        "number": ["flow", "frequency", "FeedTime", "nightflow"],
+        "select": ["mode"],
+        "binary_sensor": [
+          "Fault_Overcurrent",
+          "Fault_Overvoltage",
+          "Fault_OverTemp",
+          "Fault_Undervoltage",
+          "Fault_Lockedrotor",
+          "Fault_no_liveload",
+          "Fault_UART"
+        ]
+      }
+    },
+    "returnpump_default": {
+      "device_type": "returnpump",
+      "platforms": {
+        "switch": ["SwitchON", "FeedSwitch", "TimerON"],
+        "number": ["Motor_Speed", "FeedTime"],
+        "binary_sensor": [
+          "Fault_Overcurrent",
+          "Fault_Overvoltage",
+          "Fault_OverTemp",
+          "Fault_Undervoltage",
+          "Fault_Lockedrotor",
+          "Fault_no_liveload",
+          "Fault_UART"
+        ]
+      }
+    },
+    "6a5c47b3ea364ecb841b47f5997a1775": {
+      "inherits": "returnpump_default"
+    },
+    "02039876751049deb404d1d89221ec4b": {
+      "inherits": "returnpump_default"
+    },
+    "954b3e52aa5141539dfcaa2fff6c9e7f": {
+      "inherits": "returnpump_default"
+    },
+    "35abf13fa5444553b4a7cd0d184f3430": {
+      "inherits": "returnpump_default"
+    },
+    "bd0febe99e724e3b8640ed955cd81972": {
+      "switch": ["Switch", "FeedSwitch", "TimerON"],
+      "number": ["Motor_Speed", "FeedTime"],
+      "binary_sensor": [
+        "Fault_Overcurrent",
+        "Fault_Overvoltage",
+        "Fault_OverTemp",
+        "Fault_Undervoltage",
+        "Fault_Lockedrotor",
+        "Fault_no_liveload",
+        "Fault_UART"
+      ]
+    },
+    "cf4aaef856b84f6ea9cea29030eff19b": {
+      "device_type": "light",
+      "platforms": {
+        "switch": ["switch", "Timer"],
+        "select": ["mode"],
+        "light": [
+          "color_blue1",
+          "color_white",
+          "color_blue2",
+          "color_green",
+          "color_red",
+          "volor_violet"
+        ],
+        "sensor": [
+          "color_blue1",
+          "color_white",
+          "color_blue2",
+          "color_green",
+          "color_red",
+          "volor_violet"
+        ],
+        "binary_sensor": ["OverTemp", "OverCurrent", "Fault_Fan", "Fault_UART"]
+      }
+    },
+    "031f8753d7ad47a4bf46d89b17f40282": {
+      "device_type": "doser",
+      "platforms": {
+        "switch": ["switch", "channe1", "Timer1ON"],
+        "number": ["IntervalT1"],
+        "binary_sensor": ["OpenCircuit", "Fault_UART"]
+      }
+    },
+    "25c5b146791f465bbefdbfd312b9e8ea": {
+      "device_type": "doser",
+      "platforms": {
+        "switch": [
+          "switch",
+          "channe1",
+          "channe2",
+          "channe3",
+          "channe4",
+          "Timer1ON",
+          "Timer2ON",
+          "Timer3ON",
+          "Timer4ON"
+        ],
+        "number": ["IntervalT1", "IntervalT2", "IntervalT3", "IntervalT4"],
+        "binary_sensor": ["OpenCircuit", "Fault_UART"]
+      }
+    },
+    "5b3c136fd4b74f3fb2a366a254c76c9a": {
+      "device_type": "doser",
+      "platforms": {
+        "switch": [
+          "switch",
+          "channe1",
+          "channe2",
+          "channe3",
+          "channe4",
+          "Timer1ON",
+          "Timer2ON",
+          "Timer3ON",
+          "Timer4ON"
+        ],
+        "number": ["IntervalT1", "IntervalT2", "IntervalT3", "IntervalT4"],
+        "binary_sensor": ["OpenCircuit", "Fault_UART"]
+      }
     }
-}
+  }
 }

@@ -4,21 +4,21 @@ import asyncio
 import logging
 import struct
 import time
-import socket  # Add this import
-from typing import Any, Optional
+from typing import Any
 
-from .errors import PasscodeError, LoginError, ProtocolError
+from .connection import Connection
+from .device_status import DeviceStatus
+from .errors import LoginError, PasscodeError, ProtocolError
 from .protocol import (
     build_prefix_and_command,
     parse_response_prefix,
-    set_swapped_bits,
+    set_bits_in_byte,
     set_normal_bits_in_first_16,
-    set_bits_in_byte
+    set_swapped_bits,
 )
-from .device_status import DeviceStatus
-from .connection import Connection
 
 logger = logging.getLogger(__name__)
+
 
 def need_swapped_16bits(all_attrs) -> bool:
     for a in all_attrs:
@@ -28,10 +28,10 @@ def need_swapped_16bits(all_attrs) -> bool:
                 return True
     return False
 
+
 class Device:
-    """
-    Represents a Gizwits device accessible via LAN protocol.
-    
+    """Represents a Gizwits device accessible via LAN protocol.
+
     Handles:
     - Connection and login
     - Status updates (solicited and unsolicited)
@@ -44,30 +44,34 @@ class Device:
         port: TCP port (default 12416)
         product_key: Device model identifier
         attributes: List of attribute definitions from product JSON
+
     """
 
-    def __init__(self, ip: str, port: int = 12416, product_key: str = "",
-                 attributes=None):
+    def __init__(
+        self, ip: str, port: int = 12416, product_key: str = "", attributes=None
+    ):
         self.ip = ip
         self.port = port
         self.product_key = product_key
 
         self.all_attrs = attributes or []
-        self.writable_attrs = [a for a in self.all_attrs if a.get("type") == "status_writable"]
+        self.writable_attrs = [
+            a for a in self.all_attrs if a.get("type") == "status_writable"
+        ]
 
         self.reader: asyncio.StreamReader = None
         self.writer: asyncio.StreamWriter = None
         self._read_task: asyncio.Task = None
 
         self._pending_requests = {}
-        self.current_status = None 
+        self.current_status = None
 
         self.max_status_len = self._compute_status_len_from_all()
         self.swapped_16 = need_swapped_16bits(self.all_attrs)
 
-        self.last_pong = 0.0 # We want to try and keep our connection alive with Ping/Pongs so that we recieve status updates.
-        self.ping_interval = 4 # 10 Seconds seems to be the maximum interval - anything longer and the device will close the connection.
-        self.pong_timeout = 10 # If we've not seen a Pong in this long then we'll definitely need to reconnect anyway.
+        self.last_pong = 0.0  # We want to try and keep our connection alive with Ping/Pongs so that we recieve status updates.
+        self.ping_interval = 4  # 10 Seconds seems to be the maximum interval - anything longer and the device will close the connection.
+        self.pong_timeout = 10  # If we've not seen a Pong in this long then we'll definitely need to reconnect anyway.
 
         self._status_callbacks = set()
         self._connection_callbacks = set()
@@ -84,7 +88,7 @@ class Device:
             min_retry_interval=2.0,
             max_retry_interval=128.0,
             ping_interval=self.ping_interval,
-            ping_timeout=self.pong_timeout
+            ping_timeout=self.pong_timeout,
         )
 
     def add_status_callback(self, callback):
@@ -113,29 +117,28 @@ class Device:
                 end = bo + length_bits
             else:
                 end = bo + 1
-            if end > max_len:
-                max_len = end
+            max_len = max(end, max_len)
         return max_len
 
     async def connect(self, timeout: float = 5.0):
-        """
-        Connect to the device and start connection management.
-        
+        """Connect to the device and start connection management.
+
         This method:
         1. Starts the connection manager
         2. Waits for initial connection
         3. Ensures login sequence completes
         4. Sets up status monitoring
         5. Enables auto-reconnection
-        
+
         Args:
             timeout: How long to wait for initial connection in seconds
-            
+
         Raises:
             TimeoutError: If initial connection fails
             PasscodeError: If device not in binding mode
             LoginError: If login handshake fails
             ProtocolError: If initial status fails
+
         """
         await self._connection.start()
         # Wait for initial connection
@@ -158,17 +161,16 @@ class Device:
             try:
                 self.reader, self.writer = await asyncio.wait_for(
                     asyncio.open_connection(self.ip, self.port),
-                    timeout=3.0  # 3 second timeout for initial connection
+                    timeout=3.0,  # 3 second timeout for initial connection
                 )
-            except (asyncio.TimeoutError, ConnectionRefusedError, OSError) as e:
+            except (TimeoutError, ConnectionRefusedError, OSError) as e:
                 logger.info("Device %s not reachable: %s", self.ip, str(e))
                 return False
-            
+
             # Start read loop
             if self._read_task is None or self._read_task.done():
                 self._read_task = asyncio.create_task(
-                    self._read_loop(), 
-                    name=f"read_loop_{self.ip}"
+                    self._read_loop(), name=f"read_loop_{self.ip}"
                 )
 
             # Allow read loop to start
@@ -181,7 +183,7 @@ class Device:
             length_reported = struct.unpack(">H", passcode[:2])[0]
             if length_reported == 0:
                 raise PasscodeError("Device not in binding mode or passcode=0")
-            passcode_bytes = passcode[2:2+length_reported]
+            passcode_bytes = passcode[2 : 2 + length_reported]
 
             payload = struct.pack(">H", len(passcode_bytes)) + passcode_bytes
             login_resp = await self._send_command_no_seq(0x08, 0x09, payload, 5.0)
@@ -228,17 +230,17 @@ class Device:
         try:
             cmd_15 = build_prefix_and_command(b"\x00\x15", b"")
             last_pong = self.last_pong
-            
+
             self.writer.write(cmd_15)
             await self.writer.drain()
-            
+
             # Wait up to pong_timeout for response
             for _ in range(3):  # Try up to 3 times
                 await asyncio.sleep(0.1)
                 if self.last_pong > last_pong:
                     return True
             return False
-            
+
         except Exception as e:
             logger.error("Ping failed: %s", e)
             return False
@@ -247,19 +249,19 @@ class Device:
     # Partial Updates (93->94) for Writable Attributes
     ###########################################################################
     async def set_device_attribute(self, attr_name: str, value, timeout=3.0):
-        """
-        Set a single device attribute.
+        """Set a single device attribute.
 
         Args:
             attr_name: Name of attribute to set
             value: New value (type must match attribute definition)
             timeout: Command timeout in seconds
-            
+
         Returns:
             Response payload or None if failed
-            
+
         Raises:
             RuntimeError: If device not connected
+
         """
         return await self.set_multiple_attributes({attr_name: value}, timeout)
 
@@ -280,14 +282,15 @@ class Device:
             pos = a["position"]
             bo = pos["byte_offset"]
             end = bo + pos["len"] if pos["unit"] == "byte" else bo + 1
-            if end > max_offset:
-                max_offset = end
-        if max_offset < 2 and any(a["position"]["byte_offset"] == 0 for a in self.writable_attrs):
+            max_offset = max(end, max_offset)
+        if max_offset < 2 and any(
+            a["position"]["byte_offset"] == 0 for a in self.writable_attrs
+        ):
             max_offset = 2
         attr_values = bytearray(max_offset)
 
         name_map = {a["name"]: a for a in self.writable_attrs}
-        for (k, v) in updates.items():
+        for k, v in updates.items():
             if k not in name_map:
                 logger.warning("Ignoring attribute '%s' (not status_writable?).", k)
                 continue
@@ -297,9 +300,14 @@ class Device:
         action_byte = b"\x01"
         payload = seq + action_byte + attr_flags + attr_values
 
-        ack_payload = await self._send_command_with_seq(0x93, 0x94, seq, payload, timeout)
-        logger.debug("Partial update ack, seq=%s, ack_payload=%s", seq.hex(),
-                     ack_payload.hex() if ack_payload else "<none>")
+        ack_payload = await self._send_command_with_seq(
+            0x93, 0x94, seq, payload, timeout
+        )
+        logger.debug(
+            "Partial update ack, seq=%s, ack_payload=%s",
+            seq.hex(),
+            ack_payload.hex() if ack_payload else "<none>",
+        )
         return ack_payload
 
     def _set_one_writable_attribute(self, attr, user_value, attr_flags, attr_values):
@@ -307,7 +315,7 @@ class Device:
         byte_index = a_id // 8
         bit_index = a_id % 8
         flags_byte = len(attr_flags) - 1 - byte_index
-        attr_flags[flags_byte] |= (1 << bit_index)
+        attr_flags[flags_byte] |= 1 << bit_index
 
         pos = attr["position"]
         bo = pos["byte_offset"]
@@ -322,10 +330,12 @@ class Device:
             else:
                 val_int = int(user_value)
             if unit == "bit":
-                if (bo == 0 and self.swapped_16):
+                if bo == 0 and self.swapped_16:
                     set_swapped_bits(attr_values, bit_off, length_bits, val_int)
                 elif bo == 0:
-                    set_normal_bits_in_first_16(attr_values, bit_off, length_bits, val_int)
+                    set_normal_bits_in_first_16(
+                        attr_values, bit_off, length_bits, val_int
+                    )
                 else:
                     set_bits_in_byte(attr_values, bo, bit_off, length_bits, val_int)
             else:
@@ -335,7 +345,9 @@ class Device:
             attr_values[bo] = val & 0xFF
         elif dtype == "binary":
             length_bytes = pos["len"] if unit == "byte" else (length_bits + 7) // 8
-            val_bytes = bytes.fromhex(user_value) if isinstance(user_value, str) else user_value
+            val_bytes = (
+                bytes.fromhex(user_value) if isinstance(user_value, str) else user_value
+            )
             for i in range(min(length_bytes, len(val_bytes))):
                 attr_values[bo + i] = val_bytes[i]
         else:
@@ -404,14 +416,20 @@ class Device:
             if isinstance(self.current_status, DeviceStatus):
                 self.current_status.last_pong = self.last_pong
         elif cmd_int == 0x91:
-            logger.info("Unsolicited cmd=0x91 from %s, payload=%s", self.ip, payload.hex())
+            logger.info(
+                "Unsolicited cmd=0x91 from %s, payload=%s", self.ip, payload.hex()
+            )
         elif cmd_int == 0x93:
-            logger.info("Unsolicited cmd=0x93 from %s, payload=%s", self.ip, payload.hex())
+            logger.info(
+                "Unsolicited cmd=0x93 from %s, payload=%s", self.ip, payload.hex()
+            )
             needed = self.max_status_len
             if len(payload) < needed:
-                logger.warning("cmd=0x93 but payload len=%d < %d, ignoring", len(payload), needed)
+                logger.warning(
+                    "cmd=0x93 but payload len=%d < %d, ignoring", len(payload), needed
+                )
                 return
-            status_data = payload[-self.max_status_len:]
+            status_data = payload[-self.max_status_len :]
             parsed_dict = self._unpack_status_data(status_data)
             self.current_status = DeviceStatus(parsed_dict)
             logger.info("Device status updated => %s", self.current_status)
@@ -435,14 +453,30 @@ class Device:
             if fut:
                 fut.set_result(payload[4:])
             else:
-                logger.info("Unsolicited cmd=0x94 with seq=%s not found in pending", seq_echo.hex())
+                logger.info(
+                    "Unsolicited cmd=0x94 with seq=%s not found in pending",
+                    seq_echo.hex(),
+                )
         else:
-            logger.info("Unsolicited cmd=0x%02x from %s, len=%d, payload=%s", cmd_int, self.ip, len(payload), payload.hex())
+            logger.info(
+                "Unsolicited cmd=0x%02x from %s, len=%d, payload=%s",
+                cmd_int,
+                self.ip,
+                len(payload),
+                payload.hex(),
+            )
 
-    async def _send_command_no_seq(self, cmd_send: int, cmd_recv: int, payload: bytes, timeout: float) -> bytes:
+    async def _send_command_no_seq(
+        self, cmd_send: int, cmd_recv: int, payload: bytes, timeout: float
+    ) -> bytes:
         cmd_send_bytes = cmd_send.to_bytes(2, "big")
         packet = build_prefix_and_command(cmd_send_bytes, payload)
-        logger.debug("Sending cmd=0x%02x => expect cmd=0x%02x, payload=%s", cmd_send, cmd_recv, payload.hex())
+        logger.debug(
+            "Sending cmd=0x%02x => expect cmd=0x%02x, payload=%s",
+            cmd_send,
+            cmd_recv,
+            payload.hex(),
+        )
         fut = asyncio.get_event_loop().create_future()
         self._pending_requests[(cmd_recv, None)] = fut
         self.writer.write(packet)
@@ -450,14 +484,23 @@ class Device:
         try:
             resp = await asyncio.wait_for(fut, timeout=timeout)
             return resp
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._pending_requests.pop((cmd_recv, None), None)
-            raise ProtocolError(f"No response for cmd=0x{cmd_recv:02x} within {timeout}s")
+            raise ProtocolError(
+                f"No response for cmd=0x{cmd_recv:02x} within {timeout}s"
+            )
 
-    async def _send_command_with_seq(self, cmd_send: int, cmd_recv: int, seq: bytes, payload: bytes, timeout: float) -> bytes:
+    async def _send_command_with_seq(
+        self, cmd_send: int, cmd_recv: int, seq: bytes, payload: bytes, timeout: float
+    ) -> bytes:
         cmd_send_bytes = cmd_send.to_bytes(2, "big")
         packet = build_prefix_and_command(cmd_send_bytes, payload)
-        logger.debug("Sending cmd=0x%02x, seq=%s => expecting cmd=0x%02x", cmd_send, seq.hex(), cmd_recv)
+        logger.debug(
+            "Sending cmd=0x%02x, seq=%s => expecting cmd=0x%02x",
+            cmd_send,
+            seq.hex(),
+            cmd_recv,
+        )
         fut = asyncio.get_event_loop().create_future()
         self._pending_requests[(cmd_recv, seq)] = fut
         self.writer.write(packet)
@@ -465,9 +508,11 @@ class Device:
         try:
             resp = await asyncio.wait_for(fut, timeout=timeout)
             return resp
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._pending_requests.pop((cmd_recv, seq), None)
-            raise ProtocolError(f"No ack for cmd=0x{cmd_recv:02x}, seq={seq.hex()} within {timeout}s")
+            raise ProtocolError(
+                f"No ack for cmd=0x{cmd_recv:02x}, seq={seq.hex()} within {timeout}s"
+            )
 
     def _unpack_status_data(self, data: bytes) -> dict:
         result = {}
@@ -489,22 +534,24 @@ class Device:
                 if bo < len(data):
                     val = data[bo]
             elif dtype == "binary":
-                length_bytes = pos["len"] if unit == "byte" else ((length_bits + 7) // 8)
+                length_bytes = (
+                    pos["len"] if unit == "byte" else ((length_bits + 7) // 8)
+                )
                 end = bo + length_bytes
                 val = data[bo:end] if end <= len(data) else data[bo:]
             result[name] = val
         return result
 
-    def _decode_bits(self, data: bytes, bo: int, bit_off: int, length_bits: int, unit: str) -> int:
+    def _decode_bits(
+        self, data: bytes, bo: int, bit_off: int, length_bits: int, unit: str
+    ) -> int:
         if unit == "bit":
             if bo == 0 and self.swapped_16:
                 return self._get_swapped_bits(data, bit_off, length_bits)
-            elif bo == 0:
+            if bo == 0:
                 return self._get_normal_bits_16(data, bit_off, length_bits)
-            else:
-                return self._get_bits_in_byte(data, bo, bit_off, length_bits)
-        else:
-            return data[bo]
+            return self._get_bits_in_byte(data, bo, bit_off, length_bits)
+        return data[bo]
 
     def _get_swapped_bits(self, data: bytes, bit_off: int, length_bits: int) -> int:
         if len(data) < 2:
@@ -520,14 +567,15 @@ class Device:
         mask = (1 << length_bits) - 1
         return (av16 >> bit_off) & mask
 
-    def _get_bits_in_byte(self, data: bytes, bo: int, bit_off: int, bit_length: int) -> int:
+    def _get_bits_in_byte(
+        self, data: bytes, bo: int, bit_off: int, bit_length: int
+    ) -> int:
         val = data[bo]
         mask = (1 << bit_length) - 1
         return (val >> bit_off) & mask
 
     async def request_status_update(self, timeout: float = 5.0) -> bool:
-        """
-        Request an immediate status update from the device.
+        """Request an immediate status update from the device.
         Returns True if status was updated successfully.
         """
         if not self._connected:  # Check TCP connection state
@@ -538,40 +586,43 @@ class Device:
 
         try:
             resp = await self._send_command_with_seq(0x93, 0x94, seq, payload, timeout)
-            if not resp or resp[0] != 0x03:  # First byte (p0 action byte) should be 0x03 for status response
+            if (
+                not resp or resp[0] != 0x03
+            ):  # First byte (p0 action byte) should be 0x03 for status response
                 logger.warning("Status request: unexpected response format")
                 return False
-            
+
             parsed_dict = self._unpack_status_data(resp[1:])  # Skip the p0 action byte
             self.current_status = DeviceStatus(parsed_dict)
             logger.debug("Device status updated => %s", self.current_status)
-            
+
             # Notify callbacks about status update
             for callback in self._status_callbacks:
                 try:
                     callback(self.current_status)
                 except Exception as e:
                     logger.error("Error in status callback: %s", e)
-            
+
             return True
 
         except Exception as e:
             logger.error("Failed to request status update: %s", e)
             return False
 
-    @property 
+    @property
     def available(self) -> bool:
-        """
-        Whether the device is connected and responding to pings.
-        
+        """Whether the device is connected and responding to pings.
+
         A device is considered available if:
         1. TCP connection is established
-        2. We have valid status data 
+        2. We have valid status data
         3. Last pong was recent
         """
-        return (self._connected and 
-                isinstance(self.current_status, DeviceStatus) and
-                self.current_status.pong_age() < self.pong_timeout)
+        return (
+            self._connected
+            and isinstance(self.current_status, DeviceStatus)
+            and self.current_status.pong_age() < self.pong_timeout
+        )
 
     @property
     def attributes(self) -> dict:
@@ -582,7 +633,7 @@ class Device:
         """Get current value of a specific attribute."""
         return self.attributes.get(attr_name)
 
-    def get_attribute_metadata(self, attr_name: str) -> Optional[dict]:
+    def get_attribute_metadata(self, attr_name: str) -> dict | None:
         """Get metadata for a specific attribute (type, position, etc)."""
         for attr in self.all_attrs:
             if attr["name"] == attr_name:

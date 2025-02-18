@@ -1,22 +1,19 @@
 """Config flow for Jebao Aqua integration."""
+
 from __future__ import annotations
 
-import asyncio
+from dataclasses import dataclass
 import logging
 from typing import Any
 
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.device_registry import format_mac
 
-from .const import DOMAIN
 from . import hub
-
-from dataclasses import dataclass
-from typing import Any, Dict, List
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,14 +24,17 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
     }
 )
 
+
 @dataclass
 class DeviceCandidate:
     """Discovered device information."""
+
     ip: str
     product_key: str
     uid: str
     mac: str | None = None
     firmware_version: str | None = None
+
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Jebao Aqua integration."""
@@ -44,7 +44,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         """Initialize the config flow."""
-        self.discovered_devices: List[DeviceCandidate] = []
+        self.discovered_devices: list[DeviceCandidate] = []
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -76,13 +76,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if mac:
                 mac = format_mac(mac)
 
-            self.discovered_devices.append(DeviceCandidate(
-                ip=dev["ip"],
-                product_key=dev.get("product_key", ""),
-                uid=uid,
-                mac=mac,
-                firmware_version=dev.get("firmware_version"),
-            ))
+            self.discovered_devices.append(
+                DeviceCandidate(
+                    ip=dev["ip"],
+                    product_key=dev.get("product_key", ""),
+                    uid=uid,
+                    mac=mac,
+                    firmware_version=dev.get("firmware_version"),
+                )
+            )
 
         if self.discovered_devices:
             # Create single entry with all discovered devices
@@ -99,7 +101,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         }
                         for dev in self.discovered_devices
                     ]
-                }
+                },
             )
 
         # If no new devices found, show manual entry form
@@ -134,14 +136,16 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     return self.async_create_entry(
                         title=friendly_name or "Jebao Devices",
                         data={
-                            "devices": [{
-                                "ip": ip,
-                                "product_key": dev.get("product_key", ""),
-                                "uid": dev["uid"],
-                                "mac": mac,
-                                "firmware_version": dev.get("firmware_version"),
-                            }]
-                        }
+                            "devices": [
+                                {
+                                    "ip": ip,
+                                    "product_key": dev.get("product_key", ""),
+                                    "uid": dev["uid"],
+                                    "mac": mac,
+                                    "firmware_version": dev.get("firmware_version"),
+                                }
+                            ]
+                        },
                     )
             except Exception:
                 _LOGGER.exception("Unexpected exception")

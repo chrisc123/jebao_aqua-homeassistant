@@ -5,19 +5,14 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from homeassistant.components.number import (
-    NumberEntity,
-    NumberEntityDescription,
-)
+from homeassistant.components.number import NumberEntity, NumberEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .gizwits_lan.device_status import DeviceStatus
 from .entity import JebaoEntity
-
+from .gizwits_lan.device_status import DeviceStatus
 from .hub import JebaoDevice
-from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -92,15 +87,18 @@ class JebaoNumberEntity(JebaoEntity, NumberEntity):
         await self._device.async_set_attribute(self._attribute_name, int_value)
 
     async def async_added_to_hass(self) -> None:
-        await super().async_added_to_hass()  # Call parent to handle connection state callback
+        await (
+            super().async_added_to_hass()
+        )  # Call parent to handle connection state callback
         """Register callback."""
         self._device.register_status_callback(self._update_state_from_device)
 
     async def async_will_remove_from_hass(self) -> None:
         """Unregister callback."""
-        await super().async_will_remove_from_hass()  # Call parent to handle connection state
+        await (
+            super().async_will_remove_from_hass()
+        )  # Call parent to handle connection state
         self._device.remove_status_callback(self._update_state_from_device)
-
 
     @callback
     def _update_state_from_device(self, status: DeviceStatus) -> None:

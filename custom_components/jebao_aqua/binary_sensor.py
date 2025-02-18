@@ -6,19 +6,17 @@ import logging
 from typing import Any
 
 from homeassistant.components.binary_sensor import (
+    BinarySensorDeviceClass,
     BinarySensorEntity,
     BinarySensorEntityDescription,
-    BinarySensorDeviceClass,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .gizwits_lan.device_status import DeviceStatus
-
-from .hub import JebaoDevice
-from .const import DOMAIN
 from .entity import JebaoEntity
+from .gizwits_lan.device_status import DeviceStatus
+from .hub import JebaoDevice
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -41,7 +39,9 @@ async def async_setup_entry(
         device_cfg = device.device_config
         allowed_binary_sensor_attrs = set()
         if device_cfg and "platforms" in device_cfg:
-            allowed_binary_sensor_attrs = set(device_cfg["platforms"].get("binary_sensor", []))
+            allowed_binary_sensor_attrs = set(
+                device_cfg["platforms"].get("binary_sensor", [])
+            )
 
         # Create entities for each device's attributes
         for attr_def in device.giz_device.all_attrs:
@@ -72,12 +72,12 @@ class JebaoFaultSensorEntity(JebaoEntity, BinarySensorEntity):
         )
 
         super().__init__(entry, device, attr_def, "binary_sensor")
-        self._is_on = None 
+        self._is_on = None
 
     @property
     def is_on(self) -> bool:
         """Return True if fault is present."""
-        return self._is_on 
+        return self._is_on
 
     @property
     def device_class(self):
@@ -95,7 +95,6 @@ class JebaoFaultSensorEntity(JebaoEntity, BinarySensorEntity):
             super().async_will_remove_from_hass()
         )  # Call parent to handle connection state
         self._device.remove_status_callback(self._update_state_from_device)
-
 
     @callback
     def _update_state_from_device(self, status: DeviceStatus) -> None:

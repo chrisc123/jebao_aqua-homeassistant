@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 import json
 import logging
-from typing import Any, Dict, Callable, Set
 from pathlib import Path
+from typing import Any
 
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import format_mac
 
 from .gizwits_lan import DeviceManager, DeviceStatus, GizwitsError
 
@@ -22,9 +22,7 @@ _GLOBAL_MANAGER: DeviceManager | None = None
 
 
 async def get_manager(hass: HomeAssistant) -> DeviceManager:
-    """
-    Return a singleton DeviceManager for the integration, creating it if necessary.
-    """
+    """Return a singleton DeviceManager for the integration, creating it if necessary."""
     global _GLOBAL_MANAGER
     if _GLOBAL_MANAGER is None:
         # For real usage, specify the path to the definitions folder or
@@ -40,8 +38,7 @@ async def get_manager(hass: HomeAssistant) -> DeviceManager:
 async def async_discover_devices(
     hass: HomeAssistant, timeout: float = 5.0
 ) -> list[dict[str, Any]]:
-    """
-    Perform a broadcast discovery for Jebao (Gizwits) devices on the network
+    """Perform a broadcast discovery for Jebao (Gizwits) devices on the network
     using the gizwits_lan library. Returns a list of device info dicts:
     [
       {
@@ -66,8 +63,7 @@ async def async_discover_devices(
 async def async_directed_discovery(
     hass: HomeAssistant, ip: str, timeout: float = 5.0
 ) -> dict[str, Any] | None:
-    """
-    Perform a unicast discovery to the specified IP.
+    """Perform a unicast discovery to the specified IP.
     Return the single matching device info dict, or None if not found.
     """
     manager = await get_manager(hass)
@@ -91,10 +87,10 @@ async def _load_device_configs() -> dict:
 
     # Use aiofiles for async file operations
     try:
-        # Run file read in executor to avoid blocking
+        # Use utf-8-sig to handle files with BOM
         _DEVICE_CONFIGS = await asyncio.get_event_loop().run_in_executor(
             None,
-            lambda: json.loads(config_file.read_text(encoding="utf-8")).get(
+            lambda: json.loads(config_file.read_text(encoding="utf-8-sig")).get(
                 "device_configs", {}
             ),
         )
@@ -128,8 +124,7 @@ def _merge_config(base_config: dict, child_config: dict) -> dict:
 
 
 async def get_device_config_for_product_key(product_key: str) -> dict:
-    """
-    Return the merged config from device_configs.json for a given product_key.
+    """Return the merged config from device_configs.json for a given product_key.
     If it references an 'inherits', merge that base config. If none found, return empty.
     """
     device_configs = await _load_device_configs()  # Now awaiting the async call
@@ -164,8 +159,8 @@ class JebaoDevice:
         self.firmware_version = firmware_version
         self.device_config: dict = {}
         self.giz_device = None
-        self._status_callbacks: Set[Callable[[DeviceStatus], None]] = set()
-        self._connection_callbacks: Set[Callable[[bool], None]] = set()
+        self._status_callbacks: set[Callable[[DeviceStatus], None]] = set()
+        self._connection_callbacks: set[Callable[[bool], None]] = set()
 
     async def async_connect(self) -> None:
         """Connect to the device via gizwits_lan, subscribe to updates."""

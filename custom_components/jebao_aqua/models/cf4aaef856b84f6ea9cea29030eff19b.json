@@ -1,1369 +1,1275 @@
 ﻿{
-    "name":  "本地定时LED灯_无AP校时",
-    "packetVersion":  "0x00000004",
-    "protocolType":  "standard",
-    "product_key":  "cf4aaef856b84f6ea9cea29030eff19b",
-    "entities":  [
-                     {
-                         "display_name":  "机智云开发套件",
-                         "attrs":  [
-                                       {
-                                           "display_name":  "开关",
-                                           "name":  "switch",
-                                           "data_type":  "bool",
-                                           "position":  {
-                                                            "byte_offset":  0,
-                                                            "unit":  "bit",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  0,
-                                           "desc":  ""
-                                       },
-                                       {
-                                           "display_name":  "定时开关",
-                                           "name":  "Timer",
-                                           "data_type":  "bool",
-                                           "position":  {
-                                                            "byte_offset":  0,
-                                                            "unit":  "bit",
-                                                            "len":  1,
-                                                            "bit_offset":  1
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  1,
-                                           "desc":  "定时开关，打开\"运行\"后置1，关闭\"运行\"后置0"
-                                       },
-                                       {
-                                           "display_name":  "模式",
-                                           "name":  "mode",
-                                           "data_type":  "enum",
-                                           "enum":  [
-                                                        "手动",
-                                                        "早晨",
-                                                        "日出",
-                                                        "白天",
-                                                        "日落",
-                                                        "夜晚",
-                                                        "定时"
-                                                    ],
-                                           "position":  {
-                                                            "byte_offset":  0,
-                                                            "unit":  "bit",
-                                                            "len":  3,
-                                                            "bit_offset":  2
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  2,
-                                           "desc":  "0:手动,M模式;1:早晨，M1模式；2:日出，M2模式；3:白天，M3模式；4：日落，M4模式；5：夜晚，M5模式；6：定时"
-                                       },
-                                       {
-                                           "display_name":  "宝蓝",
-                                           "name":  "color_blue1",
-                                           "data_type":  "uint8",
-                                           "position":  {
-                                                            "byte_offset":  1,
-                                                            "unit":  "byte",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "uint_spec":  {
-                                                             "addition":  0,
-                                                             "max":  100,
-                                                             "ratio":  1,
-                                                             "min":  0
-                                                         },
-                                           "type":  "status_writable",
-                                           "id":  3,
-                                           "desc":  "宝蓝色灯"
-                                       },
-                                       {
-                                           "display_name":  "冷白",
-                                           "name":  "color_white",
-                                           "data_type":  "uint8",
-                                           "position":  {
-                                                            "byte_offset":  2,
-                                                            "unit":  "byte",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "uint_spec":  {
-                                                             "addition":  0,
-                                                             "max":  100,
-                                                             "ratio":  1,
-                                                             "min":  0
-                                                         },
-                                           "type":  "status_writable",
-                                           "id":  4,
-                                           "desc":  "冷白色灯"
-                                       },
-                                       {
-                                           "display_name":  "蓝色",
-                                           "name":  "color_blue2",
-                                           "data_type":  "uint8",
-                                           "position":  {
-                                                            "byte_offset":  3,
-                                                            "unit":  "byte",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "uint_spec":  {
-                                                             "addition":  0,
-                                                             "max":  100,
-                                                             "ratio":  1,
-                                                             "min":  0
-                                                         },
-                                           "type":  "status_writable",
-                                           "id":  5,
-                                           "desc":  "蓝色灯"
-                                       },
-                                       {
-                                           "display_name":  "绿色",
-                                           "name":  "color_green",
-                                           "data_type":  "uint8",
-                                           "position":  {
-                                                            "byte_offset":  4,
-                                                            "unit":  "byte",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "uint_spec":  {
-                                                             "addition":  0,
-                                                             "max":  100,
-                                                             "ratio":  1,
-                                                             "min":  0
-                                                         },
-                                           "type":  "status_writable",
-                                           "id":  6,
-                                           "desc":  "绿色灯"
-                                       },
-                                       {
-                                           "display_name":  "红色",
-                                           "name":  "color_red",
-                                           "data_type":  "uint8",
-                                           "position":  {
-                                                            "byte_offset":  5,
-                                                            "unit":  "byte",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "uint_spec":  {
-                                                             "addition":  0,
-                                                             "max":  100,
-                                                             "ratio":  1,
-                                                             "min":  0
-                                                         },
-                                           "type":  "status_writable",
-                                           "id":  7,
-                                           "desc":  "红色灯"
-                                       },
-                                       {
-                                           "display_name":  "紫色",
-                                           "name":  "volor_violet",
-                                           "data_type":  "uint8",
-                                           "position":  {
-                                                            "byte_offset":  6,
-                                                            "unit":  "byte",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "uint_spec":  {
-                                                             "addition":  0,
-                                                             "max":  100,
-                                                             "ratio":  1,
-                                                             "min":  0
-                                                         },
-                                           "type":  "status_writable",
-                                           "id":  8,
-                                           "desc":  "紫色灯"
-                                       },
-                                       {
-                                           "display_name":  "早晨",
-                                           "name":  "M1",
-                                           "data_type":  "uint8",
-                                           "position":  {
-                                                            "byte_offset":  7,
-                                                            "unit":  "byte",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "uint_spec":  {
-                                                             "addition":  0,
-                                                             "max":  100,
-                                                             "ratio":  1,
-                                                             "min":  10
-                                                         },
-                                           "type":  "status_writable",
-                                           "id":  9,
-                                           "desc":  "M1,早晨灯光设置值"
-                                       },
-                                       {
-                                           "display_name":  "日出",
-                                           "name":  "M2",
-                                           "data_type":  "uint8",
-                                           "position":  {
-                                                            "byte_offset":  8,
-                                                            "unit":  "byte",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "uint_spec":  {
-                                                             "addition":  0,
-                                                             "max":  100,
-                                                             "ratio":  1,
-                                                             "min":  10
-                                                         },
-                                           "type":  "status_writable",
-                                           "id":  10,
-                                           "desc":  "M2,日出灯光设置值"
-                                       },
-                                       {
-                                           "display_name":  "白天",
-                                           "name":  "M3",
-                                           "data_type":  "uint8",
-                                           "position":  {
-                                                            "byte_offset":  9,
-                                                            "unit":  "byte",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "uint_spec":  {
-                                                             "addition":  0,
-                                                             "max":  100,
-                                                             "ratio":  1,
-                                                             "min":  10
-                                                         },
-                                           "type":  "status_writable",
-                                           "id":  11,
-                                           "desc":  "M3,白天灯光设置值"
-                                       },
-                                       {
-                                           "display_name":  "日落",
-                                           "name":  "M4",
-                                           "data_type":  "uint8",
-                                           "position":  {
-                                                            "byte_offset":  10,
-                                                            "unit":  "byte",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "uint_spec":  {
-                                                             "addition":  0,
-                                                             "max":  100,
-                                                             "ratio":  1,
-                                                             "min":  10
-                                                         },
-                                           "type":  "status_writable",
-                                           "id":  12,
-                                           "desc":  "M4，日落灯光设置值"
-                                       },
-                                       {
-                                           "display_name":  "夜晚",
-                                           "name":  "M5",
-                                           "data_type":  "uint8",
-                                           "position":  {
-                                                            "byte_offset":  11,
-                                                            "unit":  "byte",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "uint_spec":  {
-                                                             "addition":  0,
-                                                             "max":  100,
-                                                             "ratio":  1,
-                                                             "min":  10
-                                                         },
-                                           "type":  "status_writable",
-                                           "id":  13,
-                                           "desc":  "M5，夜晚灯光设置值"
-                                       },
-                                       {
-                                           "display_name":  "定时组",
-                                           "name":  "TimerGroup",
-                                           "data_type":  "uint8",
-                                           "position":  {
-                                                            "byte_offset":  12,
-                                                            "unit":  "byte",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "uint_spec":  {
-                                                             "addition":  0,
-                                                             "max":  3,
-                                                             "ratio":  1,
-                                                             "min":  0
-                                                         },
-                                           "type":  "status_writable",
-                                           "id":  14,
-                                           "desc":  "定时组，LPS程序:0；SPS程序:1；LPS/SPS程序:2；自定义程序：3；    默认是0: LPS程序"
-                                       },
-                                       {
-                                           "display_name":  "0点定时值",
-                                           "name":  "Clock00",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  13,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  15,
-                                           "desc":  "0:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "1点定时值",
-                                           "name":  "Clock01",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  19,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  16,
-                                           "desc":  "1:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "2点定时值",
-                                           "name":  "Clock02",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  25,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  17,
-                                           "desc":  "2:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "3点定时值",
-                                           "name":  "Clock03",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  31,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  18,
-                                           "desc":  "3:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "4点定时值",
-                                           "name":  "Clock04",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  37,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  19,
-                                           "desc":  "4:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "5点定时值",
-                                           "name":  "Clock05",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  43,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  20,
-                                           "desc":  "5:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "6点定时值",
-                                           "name":  "Clock06",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  49,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  21,
-                                           "desc":  "6:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "7点定时值",
-                                           "name":  "Clock07",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  55,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  22,
-                                           "desc":  "7:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "8点定时值",
-                                           "name":  "Clock08",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  61,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  23,
-                                           "desc":  "8:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "9点定时值",
-                                           "name":  "Clock09",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  67,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  24,
-                                           "desc":  "9:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "10点定时值",
-                                           "name":  "Clock10",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  73,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  25,
-                                           "desc":  "10:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "11点定时值",
-                                           "name":  "Clock11",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  79,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  26,
-                                           "desc":  "11:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "12点定时值",
-                                           "name":  "Clock12",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  85,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  27,
-                                           "desc":  "12:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "13点定时值",
-                                           "name":  "Clock13",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  91,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  28,
-                                           "desc":  "13:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "14点定时值",
-                                           "name":  "Clock14",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  97,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  29,
-                                           "desc":  "14:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "15点定时值",
-                                           "name":  "Clock15",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  103,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  30,
-                                           "desc":  "15:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "16点定时值",
-                                           "name":  "Clock16",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  109,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  31,
-                                           "desc":  "16:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "17点定时值",
-                                           "name":  "Clock17",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  115,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  32,
-                                           "desc":  "17:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "18点定时值",
-                                           "name":  "Clock18",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  121,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  33,
-                                           "desc":  "18:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "19点定时值",
-                                           "name":  "Clock19",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  127,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  34,
-                                           "desc":  "19:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "20点定时值",
-                                           "name":  "Clock20",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  133,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  35,
-                                           "desc":  "20:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "21点定时值",
-                                           "name":  "Clock21",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  139,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  36,
-                                           "desc":  "21:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "22点定时值",
-                                           "name":  "Clock22",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  145,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  37,
-                                           "desc":  "22:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "23点定时值",
-                                           "name":  "Clock23",
-                                           "data_type":  "binary",
-                                           "position":  {
-                                                            "byte_offset":  151,
-                                                            "unit":  "byte",
-                                                            "len":  6,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "status_writable",
-                                           "id":  38,
-                                           "desc":  "23:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
-                                       },
-                                       {
-                                           "display_name":  "过温",
-                                           "name":  "OverTemp",
-                                           "data_type":  "bool",
-                                           "position":  {
-                                                            "byte_offset":  157,
-                                                            "unit":  "bit",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "alert",
-                                           "id":  39,
-                                           "desc":  "温度过高"
-                                       },
-                                       {
-                                           "display_name":  "过流",
-                                           "name":  "OverCurrent",
-                                           "data_type":  "bool",
-                                           "position":  {
-                                                            "byte_offset":  157,
-                                                            "unit":  "bit",
-                                                            "len":  1,
-                                                            "bit_offset":  1
-                                                        },
-                                           "type":  "alert",
-                                           "id":  40,
-                                           "desc":  "过流"
-                                       },
-                                       {
-                                           "display_name":  "风扇失效",
-                                           "name":  "Fault_Fan",
-                                           "data_type":  "bool",
-                                           "position":  {
-                                                            "byte_offset":  158,
-                                                            "unit":  "bit",
-                                                            "len":  1,
-                                                            "bit_offset":  0
-                                                        },
-                                           "type":  "fault",
-                                           "id":  41,
-                                           "desc":  "风扇失效"
-                                       },
-                                       {
-                                           "display_name":  "串口连接故障",
-                                           "name":  "Fault_UART",
-                                           "data_type":  "bool",
-                                           "position":  {
-                                                            "byte_offset":  158,
-                                                            "unit":  "bit",
-                                                            "len":  1,
-                                                            "bit_offset":  1
-                                                        },
-                                           "type":  "fault",
-                                           "id":  42,
-                                           "desc":  "模块与主板通讯不上"
-                                       }
-                                   ],
-                         "name":  "entity0",
-                         "id":  0
-                     }
-                 ],
-    "ui":  {
-               "object":  {
-                              "version":  4,
-                              "showEditButton":  false
-                          },
-               "sections":  [
-                                {
-                                    "elements":  [
-                                                     {
-                                                         "boolValue":  false,
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.switch"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "type":  "QBooleanElement",
-                                                         "key":  "entity0.switch",
-                                                         "title":  "开关"
-                                                     },
-                                                     {
-                                                         "boolValue":  false,
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Timer"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "type":  "QBooleanElement",
-                                                         "key":  "entity0.Timer",
-                                                         "title":  "定时开关"
-                                                     },
-                                                     {
-                                                         "items":  [
-                                                                       "手动",
-                                                                       "早晨",
-                                                                       "日出",
-                                                                       "白天",
-                                                                       "日落",
-                                                                       "夜晚",
-                                                                       "定时"
-                                                                   ],
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.mode"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "type":  "QRadioElement",
-                                                         "key":  "entity0.mode",
-                                                         "title":  "模式"
-                                                     },
-                                                     {
-                                                         "title":  "宝蓝",
-                                                         "bind":  "floatValue:float",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.color_blue1"
-                                                                                 ],
-                                                                        "uint_spec":  {
-                                                                                          "max":  100,
-                                                                                          "step":  1,
-                                                                                          "min":  0
-                                                                                      },
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.color_blue1",
-                                                         "maximumValue":  100,
-                                                         "minimumValue":  0,
-                                                         "type":  "QFloatElement"
-                                                     },
-                                                     {
-                                                         "title":  "冷白",
-                                                         "bind":  "floatValue:float",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.color_white"
-                                                                                 ],
-                                                                        "uint_spec":  {
-                                                                                          "max":  100,
-                                                                                          "step":  1,
-                                                                                          "min":  0
-                                                                                      },
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.color_white",
-                                                         "maximumValue":  100,
-                                                         "minimumValue":  0,
-                                                         "type":  "QFloatElement"
-                                                     },
-                                                     {
-                                                         "title":  "蓝色",
-                                                         "bind":  "floatValue:float",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.color_blue2"
-                                                                                 ],
-                                                                        "uint_spec":  {
-                                                                                          "max":  100,
-                                                                                          "step":  1,
-                                                                                          "min":  0
-                                                                                      },
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.color_blue2",
-                                                         "maximumValue":  100,
-                                                         "minimumValue":  0,
-                                                         "type":  "QFloatElement"
-                                                     },
-                                                     {
-                                                         "title":  "绿色",
-                                                         "bind":  "floatValue:float",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.color_green"
-                                                                                 ],
-                                                                        "uint_spec":  {
-                                                                                          "max":  100,
-                                                                                          "step":  1,
-                                                                                          "min":  0
-                                                                                      },
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.color_green",
-                                                         "maximumValue":  100,
-                                                         "minimumValue":  0,
-                                                         "type":  "QFloatElement"
-                                                     },
-                                                     {
-                                                         "title":  "红色",
-                                                         "bind":  "floatValue:float",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.color_red"
-                                                                                 ],
-                                                                        "uint_spec":  {
-                                                                                          "max":  100,
-                                                                                          "step":  1,
-                                                                                          "min":  0
-                                                                                      },
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.color_red",
-                                                         "maximumValue":  100,
-                                                         "minimumValue":  0,
-                                                         "type":  "QFloatElement"
-                                                     },
-                                                     {
-                                                         "title":  "紫色",
-                                                         "bind":  "floatValue:float",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.volor_violet"
-                                                                                 ],
-                                                                        "uint_spec":  {
-                                                                                          "max":  100,
-                                                                                          "step":  1,
-                                                                                          "min":  0
-                                                                                      },
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.volor_violet",
-                                                         "maximumValue":  100,
-                                                         "minimumValue":  0,
-                                                         "type":  "QFloatElement"
-                                                     },
-                                                     {
-                                                         "title":  "早晨",
-                                                         "bind":  "floatValue:float",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.M1"
-                                                                                 ],
-                                                                        "uint_spec":  {
-                                                                                          "max":  100,
-                                                                                          "step":  1,
-                                                                                          "min":  10
-                                                                                      },
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.M1",
-                                                         "maximumValue":  100,
-                                                         "minimumValue":  10,
-                                                         "type":  "QFloatElement"
-                                                     },
-                                                     {
-                                                         "title":  "日出",
-                                                         "bind":  "floatValue:float",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.M2"
-                                                                                 ],
-                                                                        "uint_spec":  {
-                                                                                          "max":  100,
-                                                                                          "step":  1,
-                                                                                          "min":  10
-                                                                                      },
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.M2",
-                                                         "maximumValue":  100,
-                                                         "minimumValue":  10,
-                                                         "type":  "QFloatElement"
-                                                     },
-                                                     {
-                                                         "title":  "白天",
-                                                         "bind":  "floatValue:float",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.M3"
-                                                                                 ],
-                                                                        "uint_spec":  {
-                                                                                          "max":  100,
-                                                                                          "step":  1,
-                                                                                          "min":  10
-                                                                                      },
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.M3",
-                                                         "maximumValue":  100,
-                                                         "minimumValue":  10,
-                                                         "type":  "QFloatElement"
-                                                     },
-                                                     {
-                                                         "title":  "日落",
-                                                         "bind":  "floatValue:float",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.M4"
-                                                                                 ],
-                                                                        "uint_spec":  {
-                                                                                          "max":  100,
-                                                                                          "step":  1,
-                                                                                          "min":  10
-                                                                                      },
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.M4",
-                                                         "maximumValue":  100,
-                                                         "minimumValue":  10,
-                                                         "type":  "QFloatElement"
-                                                     },
-                                                     {
-                                                         "title":  "夜晚",
-                                                         "bind":  "floatValue:float",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.M5"
-                                                                                 ],
-                                                                        "uint_spec":  {
-                                                                                          "max":  100,
-                                                                                          "step":  1,
-                                                                                          "min":  10
-                                                                                      },
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.M5",
-                                                         "maximumValue":  100,
-                                                         "minimumValue":  10,
-                                                         "type":  "QFloatElement"
-                                                     },
-                                                     {
-                                                         "title":  "定时组",
-                                                         "bind":  "floatValue:float",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.TimerGroup"
-                                                                                 ],
-                                                                        "uint_spec":  {
-                                                                                          "max":  3,
-                                                                                          "step":  1,
-                                                                                          "min":  0
-                                                                                      },
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.TimerGroup",
-                                                         "maximumValue":  3,
-                                                         "minimumValue":  0,
-                                                         "type":  "QFloatElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "0点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock00"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock00",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "1点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock01"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock01",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "2点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock02"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock02",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "3点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock03"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock03",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "4点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock04"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock04",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "5点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock05"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock05",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "6点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock06"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock06",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "7点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock07"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock07",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "8点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock08"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock08",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "9点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock09"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock09",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "10点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock10"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock10",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "11点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock11"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock11",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "12点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock12"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock12",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "13点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock13"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock13",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "14点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock14"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock14",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "15点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock15"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock15",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "16点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock16"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock16",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "17点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock17"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock17",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "18点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock18"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock18",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "19点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock19"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock19",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "20点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock20"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock20",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "21点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock21"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock21",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "22点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock22"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock22",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     },
-                                                     {
-                                                         "keyboardType":  "NumbersAndPunctuation",
-                                                         "title":  "23点定时值",
-                                                         "object":  {
-                                                                        "action":  "entity0",
-                                                                        "bind":  [
-                                                                                     "entity0.Clock23"
-                                                                                 ],
-                                                                        "perm":  "W"
-                                                                    },
-                                                         "value":  0,
-                                                         "key":  "entity0.Clock23",
-                                                         "maxLength":  12,
-                                                         "type":  "QMultilineElement"
-                                                     }
-                                                 ]
-                                }
-                            ]
-           }
+  "name": "本地定时LED灯_无AP校时",
+  "packetVersion": "0x00000004",
+  "protocolType": "standard",
+  "product_key": "cf4aaef856b84f6ea9cea29030eff19b",
+  "entities": [
+    {
+      "display_name": "机智云开发套件",
+      "attrs": [
+        {
+          "display_name": "开关",
+          "name": "switch",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 0,
+          "desc": ""
+        },
+        {
+          "display_name": "定时开关",
+          "name": "Timer",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 1
+          },
+          "type": "status_writable",
+          "id": 1,
+          "desc": "定时开关，打开\"运行\"后置1，关闭\"运行\"后置0"
+        },
+        {
+          "display_name": "模式",
+          "name": "mode",
+          "data_type": "enum",
+          "enum": ["手动", "早晨", "日出", "白天", "日落", "夜晚", "定时"],
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 3,
+            "bit_offset": 2
+          },
+          "type": "status_writable",
+          "id": 2,
+          "desc": "0:手动,M模式;1:早晨，M1模式；2:日出，M2模式；3:白天，M3模式；4：日落，M4模式；5：夜晚，M5模式；6：定时"
+        },
+        {
+          "display_name": "宝蓝",
+          "name": "color_blue1",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 1,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 3,
+          "desc": "宝蓝色灯"
+        },
+        {
+          "display_name": "冷白",
+          "name": "color_white",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 2,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 4,
+          "desc": "冷白色灯"
+        },
+        {
+          "display_name": "蓝色",
+          "name": "color_blue2",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 3,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 5,
+          "desc": "蓝色灯"
+        },
+        {
+          "display_name": "绿色",
+          "name": "color_green",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 4,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 6,
+          "desc": "绿色灯"
+        },
+        {
+          "display_name": "红色",
+          "name": "color_red",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 5,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 7,
+          "desc": "红色灯"
+        },
+        {
+          "display_name": "紫色",
+          "name": "volor_violet",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 6,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 8,
+          "desc": "紫色灯"
+        },
+        {
+          "display_name": "早晨",
+          "name": "M1",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 7,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 10
+          },
+          "type": "status_writable",
+          "id": 9,
+          "desc": "M1,早晨灯光设置值"
+        },
+        {
+          "display_name": "日出",
+          "name": "M2",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 8,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 10
+          },
+          "type": "status_writable",
+          "id": 10,
+          "desc": "M2,日出灯光设置值"
+        },
+        {
+          "display_name": "白天",
+          "name": "M3",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 9,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 10
+          },
+          "type": "status_writable",
+          "id": 11,
+          "desc": "M3,白天灯光设置值"
+        },
+        {
+          "display_name": "日落",
+          "name": "M4",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 10,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 10
+          },
+          "type": "status_writable",
+          "id": 12,
+          "desc": "M4，日落灯光设置值"
+        },
+        {
+          "display_name": "夜晚",
+          "name": "M5",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 11,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 10
+          },
+          "type": "status_writable",
+          "id": 13,
+          "desc": "M5，夜晚灯光设置值"
+        },
+        {
+          "display_name": "定时组",
+          "name": "TimerGroup",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 12,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 3,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 14,
+          "desc": "定时组，LPS程序:0；SPS程序:1；LPS/SPS程序:2；自定义程序：3；    默认是0: LPS程序"
+        },
+        {
+          "display_name": "0点定时值",
+          "name": "Clock00",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 13,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 15,
+          "desc": "0:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "1点定时值",
+          "name": "Clock01",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 19,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 16,
+          "desc": "1:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "2点定时值",
+          "name": "Clock02",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 25,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 17,
+          "desc": "2:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "3点定时值",
+          "name": "Clock03",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 31,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 18,
+          "desc": "3:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "4点定时值",
+          "name": "Clock04",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 37,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 19,
+          "desc": "4:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "5点定时值",
+          "name": "Clock05",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 43,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 20,
+          "desc": "5:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "6点定时值",
+          "name": "Clock06",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 49,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 21,
+          "desc": "6:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "7点定时值",
+          "name": "Clock07",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 55,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 22,
+          "desc": "7:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "8点定时值",
+          "name": "Clock08",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 61,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 23,
+          "desc": "8:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "9点定时值",
+          "name": "Clock09",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 67,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 24,
+          "desc": "9:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "10点定时值",
+          "name": "Clock10",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 73,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 25,
+          "desc": "10:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "11点定时值",
+          "name": "Clock11",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 79,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 26,
+          "desc": "11:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "12点定时值",
+          "name": "Clock12",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 85,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 27,
+          "desc": "12:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "13点定时值",
+          "name": "Clock13",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 91,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 28,
+          "desc": "13:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "14点定时值",
+          "name": "Clock14",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 97,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 29,
+          "desc": "14:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "15点定时值",
+          "name": "Clock15",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 103,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 30,
+          "desc": "15:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "16点定时值",
+          "name": "Clock16",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 109,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 31,
+          "desc": "16:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "17点定时值",
+          "name": "Clock17",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 115,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 32,
+          "desc": "17:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "18点定时值",
+          "name": "Clock18",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 121,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 33,
+          "desc": "18:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "19点定时值",
+          "name": "Clock19",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 127,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 34,
+          "desc": "19:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "20点定时值",
+          "name": "Clock20",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 133,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 35,
+          "desc": "20:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "21点定时值",
+          "name": "Clock21",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 139,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 36,
+          "desc": "21:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "22点定时值",
+          "name": "Clock22",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 145,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 37,
+          "desc": "22:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "23点定时值",
+          "name": "Clock23",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 151,
+            "unit": "byte",
+            "len": 6,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 38,
+          "desc": "23:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+        },
+        {
+          "display_name": "过温",
+          "name": "OverTemp",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 157,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "type": "alert",
+          "id": 39,
+          "desc": "温度过高"
+        },
+        {
+          "display_name": "过流",
+          "name": "OverCurrent",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 157,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 1
+          },
+          "type": "alert",
+          "id": 40,
+          "desc": "过流"
+        },
+        {
+          "display_name": "风扇失效",
+          "name": "Fault_Fan",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 158,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "type": "fault",
+          "id": 41,
+          "desc": "风扇失效"
+        },
+        {
+          "display_name": "串口连接故障",
+          "name": "Fault_UART",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 158,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 1
+          },
+          "type": "fault",
+          "id": 42,
+          "desc": "模块与主板通讯不上"
+        }
+      ],
+      "name": "entity0",
+      "id": 0
+    }
+  ],
+  "ui": {
+    "object": {
+      "version": 4,
+      "showEditButton": false
+    },
+    "sections": [
+      {
+        "elements": [
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.switch"],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.switch",
+            "title": "开关"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Timer"],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.Timer",
+            "title": "定时开关"
+          },
+          {
+            "items": ["手动", "早晨", "日出", "白天", "日落", "夜晚", "定时"],
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.mode"],
+              "perm": "W"
+            },
+            "type": "QRadioElement",
+            "key": "entity0.mode",
+            "title": "模式"
+          },
+          {
+            "title": "宝蓝",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.color_blue1"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 0
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.color_blue1",
+            "maximumValue": 100,
+            "minimumValue": 0,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "冷白",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.color_white"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 0
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.color_white",
+            "maximumValue": 100,
+            "minimumValue": 0,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "蓝色",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.color_blue2"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 0
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.color_blue2",
+            "maximumValue": 100,
+            "minimumValue": 0,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "绿色",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.color_green"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 0
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.color_green",
+            "maximumValue": 100,
+            "minimumValue": 0,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "红色",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.color_red"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 0
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.color_red",
+            "maximumValue": 100,
+            "minimumValue": 0,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "紫色",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.volor_violet"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 0
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.volor_violet",
+            "maximumValue": 100,
+            "minimumValue": 0,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "早晨",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.M1"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 10
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.M1",
+            "maximumValue": 100,
+            "minimumValue": 10,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "日出",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.M2"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 10
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.M2",
+            "maximumValue": 100,
+            "minimumValue": 10,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "白天",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.M3"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 10
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.M3",
+            "maximumValue": 100,
+            "minimumValue": 10,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "日落",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.M4"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 10
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.M4",
+            "maximumValue": 100,
+            "minimumValue": 10,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "夜晚",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.M5"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 10
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.M5",
+            "maximumValue": 100,
+            "minimumValue": 10,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "定时组",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.TimerGroup"],
+              "uint_spec": {
+                "max": 3,
+                "step": 1,
+                "min": 0
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.TimerGroup",
+            "maximumValue": 3,
+            "minimumValue": 0,
+            "type": "QFloatElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "0点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock00"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock00",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "1点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock01"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock01",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "2点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock02"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock02",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "3点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock03"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock03",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "4点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock04"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock04",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "5点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock05"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock05",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "6点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock06"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock06",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "7点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock07"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock07",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "8点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock08"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock08",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "9点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock09"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock09",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "10点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock10"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock10",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "11点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock11"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock11",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "12点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock12"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock12",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "13点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock13"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock13",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "14点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock14"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock14",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "15点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock15"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock15",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "16点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock16"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock16",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "17点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock17"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock17",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "18点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock18"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock18",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "19点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock19"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock19",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "20点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock20"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock20",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "21点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock21"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock21",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "22点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock22"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock22",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "23点定时值",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Clock23"],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.Clock23",
+            "maxLength": 12,
+            "type": "QMultilineElement"
+          }
+        ]
+      }
+    ]
+  }
 }

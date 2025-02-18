@@ -1,4 +1,5 @@
 """Platform for sensor entities for Jebao Aqua integration."""
+
 from __future__ import annotations
 
 import logging
@@ -14,10 +15,9 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util.color import value_to_brightness  # Add this import
 
-from .gizwits_lan.device_status import DeviceStatus
 from .entity import JebaoEntity
+from .gizwits_lan.device_status import DeviceStatus
 from .hub import JebaoDevice
-from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -66,7 +66,9 @@ async def async_setup_entry(
 class JebaoLightLevelSensor(JebaoEntity, SensorEntity):
     """Sensor showing light level as 0-255."""
 
-    def __init__(self, entry: ConfigEntry, device: JebaoDevice, attr_def: dict[str, Any]) -> None:
+    def __init__(
+        self, entry: ConfigEntry, device: JebaoDevice, attr_def: dict[str, Any]
+    ) -> None:
         """Initialize the sensor entity."""
         # Append "Level" to the name
         attr_def = dict(attr_def)
@@ -86,7 +88,9 @@ class JebaoLightLevelSensor(JebaoEntity, SensorEntity):
         # Get min/max from uint_spec if available
         uint_spec = attr_def.get("uint_spec") or {}
         self._value_min = uint_spec.get("min", 0)
-        self._value_max = uint_spec.get("max", 100)  # Default to 0-100 range if not specified
+        self._value_max = uint_spec.get(
+            "max", 100
+        )  # Default to 0-100 range if not specified
 
     @property
     def native_value(self) -> int | None:
