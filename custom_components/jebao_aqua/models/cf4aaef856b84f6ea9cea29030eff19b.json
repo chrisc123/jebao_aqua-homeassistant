@@ -33,7 +33,7 @@
           },
           "type": "status_writable",
           "id": 1,
-          "desc": "定时开关，打开\"运行\"后置1，关闭\"运行\"后置0"
+          "desc": "定时开关, 打开\"运行\"后置1, 关闭\"运行\"后置0"
         },
         {
           "display_name": "模式",
@@ -56,7 +56,7 @@
           },
           "type": "status_writable",
           "id": 2,
-          "desc": "0:手动,M模式;1:早晨，M1模式；2:日出，M2模式；3:白天，M3模式；4：日落，M4模式；5：夜晚，M5模式；6：定时"
+          "desc": "0:手动,M模式;1:早晨, M1模式；2:日出, M2模式；3:白天, M3模式；4: 日落, M4模式；5: 夜晚, M5模式；6: 定时"
         },
         {
           "display_name": "宝蓝",
@@ -256,7 +256,7 @@
           },
           "type": "status_writable",
           "id": 12,
-          "desc": "M4，日落灯光设置值"
+          "desc": "M4, 日落灯光设置值"
         },
         {
           "display_name": "夜晚",
@@ -276,7 +276,7 @@
           },
           "type": "status_writable",
           "id": 13,
-          "desc": "M5，夜晚灯光设置值"
+          "desc": "M5, 夜晚灯光设置值"
         },
         {
           "display_name": "定时组",
@@ -296,7 +296,7 @@
           },
           "type": "status_writable",
           "id": 14,
-          "desc": "定时组，LPS程序:0；SPS程序:1；LPS/SPS程序:2；自定义程序：3；    默认是0: LPS程序"
+          "desc": "定时组, LPS程序:0；SPS程序:1；LPS/SPS程序:2；自定义程序: 3；    默认是0: LPS程序"
         },
         {
           "display_name": "0点定时值",
@@ -310,7 +310,7 @@
           },
           "type": "status_writable",
           "id": 15,
-          "desc": "0:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "0:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "1点定时值",
@@ -324,7 +324,7 @@
           },
           "type": "status_writable",
           "id": 16,
-          "desc": "1:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "1:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "2点定时值",
@@ -338,7 +338,7 @@
           },
           "type": "status_writable",
           "id": 17,
-          "desc": "2:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "2:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "3点定时值",
@@ -352,7 +352,7 @@
           },
           "type": "status_writable",
           "id": 18,
-          "desc": "3:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "3:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "4点定时值",
@@ -366,7 +366,7 @@
           },
           "type": "status_writable",
           "id": 19,
-          "desc": "4:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "4:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "5点定时值",
@@ -380,7 +380,7 @@
           },
           "type": "status_writable",
           "id": 20,
-          "desc": "5:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "5:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "6点定时值",
@@ -394,7 +394,7 @@
           },
           "type": "status_writable",
           "id": 21,
-          "desc": "6:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "6:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "7点定时值",
@@ -408,7 +408,7 @@
           },
           "type": "status_writable",
           "id": 22,
-          "desc": "7:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "7:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "8点定时值",
@@ -422,7 +422,7 @@
           },
           "type": "status_writable",
           "id": 23,
-          "desc": "8:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "8:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "9点定时值",
@@ -436,7 +436,7 @@
           },
           "type": "status_writable",
           "id": 24,
-          "desc": "9:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "9:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "10点定时值",
@@ -450,7 +450,7 @@
           },
           "type": "status_writable",
           "id": 25,
-          "desc": "10:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "10:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "11点定时值",
@@ -464,7 +464,7 @@
           },
           "type": "status_writable",
           "id": 26,
-          "desc": "11:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "11:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "12点定时值",
@@ -478,7 +478,7 @@
           },
           "type": "status_writable",
           "id": 27,
-          "desc": "12:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "12:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "13点定时值",
@@ -492,7 +492,7 @@
           },
           "type": "status_writable",
           "id": 28,
-          "desc": "13:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "13:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "14点定时值",
@@ -506,7 +506,7 @@
           },
           "type": "status_writable",
           "id": 29,
-          "desc": "14:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "14:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "15点定时值",
@@ -520,7 +520,7 @@
           },
           "type": "status_writable",
           "id": 30,
-          "desc": "15:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "15:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "16点定时值",
@@ -534,7 +534,7 @@
           },
           "type": "status_writable",
           "id": 31,
-          "desc": "16:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "16:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "17点定时值",
@@ -548,7 +548,7 @@
           },
           "type": "status_writable",
           "id": 32,
-          "desc": "17:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "17:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "18点定时值",
@@ -562,7 +562,7 @@
           },
           "type": "status_writable",
           "id": 33,
-          "desc": "18:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "18:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "19点定时值",
@@ -576,7 +576,7 @@
           },
           "type": "status_writable",
           "id": 34,
-          "desc": "19:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "19:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "20点定时值",
@@ -590,7 +590,7 @@
           },
           "type": "status_writable",
           "id": 35,
-          "desc": "20:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "20:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "21点定时值",
@@ -604,7 +604,7 @@
           },
           "type": "status_writable",
           "id": 36,
-          "desc": "21:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "21:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "22点定时值",
@@ -618,7 +618,7 @@
           },
           "type": "status_writable",
           "id": 37,
-          "desc": "22:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "22:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "23点定时值",
@@ -632,7 +632,7 @@
           },
           "type": "status_writable",
           "id": 38,
-          "desc": "23:00定时值：Byte0：白灯亮度值，Byte1：蓝灯，Byte2：宝蓝灯，Byte3:绿灯，Byte4：红灯，Byte5：紫灯"
+          "desc": "23:00定时值: Byte0: 白灯亮度值, Byte1: 蓝灯, Byte2: 宝蓝灯, Byte3:绿灯, Byte4: 红灯, Byte5: 紫灯"
         },
         {
           "display_name": "过温",

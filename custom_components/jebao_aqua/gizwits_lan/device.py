@@ -409,23 +409,32 @@ class Device:
             return None
         packet = bytes(buffer[:total_len])
         del buffer[:total_len]
+        
+        # Log complete raw packet
+        logger.debug("[%s] Received packet: %s", self.ip, packet.hex())
+        
         return packet
 
     async def _handle_incoming_packet(self, cmd: bytes, payload: bytes):
         cmd_int = int.from_bytes(cmd, "big")
+        
+        # First handle responses that use the simple mapping
+        if cmd_int in (0x07,):  # Passcode response
+            fut = self._pending_requests.pop((cmd_int, None), None)
+            if fut:
+                fut.set_result(payload)
+                return  # Important - return after handling
+            logger.debug("Unexpected passcode response")  # Less alarming log level
+                
+        # Then handle login response specifically
         if cmd_int == 0x09:  # Login response
             if self._pending_login and not self._pending_login.done():
                 self._pending_login.set_result(payload)
                 return
-                
-        if cmd_int in (0x07,):  # Only passcode uses simple mapping now
-            fut = self._pending_requests.pop((cmd_int, None), None)
-            if fut:
-                fut.set_result(payload)
-            else:
-                logger.info("Unsolicited cmd=0x%02x with no matching request", cmd_int)
-                
-        if cmd_int == 0x16:
+            logger.debug("Unexpected login response")  # Less alarming log level
+
+        # Handle the rest of the packet types
+        if cmd_int == 0x16:  # Pong
             logger.debug("Pong (cmd=16) from %s", self.ip)
             self.last_pong = time.time()
             if isinstance(self.current_status, DeviceStatus):
@@ -464,7 +473,8 @@ class Device:
             else:
                 logger.info("Unsolicited cmd=0x94 with seq=%s not found in pending", seq_echo.hex())
         else:
-            logger.info("Unsolicited cmd=0x%02x from %s, len=%d, payload=%s", cmd_int, self.ip, len(payload), payload.hex())
+            logger.info("Unsolicited cmd=0x%02x from %s, len=%d, payload=%s", 
+                       cmd_int, self.ip, len(payload), payload.hex())
 
     async def _send_command_no_seq(self, cmd_send: int, cmd_recv: int, payload: bytes, timeout: float) -> bytes:
         cmd_send_bytes = cmd_send.to_bytes(2, "big")
