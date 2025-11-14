@@ -44,10 +44,22 @@ class JebaoEntity(Entity):
         # Use product key as model if available
         model = device.product_key or "Unknown Model"
 
+        # Create a stable device name that doesn't change with IP
+        # Use UID suffix or MAC suffix for human-readable identification
+        device_name = "Jebao Device"
+        if device.uid:
+            # Use last 6 characters of UID for identification
+            uid_suffix = device.uid[-6:] if len(device.uid) >= 6 else device.uid
+            device_name = f"Jebao Device {uid_suffix}"
+        elif device.mac:
+            # Fallback to MAC suffix if no UID
+            mac_suffix = device.mac.replace(":", "")[-6:] if device.mac else ""
+            device_name = f"Jebao Device {mac_suffix}" if mac_suffix else device_name
+
         # Device info that will be shared between all entities for this device
         device_info = {
             "identifiers": {(DOMAIN, device_uid)},
-            "name": f"Jebao Device {device.ip}",
+            "name": device_name,
             "manufacturer": "Jebao",
             "model": model,
         }

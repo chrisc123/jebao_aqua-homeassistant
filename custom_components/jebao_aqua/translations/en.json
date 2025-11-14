@@ -26,6 +26,17 @@
             }
         }
     },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "rediscover": "Rediscover devices"
+                },
+                "description": "This integration currently manages {device_count} device(s). You can rediscover devices to handle IP address changes.",
+                "title": "Jebao Aqua Options"
+            }
+        }
+    },
     "entity": {
         "binary_sensor": {
             "fault_fan": {

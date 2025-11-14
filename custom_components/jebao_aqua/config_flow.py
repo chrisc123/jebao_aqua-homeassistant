@@ -173,3 +173,99 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=STEP_USER_DATA_SCHEMA,
             errors=errors,
         )
+
+    @staticmethod
+    def async_get_options_flow(config_entry: config_entries.ConfigEntry) -> OptionsFlowHandler:
+        """Return the options flow."""
+        return OptionsFlowHandler(config_entry)
+
+
+class OptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle options flow for Jebao Aqua integration."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            if user_input.get("rediscover"):
+                return await self.async_step_rediscover()
+            return self.async_create_entry(title="", data={})
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema({
+                vol.Optional("rediscover", default=False): bool,
+            }),
+            description_placeholders={
+                "device_count": str(len(self.config_entry.data.get("devices", []))),
+            },
+        )
+
+    async def async_step_rediscover(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle rediscovery of devices."""
+        # Perform discovery
+        discovered = await hub.async_discover_devices(self.hass, timeout=10.0)
+        
+        # Get existing UIDs from this config entry
+        existing_devices = {
+            device["uid"]: device
+            for device in self.config_entry.data.get("devices", [])
+            if device.get("uid")
+        }
+        
+        # Track changes
+        updated_devices = []
+        new_devices = []
+        found_uids = set()
+        
+        for dev in discovered:
+            uid = dev.get("uid")
+            if not uid:
+                continue
+                
+            found_uids.add(uid)
+            mac = dev.get("mac")
+            if mac:
+                mac = format_mac(mac)
+            
+            device_data = {
+                "ip": dev["ip"],
+                "product_key": dev.get("product_key", ""),
+                "uid": uid,
+                "mac": mac,
+                "firmware_version": dev.get("firmware_version"),
+            }
+            
+            if uid in existing_devices:
+                # Update existing device
+                updated_devices.append(device_data)
+            else:
+                # New device found
+                new_devices.append(device_data)
+        
+        # Add devices that weren't found (keep original data)
+        for uid, device in existing_devices.items():
+            if uid not in found_uids:
+                updated_devices.append(device)
+        
+        # Update config entry
+        new_data = dict(self.config_entry.data)
+        new_data["devices"] = updated_devices + new_devices
+        
+        self.hass.config_entries.async_update_entry(self.config_entry, data=new_data)
+        
+        # Reload the integration to pick up changes
+        await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+        
+        result_message = f"Rediscovery complete. Found {len(found_uids)} devices."
+        if new_devices:
+            result_message += f" Added {len(new_devices)} new devices."
+        
+        return self.async_create_entry(title="", data={}, description=result_message)
