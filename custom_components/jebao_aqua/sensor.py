@@ -129,33 +129,55 @@ class JebaoChannelScheduleSensor(SensorEntity):
         return attr.get(field_name, "")
     
     def _parse_schedule(self) -> list[dict]:
-        """Parse CHxSWTime hex string into schedule entries."""
+        """Parse CHxSWTime hex string into schedule entries.
+        
+        The protocol encodes schedule data in 8-byte (16 hex char) blocks.
+        Each block contains TWO time/dose pairs:
+          Bytes 0-1: hour, minute of first dosing time
+          Byte  2:   unknown/padding
+          Byte  3:   dose amount in mL for first time
+          Bytes 4-5: hour, minute of second dosing time
+          Byte  6:   unknown/padding
+          Byte  7:   dose amount in mL for second time
+        
+        A block of all zeros signals the end of the schedule.
+        """
         raw = self._get_raw_schedule()
         if not raw or raw == "0" * len(raw):
             return []
         
         entries = []
-        # Parse hex string in 12-character (6-byte) blocks
-        for i in range(0, min(len(raw), 240), 12):  # Max 20 entries
-            block = raw[i:i+12]
-            if block == "0" * 12:
+        # Parse hex string in 16-character (8-byte) blocks; max 12 blocks = 24 entries
+        for i in range(0, min(len(raw), 192), 16):
+            block = raw[i:i+16]
+            if len(block) < 16:
+                break
+            if block == "0" * 16:
                 break  # End of schedule entries
                 
             try:
-                # Parse bytes
-                hour = int(block[0:2], 16)
-                minute = int(block[2:4], 16) 
-                unknown1 = int(block[4:6], 16)
-                value = int(block[6:8], 16)
-                unknown2 = int(block[8:10], 16)
-                unknown3 = int(block[10:12], 16)
+                # First time/dose pair in this block
+                hour1 = int(block[0:2], 16)
+                minute1 = int(block[2:4], 16)
+                dose1 = int(block[6:8], 16)
                 
-                # Only add if hour seems valid (0-23)
-                if 0 <= hour <= 23:
+                # Second time/dose pair in this block
+                hour2 = int(block[8:10], 16)
+                minute2 = int(block[10:12], 16)
+                dose2 = int(block[14:16], 16)
+                
+                if 0 <= hour1 <= 23 and dose1 > 0:
                     entries.append({
-                        "time": f"{hour:02d}:{minute:02d}",
-                        "dose_ml": value,
-                        "raw": block,
+                        "time": f"{hour1:02d}:{minute1:02d}",
+                        "dose_ml": dose1,
+                        "raw": block[0:8],
+                    })
+                
+                if 0 <= hour2 <= 23 and dose2 > 0:
+                    entries.append({
+                        "time": f"{hour2:02d}:{minute2:02d}",
+                        "dose_ml": dose2,
+                        "raw": block[8:16],
                     })
             except ValueError:
                 continue
