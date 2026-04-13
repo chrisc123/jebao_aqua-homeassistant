@@ -11,7 +11,7 @@ from homeassistant.helpers.entity_registry import async_get as async_get_entity_
 from homeassistant.helpers.device_registry import async_get as async_get_device_registry
 
 from .const import DOMAIN, PLATFORMS, UPDATE_INTERVAL, LOGGER, GIZWITS_API_URLS, MAX_LAN_FAILURES
-from .api import GizwitsApi
+from .api import GizwitsApi, AuthenticationError
 from .discovery import discover_devices
 from .helpers import is_device_data_valid  # Add this import
 
@@ -57,9 +57,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         LOGGER.error("API token or region not found in configuration entry")
         return False
 
+    email = entry.data.get("email")
+    password = entry.data.get("password")
+
+    if not password:
+        LOGGER.warning(
+            "Password not stored in config entry. "
+            "Automatic token refresh will not be available. "
+            "Please reconfigure the integration to enable this feature."
+        )
+
     # Load attribute models asynchronously
     attribute_models = await load_attribute_models(hass)
     LOGGER.debug(f"Setting up API object with token: {token} and region: {region}")
+
+    def _handle_token_refresh(new_token: str):
+        """Update config entry with refreshed token."""
+        new_data = {**entry.data, "token": new_token}
+        hass.config_entries.async_update_entry(entry, data=new_data)
+        LOGGER.info("Config entry updated with refreshed token")
 
     # Initialize API with correct regional URLs
     api = GizwitsApi(
@@ -68,6 +84,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         device_data_url=GIZWITS_API_URLS[region]["DEVICE_DATA_URL"],
         control_url=GIZWITS_API_URLS[region]["CONTROL_URL"],
         token=token,
+        email=email,
+        password=password,
+        on_token_refresh=_handle_token_refresh,
     )
 
     await api.async_init_session()
@@ -232,6 +251,14 @@ class GizwitsDataUpdateCoordinator(DataUpdateCoordinator):
                 else:
                     LOGGER.warning(f"No valid data for device {device_id}")
                     return device_id, None
+            except AuthenticationError as e:
+                LOGGER.error(
+                    "Authentication failed while updating device %s: %s",
+                    device_id, e,
+                )
+                if device_id in self.device_data:
+                    return device_id, self.device_data[device_id]
+                return device_id, None
             except Exception as e:
                 LOGGER.error(f"Error updating device {device_id}: {e}")
                 if device_id in self.device_data:

@@ -116,3 +116,66 @@ If you don't have pumps available, you can mock the API layer. A quick approach:
 async def get_device_data(self, device_id):
     return {"Power": 1, "Speed": 50, "Mode": 1, "Fault": 0}  # fake data
 ```
+
+---
+
+## 7. Authentication Flow
+
+The integration authenticates with the Gizwits cloud API using email/password credentials. The auth flow is designed for robustness:
+
+### Token Lifecycle
+
+1. **Initial login**: During config flow setup, the user provides email + password. The integration calls the Gizwits `/login/pwd` endpoint, which returns a `userToken`.
+2. **Storage**: The token, email, and password are stored in the HA config entry (encrypted at rest by HA's storage layer).
+3. **Runtime usage**: All cloud API calls (`get_devices`, `get_device_data`, `control_device`) include the token in the `X-Gizwits-User-token` header.
+4. **Expiry detection**: If any API call returns HTTP 401, the token is considered expired.
+5. **Auto re-auth**: The `_try_reauth()` method re-logs-in with stored credentials and updates the token. A cooldown (30s) prevents concurrent/repeated re-auth.
+6. **Token persistence**: On successful re-auth, the `on_token_refresh` callback updates the HA config entry so the new token survives restarts.
+
+### Retry & Reconnect Strategy
+
+- **HTTP retries**: All cloud API requests are wrapped in `_api_request()` which retries up to 3 times with exponential backoff (1s, 2s, 4s) on connection errors or timeouts.
+- **Session recovery**: If the `aiohttp` session is closed or broken, `_ensure_session()` transparently recreates it before each request.
+- **Auth lock**: An `asyncio.Lock` ensures only one re-authentication runs at a time, even when multiple device polls trigger 401 simultaneously.
+- **Graceful degradation**: If re-auth fails, the coordinator preserves the last known device data so entities stay available with stale values rather than going unavailable.
+
+### Key Classes
+
+| Class | File | Role |
+|---|---|---|
+| `GizwitsApi` | `api.py` | Handles all Gizwits HTTP calls, token management, retry logic |
+| `AuthenticationError` | `api.py` | Raised when auth fails permanently (re-auth unsuccessful) |
+| `GizwitsDataUpdateCoordinator` | `__init__.py` | Polls devices on a 2s interval, handles auth errors gracefully |
+
+### Sequence Diagram (Token Refresh)
+
+```
+Coordinator -> api._api_request: GET /devdata/{id}/latest
+api._api_request -> Gizwits: HTTP request (with expired token)
+Gizwits -> api._api_request: 401 Unauthorized
+api._api_request -> api._try_reauth: Token expired
+api._try_reauth -> api.async_login: Re-login with email/password
+api.async_login -> Gizwits: POST /login/pwd
+Gizwits -> api.async_login: New userToken
+api._try_reauth -> on_token_refresh callback: Save new token to config entry
+api._api_request -> Gizwits: Retry HTTP request (with new token)
+Gizwits -> api._api_request: 200 OK
+api._api_request -> Coordinator: Device data
+```
+
+### Upgrading from Older Versions
+
+Users who configured the integration before password storage was added will see a warning:
+> "Password not stored in config entry. Automatic token refresh will not be available."
+
+They should reconfigure via Settings → Integrations → Jebao Aqua → ⋮ → Reconfigure.
+
+---
+
+## 8. Running Tests
+
+```bash
+# From the project root, with the venv activated:
+pip install pytest pytest-asyncio aiohttp
+pytest tests/ -v
+```

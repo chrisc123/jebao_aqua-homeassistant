@@ -3,3 +3,5 @@ ha-config/
 .vscode/
 dumps/
 tests/__pycache__/
+tests/.pytest_cache/
+__pycache__/
