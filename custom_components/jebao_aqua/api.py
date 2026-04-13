@@ -2,7 +2,8 @@ import aiohttp
 import asyncio
 import json
 import logging
-from typing import Tuple
+import time
+from typing import Tuple, Optional, Callable
 
 from .const import (
     GIZWITS_APP_ID,
@@ -20,6 +21,15 @@ GIZWITS_ERROR_CODES = {
     "1000033": "invalid_password",
 }
 
+MAX_API_RETRIES = 3
+RETRY_BASE_DELAY = 1.0  # seconds
+REAUTH_COOLDOWN = 30  # seconds between re-auth attempts
+
+
+class AuthenticationError(Exception):
+    """Raised when authentication fails and cannot be recovered."""
+    pass
+
 
 class GizwitsApi:
     """Class to handle communication with the Gizwits API."""
@@ -31,13 +41,21 @@ class GizwitsApi:
         device_data_url,
         control_url,
         token: str = None,
+        email: str = None,
+        password: str = None,
+        on_token_refresh: Optional[Callable[[str], None]] = None,
     ):
         self._token = token
+        self._email = email
+        self._password = password
         self._attribute_models = None
         self.login_url = login_url
         self.devices_url = devices_url
         self.device_data_url = device_data_url
         self.control_url = control_url
+        self._auth_lock = asyncio.Lock()
+        self._last_auth_time: Optional[float] = None
+        self._on_token_refresh = on_token_refresh
 
     async def async_init_session(self):
         """Initialize the aiohttp session. Must be called before making API requests."""
@@ -135,104 +153,138 @@ class GizwitsApi:
         """Set the user token for the API."""
         self._token = token
 
+    def set_credentials(self, email: str, password: str):
+        """Store credentials for automatic re-authentication."""
+        self._email = email
+        self._password = password
+
+    async def _try_reauth(self) -> bool:
+        """Attempt to re-authenticate using stored credentials.
+
+        Uses a lock to prevent multiple concurrent re-auth attempts.
+        Skips if a successful re-auth happened within REAUTH_COOLDOWN seconds.
+        Returns True if a valid token is available.
+        """
+        async with self._auth_lock:
+            # If recently re-authenticated, assume token is still valid
+            if self._last_auth_time and (time.monotonic() - self._last_auth_time) < REAUTH_COOLDOWN:
+                return self._token is not None
+
+            if not self._email or not self._password:
+                LOGGER.error("Cannot re-authenticate: no stored credentials")
+                return False
+
+            LOGGER.info("Token expired or invalid, attempting re-authentication...")
+            token, error = await self.async_login(self._email, self._password)
+            if token:
+                self._token = token
+                self._last_auth_time = time.monotonic()
+                LOGGER.info("Re-authentication successful")
+                if self._on_token_refresh:
+                    self._on_token_refresh(token)
+                return True
+            else:
+                LOGGER.error("Re-authentication failed: %s", error)
+                return False
+
+    async def _api_request(self, method: str, url: str, **kwargs) -> Optional[dict]:
+        """Make an authenticated API request with automatic retry and re-auth.
+
+        Handles:
+        - 401 responses by re-authenticating and retrying
+        - Connection errors with exponential backoff
+        - Session recreation if closed
+        """
+        await self._ensure_session()
+
+        for attempt in range(MAX_API_RETRIES):
+            headers = {
+                "X-Gizwits-User-token": self._token,
+                "X-Gizwits-Application-Id": GIZWITS_APP_ID,
+                "Accept": "application/json",
+            }
+            if "json" in kwargs:
+                headers["Content-Type"] = "application/json"
+
+            try:
+                async with self._session.request(
+                    method, url, headers=headers, timeout=TIMEOUT, **kwargs
+                ) as response:
+                    result = await response.text()
+                    LOGGER.debug(
+                        "API %s %s -> status %s (attempt %d/%d)",
+                        method.upper(), url, response.status,
+                        attempt + 1, MAX_API_RETRIES,
+                    )
+
+                    if response.status == 200:
+                        return json.loads(result)
+
+                    if response.status == 401:
+                        LOGGER.warning(
+                            "Received 401 (attempt %d/%d) for %s",
+                            attempt + 1, MAX_API_RETRIES, url,
+                        )
+                        if await self._try_reauth():
+                            if attempt < MAX_API_RETRIES - 1:
+                                continue  # Retry with new token
+                        raise AuthenticationError(
+                            "Authentication failed after %d attempt(s)" % (attempt + 1)
+                        )
+
+                    LOGGER.error(
+                        "API request failed: %s %s -> %s",
+                        method.upper(), url, response.status,
+                    )
+                    return None
+
+            except AuthenticationError:
+                raise
+            except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+                LOGGER.warning(
+                    "Request error (attempt %d/%d) for %s: %s",
+                    attempt + 1, MAX_API_RETRIES, url, e,
+                )
+                if attempt < MAX_API_RETRIES - 1:
+                    delay = RETRY_BASE_DELAY * (2 ** attempt)
+                    LOGGER.debug("Retrying in %.1f seconds...", delay)
+                    await asyncio.sleep(delay)
+                    await self._ensure_session()
+                else:
+                    LOGGER.error(
+                        "All %d retries exhausted for %s %s",
+                        MAX_API_RETRIES, method.upper(), url,
+                    )
+                    return None
+            except Exception as e:
+                LOGGER.error("Unexpected error during API request to %s: %s", url, e)
+                return None
+
+        return None
+
     def add_attribute_models(self, attribute_models):
         """Add attribute models to the API instance."""
         self._attribute_models = attribute_models
 
     async def get_devices(self):
         """Get a list of bound devices."""
-        await self._ensure_session()
-        headers = {
-            "X-Gizwits-User-token": self._token,
-            "X-Gizwits-Application-Id": GIZWITS_APP_ID,
-            "Accept": "application/json",
-        }
-        LOGGER.debug("Trying to get devices - Headers are: %s", headers)
-        try:
-            async with self._session.get(
-                self.devices_url, headers=headers, timeout=TIMEOUT
-            ) as response:
-                result = await response.text()
-                LOGGER.debug("Response from Gizwits API: %s", result)
-                if response.status == 200:
-                    return json.loads(result)
-                else:
-                    LOGGER.error(
-                        "Failed to fetch devices from Gizwits API: %s", response.status
-                    )
-                    return None
-        except Exception as e:
-            LOGGER.error("Exception while fetching devices from Gizwits API: %s", e)
-            return None
+        LOGGER.debug("Fetching device list from Gizwits API")
+        return await self._api_request("GET", self.devices_url)
 
     async def get_device_data(self, device_id: str):
         """Get the latest attribute status values from a device."""
-        await self._ensure_session()
         url = self.device_data_url.format(device_id=device_id)
-        LOGGER.debug("Trying to get device data from URL: %s", url)
-        headers = {
-            "X-Gizwits-User-token": self._token,
-            "X-Gizwits-Application-Id": GIZWITS_APP_ID,
-            "Accept": "application/json",
-        }
-        try:
-            async with self._session.get(
-                url, headers=headers, timeout=TIMEOUT
-            ) as response:
-                result = await response.text()
-                LOGGER.debug("Response from Gizwits API - Device Data: %s", result)
-                if response.status == 200:
-                    return json.loads(result)
-                else:
-                    LOGGER.error(
-                        "Failed to fetch device data from Gizwits API: %s",
-                        response.status,
-                    )
-                    return None
-        except Exception as e:
-            LOGGER.error("Exception while fetching device data from Gizwits API: %s", e)
-            return None
+        LOGGER.debug("Fetching device data for %s", device_id)
+        return await self._api_request("GET", url)
 
     async def control_device(self, device_id: str, attributes: dict):
         """Send a command to change an attribute value on a device."""
         url = self.control_url.format(device_id=device_id)
-        headers = {
-            "X-Gizwits-User-token": self._token,
-            "X-Gizwits-Application-Id": GIZWITS_APP_ID,
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
         data = {"attrs": attributes}
         LOGGER.debug(
-            "Sending control command to Gizwits API - URL: %s, Data: %s, Headers: %s",
-            url,
-            data,
-            headers,
+            "Sending control command for device %s: %s", device_id, data
         )
-
-        await self._ensure_session()
-        try:
-            async with self._session.post(
-                url, json=data, headers=headers, timeout=TIMEOUT
-            ) as response:
-                result = await response.text()
-                LOGGER.debug(
-                    "Response from Gizwits API to Control Command - Device Data: %s",
-                    result,
-                )
-                if response.status == 200:
-                    return json.loads(result)
-                else:
-                    LOGGER.error(
-                        "Failed to send control command to Gizwits API: %s",
-                        response.status,
-                    )
-                    return None
-        except Exception as e:
-            LOGGER.error(
-                "Exception while sending control command to Gizwits API: %s", e
-            )
-            return None
+        return await self._api_request("POST", url, json=data)
 
     async def _read_gizwits_frame(self, reader):
         """Read a complete Gizwits LAN protocol frame from the stream.

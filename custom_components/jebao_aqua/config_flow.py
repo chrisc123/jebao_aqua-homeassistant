@@ -48,6 +48,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             "devices": [],
             "region": None,
             "email": None,
+            "password": None,
             "country": None,  # Add country to config
         }  # Add email to config
         # Pre-load country choices during initialization
@@ -69,6 +70,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             region = SERVICE_MAP.get(country_code.upper(), DEFAULT_REGION)
             self._config["region"] = region
             self._config["email"] = user_input["email"]
+            self._config["password"] = user_input["password"]
 
             self._api = GizwitsApi(
                 GIZWITS_API_URLS[region]["LOGIN_URL"],
@@ -271,6 +273,7 @@ class JebaoPumpOptionsFlowHandler(config_entries.OptionsFlow):
             # Store configuration for later use
             self._config = {
                 "email": user_input["email"],
+                "password": user_input["password"],
                 "country": country_code,
                 "region": region,
                 "devices": [],
