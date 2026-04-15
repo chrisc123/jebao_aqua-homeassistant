@@ -12,6 +12,9 @@ import pytest
 
 # ---------------------------------------------------------------------------
 # Bootstrap: stub out dependencies so we can import api.py in isolation
+# when running outside a full Home Assistant environment.
+# When pytest-homeassistant-custom-component is installed and the real
+# modules are already importable, we skip the stubbing entirely.
 # ---------------------------------------------------------------------------
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -19,33 +22,37 @@ _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
-# Create package stubs with proper __path__ so Python treats them as packages
-_cc = types.ModuleType("custom_components")
-_cc.__path__ = [os.path.join(_PROJECT_ROOT, "custom_components")]
-sys.modules.setdefault("custom_components", _cc)
+try:
+    # If the real modules are importable, use them directly
+    from custom_components.jebao_aqua.const import DOMAIN as _check  # noqa: F401
+except (ImportError, ModuleNotFoundError):
+    # Create package stubs with proper __path__ so Python treats them as packages
+    _cc = types.ModuleType("custom_components")
+    _cc.__path__ = [os.path.join(_PROJECT_ROOT, "custom_components")]
+    sys.modules.setdefault("custom_components", _cc)
 
-_ja = types.ModuleType("custom_components.jebao_aqua")
-_ja.__path__ = [os.path.join(_PROJECT_ROOT, "custom_components", "jebao_aqua")]
-sys.modules["custom_components.jebao_aqua"] = _ja
+    _ja = types.ModuleType("custom_components.jebao_aqua")
+    _ja.__path__ = [os.path.join(_PROJECT_ROOT, "custom_components", "jebao_aqua")]
+    sys.modules.setdefault("custom_components.jebao_aqua", _ja)
 
-# Stub the const module with test values
-_const = types.ModuleType("custom_components.jebao_aqua.const")
-_const.GIZWITS_APP_ID = "test_app_id"
-_const.TIMEOUT = 5
-_const.LOGGER = __import__("logging").getLogger("test_jebao")
-_const.LAN_PORT = 12416
-_const.LAN_CONNECT_TIMEOUT = 5
-_const.LAN_COMMAND_TIMEOUT = 5
-_const.GIZWITS_API_URLS = {
-    "eu": {
-        "LOGIN_URL": "https://euaepapp.gizwits.com/app/smart_home/login/pwd",
-        "DEVICES_URL": "https://euapi.gizwits.com/app/bindings",
-        "DEVICE_DATA_URL": "https://euapi.gizwits.com/app/devdata/{device_id}/latest",
-        "CONTROL_URL": "https://euapi.gizwits.com/app/control/{device_id}",
+    # Stub the const module with test values
+    _const = types.ModuleType("custom_components.jebao_aqua.const")
+    _const.GIZWITS_APP_ID = "test_app_id"
+    _const.TIMEOUT = 5
+    _const.LOGGER = __import__("logging").getLogger("test_jebao")
+    _const.LAN_PORT = 12416
+    _const.LAN_CONNECT_TIMEOUT = 5
+    _const.LAN_COMMAND_TIMEOUT = 5
+    _const.GIZWITS_API_URLS = {
+        "eu": {
+            "LOGIN_URL": "https://euaepapp.gizwits.com/app/smart_home/login/pwd",
+            "DEVICES_URL": "https://euapi.gizwits.com/app/bindings",
+            "DEVICE_DATA_URL": "https://euapi.gizwits.com/app/devdata/{device_id}/latest",
+            "CONTROL_URL": "https://euapi.gizwits.com/app/control/{device_id}",
+        }
     }
-}
-_const.DEFAULT_REGION = "eu"
-sys.modules["custom_components.jebao_aqua.const"] = _const
+    _const.DEFAULT_REGION = "eu"
+    sys.modules.setdefault("custom_components.jebao_aqua.const", _const)
 
 from custom_components.jebao_aqua.api import (
     GizwitsApi,

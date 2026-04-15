@@ -30,10 +30,10 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install pytest pytest-asyncio homeassistant
+        run: pip install pytest pytest-asyncio pytest-homeassistant-custom-component
 
       - name: Run tests
-        run: pytest --tb=short -v
+        run: pytest tests/ --tb=short -v
 
   auto-bump-version:
     name: Auto-bump patch version if needed
