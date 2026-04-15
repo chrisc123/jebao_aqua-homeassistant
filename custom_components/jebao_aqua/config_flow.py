@@ -387,6 +387,7 @@ class JebaoPumpOptionsFlowHandler(config_entries.OptionsFlow):
                     # Create new config data first
                     new_data = {
                         "email": self._config["email"],
+                        "password": self._config["password"],
                         "token": self._config["token"],
                         "region": self._config["region"],
                         "country": self._config["country"],
