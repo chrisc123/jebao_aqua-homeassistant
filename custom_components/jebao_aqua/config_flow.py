@@ -37,7 +37,7 @@ def get_country_choices():
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 1
+    VERSION = 2
 
     def __init__(self):
         self._api = None  # Initialize _api to None
@@ -206,6 +206,58 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             description_placeholders={
                 "number_of_devices": len(self._devices["devices"])
             },
+            errors=errors,
+        )
+
+    async def async_step_reauth(self, entry_data: dict):
+        """Handle reauth flow when password is missing or credentials are invalid."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(self, user_input=None):
+        """Prompt the user for their password to re-enable automatic token refresh."""
+        errors = {}
+
+        entry_id = self.context.get("entry_id")
+        reauth_entry = self.hass.config_entries.async_get_entry(entry_id)
+
+        if user_input is not None:
+            email = user_input.get("email", reauth_entry.data.get("email", ""))
+            password = user_input["password"]
+            region = reauth_entry.data.get("region")
+
+            self._api = GizwitsApi(
+                GIZWITS_API_URLS[region]["LOGIN_URL"],
+                GIZWITS_API_URLS[region]["DEVICES_URL"],
+                GIZWITS_API_URLS[region]["DEVICE_DATA_URL"],
+                GIZWITS_API_URLS[region]["CONTROL_URL"],
+            )
+
+            async with self._api as api:
+                token, error_code = await api.async_login(email, password)
+                if token:
+                    new_data = {
+                        **reauth_entry.data,
+                        "email": email,
+                        "password": password,
+                        "token": token,
+                    }
+                    self.hass.config_entries.async_update_entry(
+                        reauth_entry, data=new_data
+                    )
+                    await self.hass.config_entries.async_reload(reauth_entry.entry_id)
+                    return self.async_abort(reason="reauth_successful")
+                else:
+                    errors["base"] = error_code or "auth"
+
+        default_email = reauth_entry.data.get("email", "") if reauth_entry else ""
+        return self.async_show_form(
+            step_id="reauth_confirm",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("email", default=default_email): str,
+                    vol.Required("password"): str,
+                }
+            ),
             errors=errors,
         )
 

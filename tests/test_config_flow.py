@@ -334,3 +334,98 @@ class TestConfigFlowDeviceSetup:
             assert result["data"]["region"] == expected_region, (
                 f"Country {country} should map to region {expected_region}"
             )
+
+
+# ---------------------------------------------------------------------------
+# Tests – reauth flow
+# ---------------------------------------------------------------------------
+
+
+class TestReauthFlow:
+    """Tests for the reauth flow triggered when password is missing."""
+
+    @pytest.mark.asyncio
+    async def test_reauth_shows_form(self, hass: HomeAssistant, mock_config_entry):
+        """Reauth flow should show a form requesting credentials."""
+        mock_config_entry.add_to_hass(hass)
+
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN,
+            context={
+                "source": config_entries.SOURCE_REAUTH,
+                "entry_id": mock_config_entry.entry_id,
+            },
+            data=mock_config_entry.data,
+        )
+
+        assert result["type"] == FlowResultType.FORM
+        assert result["step_id"] == "reauth_confirm"
+        assert "email" in result["data_schema"].schema
+        assert "password" in result["data_schema"].schema
+
+    @pytest.mark.asyncio
+    async def test_reauth_success_updates_entry(self, hass: HomeAssistant, mock_config_entry):
+        """Successful reauth should update config entry with new token and password."""
+        # Start with no password in the config entry
+        from pytest_homeassistant_custom_component.common import MockConfigEntry
+        from .conftest import make_config_entry_data
+
+        data = make_config_entry_data()
+        data["password"] = None
+        entry = MockConfigEntry(domain=DOMAIN, data=data, version=2)
+        entry.add_to_hass(hass)
+
+        api = _mock_api_successful_login()
+        new_token = "new_token_xyz"
+        api.async_login = AsyncMock(return_value=(new_token, None))
+
+        with patch(
+            "custom_components.jebao_aqua.config_flow.GizwitsApi",
+            return_value=api,
+        ):
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN,
+                context={
+                    "source": config_entries.SOURCE_REAUTH,
+                    "entry_id": entry.entry_id,
+                },
+                data=entry.data,
+            )
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"],
+                {"email": MOCK_EMAIL, "password": MOCK_PASSWORD},
+            )
+            await hass.async_block_till_done()
+
+        assert result["type"] == FlowResultType.ABORT
+        assert result["reason"] == "reauth_successful"
+        assert entry.data["password"] == MOCK_PASSWORD
+        assert entry.data["token"] == new_token
+
+    @pytest.mark.asyncio
+    async def test_reauth_failure_shows_error(self, hass: HomeAssistant, mock_config_entry):
+        """Failed reauth login should show an error on the form."""
+        mock_config_entry.add_to_hass(hass)
+
+        api = _mock_api_failed_login("invalid_password")
+
+        with patch(
+            "custom_components.jebao_aqua.config_flow.GizwitsApi",
+            return_value=api,
+        ):
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN,
+                context={
+                    "source": config_entries.SOURCE_REAUTH,
+                    "entry_id": mock_config_entry.entry_id,
+                },
+                data=mock_config_entry.data,
+            )
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"],
+                {"email": MOCK_EMAIL, "password": "wrong_password"},
+            )
+
+        assert result["type"] == FlowResultType.FORM
+        assert result["step_id"] == "reauth_confirm"
+        assert result["errors"]["base"] == "invalid_password"

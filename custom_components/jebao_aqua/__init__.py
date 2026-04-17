@@ -24,6 +24,34 @@ async def async_setup(hass: HomeAssistant, config: dict):
     return True
 
 
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+    """Migrate old entry."""
+    LOGGER.debug("Migrating config entry from version %s", config_entry.version)
+
+    if config_entry.version == 1:
+        # Version 1 entries may not have the password field
+        new_data = {**config_entry.data}
+
+        # Ensure password field exists (may be None if not stored)
+        if "password" not in new_data:
+            new_data["password"] = None
+            LOGGER.info(
+                "Migrated config entry to version 2. "
+                "Password field added (not set). "
+                "Please reconfigure the integration to enable automatic token refresh."
+            )
+
+        # Update the entry with new data and version
+        hass.config_entries.async_update_entry(
+            config_entry, data=new_data, version=2
+        )
+
+        LOGGER.info("Migration to version 2 successful")
+        return True
+
+    return True
+
+
 async def load_attribute_models(hass: HomeAssistant) -> dict:
     """Load attribute models asynchronously."""
     models_path = Path(hass.config.path("custom_components/jebao_aqua/models"))
@@ -61,6 +89,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
             "Automatic token refresh will not be available. "
             "Please reconfigure the integration to enable this feature."
         )
+        entry.async_start_reauth(hass)
 
     # Load attribute models asynchronously
     attribute_models = await load_attribute_models(hass)

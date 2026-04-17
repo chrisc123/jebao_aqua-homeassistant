@@ -11,6 +11,14 @@
           "country": "Country"
         }
       },
+      "reauth_confirm": {
+        "title": "Re-authenticate Jebao",
+        "description": "Your password is missing from the integration configuration. Please enter your Jebao credentials to enable automatic token refresh.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      },
       "device_setup": {
         "title": "Device Setup",
         "description": "Configure IP addresses for {number_of_devices} devices. Leave empty for cloud-only mode.",
@@ -35,7 +43,8 @@
     "abort": {
       "already_configured": "This account is already configured.",
       "no_devices": "No devices available for setup.",
-      "device_index_error": "Error accessing device information."
+      "device_index_error": "Error accessing device information.",
+      "reauth_successful": "Re-authentication was successful."
     },
     "success": {
       "discovery_complete": "All devices discovered successfully."

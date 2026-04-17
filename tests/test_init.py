@@ -18,6 +18,7 @@ from .conftest import (
     MOCK_LAN_IP,
     MOCK_PRODUCT_KEY,
     MOCK_TOKEN,
+    MOCK_PASSWORD,
     make_config_entry_data,
 )
 
@@ -261,3 +262,90 @@ class TestCoordinatorUpdate:
             d for d in coordinator.device_inventory if d["did"] == MOCK_DEVICE_ID
         )
         assert device.get("lan_ip") == "192.168.1.200"
+
+
+# ---------------------------------------------------------------------------
+# Tests – config entry migration
+# ---------------------------------------------------------------------------
+
+
+class TestConfigEntryMigration:
+    @pytest.mark.asyncio
+    async def test_migrate_v1_to_v2_with_password(
+        self, hass: HomeAssistant, mock_api, mock_attribute_models
+    ):
+        """Config entry v1 with password should migrate to v2."""
+        # Create a v1 config entry with password
+        data = make_config_entry_data()
+        entry = MockConfigEntry(domain=DOMAIN, data=data, version=1)
+        entry.add_to_hass(hass)
+
+        # Trigger migration
+        p1, p2, p3 = _patch_setup(mock_api, mock_attribute_models)
+        with p1, p2, p3:
+            await hass.config_entries.async_setup(entry.entry_id)
+            await hass.async_block_till_done()
+
+        # Entry should be migrated to v2
+        assert entry.version == 2
+        assert entry.data.get("password") == MOCK_PASSWORD
+
+    @pytest.mark.asyncio
+    async def test_migrate_v1_to_v2_without_password(
+        self, hass: HomeAssistant, mock_api, mock_attribute_models
+    ):
+        """Config entry v1 without password should migrate to v2 with password=None."""
+        # Create a v1 config entry WITHOUT password
+        data = make_config_entry_data()
+        data.pop("password")
+        entry = MockConfigEntry(domain=DOMAIN, data=data, version=1)
+        entry.add_to_hass(hass)
+
+        # Trigger migration
+        p1, p2, p3 = _patch_setup(mock_api, mock_attribute_models)
+        with p1, p2, p3:
+            await hass.config_entries.async_setup(entry.entry_id)
+            await hass.async_block_till_done()
+
+        # Entry should be migrated to v2 with password=None
+        assert entry.version == 2
+        assert "password" in entry.data
+        assert entry.data.get("password") is None
+
+    @pytest.mark.asyncio
+    async def test_setup_warns_when_password_is_none(
+        self, hass: HomeAssistant, mock_api, mock_attribute_models, caplog
+    ):
+        """Setup should log warning and trigger reauth when password is None after migration."""
+        import logging
+
+        # Create a v2 config entry with password=None (simulating migrated entry)
+        data = make_config_entry_data()
+        data["password"] = None
+        entry = MockConfigEntry(domain=DOMAIN, data=data, version=2)
+        entry.add_to_hass(hass)
+
+        # Trigger setup with logging
+        p1, p2, p3 = _patch_setup(mock_api, mock_attribute_models)
+        with p1, p2, p3:
+            with caplog.at_level(logging.WARNING):
+                await hass.config_entries.async_setup(entry.entry_id)
+                await hass.async_block_till_done()
+
+        # Should have logged the warning about missing password
+        assert any(
+            "Password not stored in config entry" in record.message
+            for record in caplog.records
+        )
+        # Entry should still be loaded
+        assert entry.state == ConfigEntryState.LOADED
+        # A reauth flow should have been started
+        reauth_flows = [
+            flow
+            for flow in hass.config_entries.flow.async_progress()
+            if flow["context"].get("source") == "reauth"
+            and flow["context"].get("entry_id") == entry.entry_id
+        ]
+        assert len(reauth_flows) == 1
+
+

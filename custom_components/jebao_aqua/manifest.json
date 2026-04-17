@@ -3,10 +3,12 @@
   "name": "Jebao Aqua Aquarium Pump",
   "config_flow": true,
   "documentation": "https://github.com/chrisc123/jebao_aqua-homeassistant",
-  "requirements": ["pycountry==24.6.1"],
+  "requirements": [
+    "pycountry==24.6.1"
+  ],
   "dependencies": [],
   "codeowners": [
     "@chrisc123"
   ],
-  "version": "0.1.2"
+  "version": "0.1.3"
 }
