@@ -1,6 +1,8 @@
 """Shared fixtures for Jebao Aqua integration tests."""
 
 import json
+import pathlib
+import sys
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -9,6 +11,24 @@ from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.jebao_aqua.const import DOMAIN
+
+
+# ---------------------------------------------------------------------------
+# Remove editable-install namespace placeholder from sys.path so that
+# homeassistant.loader._get_custom_components can iterate
+# custom_components.__path__ without hitting a FileNotFoundError on the
+# fake "__editable__….__path_hook__" entry injected by the editable install.
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="session", autouse=True)
+def clean_editable_namespace_path():
+    """Strip non-existent editable-install placeholders from sys.path."""
+    placeholders = [p for p in sys.path if not pathlib.Path(p).exists()]
+    # Rebuild sys.path without the invalid placeholders
+    sys.path[:] = [p for p in sys.path if pathlib.Path(p).exists()]
+    yield
+    # Restore on teardown so we don't affect other test sessions
+    sys.path.extend(placeholders)
 
 
 # ---------------------------------------------------------------------------
