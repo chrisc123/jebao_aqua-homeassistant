@@ -125,7 +125,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
                     if attr["name"].startswith("IntervalT"):
                         channel_name = get_channel_name_from_attribute(attr["name"], channel_names)
                         if channel_name:
-                            custom_name = f"{channel_name} Interval"
+                            custom_name = f"{channel_name} Pause Days"
                     numbers.append(JebaoPumpNumber(coordinator, device, attr, attribute_models, custom_name))
 
     async_add_entities(numbers)

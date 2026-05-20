@@ -121,59 +121,59 @@
       "desc": "Selects the calibration channel."
     },
     {
-      "display_name": "Interval Time 1",
+      "display_name": "Channel 1 Pause Days",
       "name": "IntervalT1",
       "data_type": "uint8",
       "position": { "byte_offset": 2, "unit": "byte", "len": 1, "bit_offset": 0 },
       "uint_spec": { "addition": 0, "max": 30, "ratio": 1, "min": 0 },
       "type": "status_writable",
       "id": 11,
-      "desc": "Interval time for Channel 1.",
-      "unit": "min"
+      "desc": "Days between dosing cycles for Channel 1.",
+      "unit": "d"
     },
     {
-      "display_name": "Interval Time 2",
+      "display_name": "Channel 2 Pause Days",
       "name": "IntervalT2",
       "data_type": "uint8",
       "position": { "byte_offset": 3, "unit": "byte", "len": 1, "bit_offset": 0 },
       "uint_spec": { "addition": 0, "max": 30, "ratio": 1, "min": 0 },
       "type": "status_writable",
       "id": 12,
-      "desc": "Interval time for Channel 2.",
-      "unit": "min"
+      "desc": "Days between dosing cycles for Channel 2.",
+      "unit": "d"
     },
     {
-      "display_name": "Interval Time 3",
+      "display_name": "Channel 3 Pause Days",
       "name": "IntervalT3",
       "data_type": "uint8",
       "position": { "byte_offset": 4, "unit": "byte", "len": 1, "bit_offset": 0 },
       "uint_spec": { "addition": 0, "max": 30, "ratio": 1, "min": 0 },
       "type": "status_writable",
       "id": 13,
-      "desc": "Interval time for Channel 3.",
-      "unit": "min"
+      "desc": "Days between dosing cycles for Channel 3.",
+      "unit": "d"
     },
     {
-      "display_name": "Interval Time 4",
+      "display_name": "Channel 4 Pause Days",
       "name": "IntervalT4",
       "data_type": "uint8",
       "position": { "byte_offset": 5, "unit": "byte", "len": 1, "bit_offset": 0 },
       "uint_spec": { "addition": 0, "max": 30, "ratio": 1, "min": 0 },
       "type": "status_writable",
       "id": 14,
-      "desc": "Interval time for Channel 4.",
-      "unit": "min"
+      "desc": "Days between dosing cycles for Channel 4.",
+      "unit": "d"
     },
     {
-      "display_name": "Interval Time 5",
+      "display_name": "Channel 5 Pause Days",
       "name": "IntervalT5",
       "data_type": "uint8",
       "position": { "byte_offset": 6, "unit": "byte", "len": 1, "bit_offset": 0 },
       "uint_spec": { "addition": 0, "max": 30, "ratio": 1, "min": 0 },
       "type": "status_writable",
       "id": 16,
-      "desc": "Interval time for Channel 5.",
-      "unit": "min"
+      "desc": "Days between dosing cycles for Channel 5.",
+      "unit": "d"
     },
     {
       "display_name": "Calibration Value",
