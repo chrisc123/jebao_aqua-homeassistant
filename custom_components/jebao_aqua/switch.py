@@ -33,16 +33,6 @@ class JebaoPumpSwitch(CoordinatorEntity, SwitchEntity):
         self._attr_unique_id = create_unique_id(device_id, attribute["name"])
         self.entity_id = create_entity_id("switch", device_name, attribute["name"])
 
-    async def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        _LOGGER.debug(
-            "Coordinator update for switch %s (%s): device_data=%s",
-            self.name,
-            self._attr_key,
-            self.coordinator.data.get(self._device_id)
-        )
-        self.async_write_ha_state()
-
     @property
     def available(self) -> bool:
         """Return if entity is available."""
@@ -155,13 +145,17 @@ async def async_setup_entry(hass, entry, async_add_entities):
         if model:
             for attr in model["attrs"]:
                 if attr["type"] == "status_writable" and attr["data_type"] == "bool":
-                    # Check if this is a timer switch and if we have a custom name
+                    # Apply custom channel name for Timer*ON and channe* attributes
                     custom_name = None
                     if attr["name"].startswith("Timer") and attr["name"].endswith("ON"):
                         channel_name = get_channel_name_from_attribute(attr["name"], channel_names)
                         if channel_name:
                             custom_name = f"{channel_name} Timer"
-                    
+                    elif attr["name"].startswith("channe"):
+                        channel_name = get_channel_name_from_attribute(attr["name"], channel_names)
+                        if channel_name:
+                            custom_name = f"{channel_name} Switch"
+
                     switches.append(JebaoPumpSwitch(coordinator, device, attr, attribute_models, custom_name))
 
     async_add_entities(switches)

@@ -6,8 +6,10 @@ from .helpers import (
     create_entity_name,
     create_entity_id,
     create_unique_id,
-    is_device_data_valid,  # Add this import
-    get_attribute_value,  # Add this import
+    is_device_data_valid,
+    get_attribute_value,
+    parse_channel_names,
+    get_channel_name_from_attribute,
 )
 import asyncio
 
@@ -15,7 +17,7 @@ import asyncio
 class JebaoPumpNumber(CoordinatorEntity, NumberEntity):
     """Representation of a Jebao Pump Number Entity."""
 
-    def __init__(self, coordinator, device, attribute, attribute_models):
+    def __init__(self, coordinator, device, attribute, attribute_models, custom_name=None):
         super().__init__(coordinator)
         self._device = device
         self._attribute = attribute
@@ -23,8 +25,10 @@ class JebaoPumpNumber(CoordinatorEntity, NumberEntity):
         device_id = device.get("did")
         device_name = device.get("dev_alias") or device.get("did")
 
+        display_name = custom_name if custom_name else attribute["display_name"]
+
         # Use helper functions for consistent entity properties
-        self._attr_name = create_entity_name(device_name, attribute["display_name"])
+        self._attr_name = create_entity_name(device_name, display_name)
         self._attr_unique_id = create_unique_id(device_id, attribute["name"])
         self.entity_id = create_entity_id("number", device_name, attribute["name"])
 
@@ -34,16 +38,6 @@ class JebaoPumpNumber(CoordinatorEntity, NumberEntity):
         self._attr_native_step = attribute.get("step", 1)  # Default step to 1 if not specified
         # Set the unit of measurement if applicable
         self._attr_native_unit_of_measurement = attribute.get("unit")
-
-    async def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        _LOGGER.debug(
-            "Coordinator update for number %s (%s): device_data=%s",
-            self.name,
-            self._attr_key,
-            self.coordinator.data.get(self._device_id)
-        )
-        self.async_write_ha_state()
 
     @property
     def available(self) -> bool:
@@ -121,9 +115,17 @@ async def async_setup_entry(hass, entry, async_add_entities):
         product_key = device.get("product_key")
         model = attribute_models.get(product_key)
 
+        # Parse custom channel names for this device
+        channel_names = parse_channel_names(device)
+
         if model:
             for attr in model["attrs"]:
                 if attr["type"] == "status_writable" and attr["data_type"] == "uint8":
-                    numbers.append(JebaoPumpNumber(coordinator, device, attr, attribute_models))
+                    custom_name = None
+                    if attr["name"].startswith("IntervalT"):
+                        channel_name = get_channel_name_from_attribute(attr["name"], channel_names)
+                        if channel_name:
+                            custom_name = f"{channel_name} Interval"
+                    numbers.append(JebaoPumpNumber(coordinator, device, attr, attribute_models, custom_name))
 
     async_add_entities(numbers)

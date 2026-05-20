@@ -28,20 +28,18 @@ class JebaoPumpSelect(CoordinatorEntity, SelectEntity):
         self._attr_unique_id = create_unique_id(device_id, attribute["name"])
         self.entity_id = create_entity_id("select", device_name, attribute["name"])
 
-        # Mapping the descriptions to their integer indices
-        # The API returns/expects integer indices (0, 1, 2, 3), not the Chinese enum strings
-        self._option_mapping = {desc: idx for idx, desc in enumerate(attribute["desc"])}
+        # Build option list for display. Prefer "desc" when it's a list of English labels,
+        # otherwise fall back to "enum". The API always expects the integer index.
+        desc = attribute.get("desc")
+        enum_values = attribute.get("enum")
+        if isinstance(desc, list):
+            options = desc
+        elif isinstance(enum_values, list):
+            options = enum_values
+        else:
+            options = []
+        self._option_mapping = {opt: idx for idx, opt in enumerate(options)}
         self._options = list(self._option_mapping.keys())
-
-    async def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        _LOGGER.debug(
-            "Coordinator update for select %s (%s): device_data=%s",
-            self.name,
-            self._attr_key,
-            self.coordinator.data.get(self._device_id)
-        )
-        self.async_write_ha_state()
 
     @property
     def available(self) -> bool:

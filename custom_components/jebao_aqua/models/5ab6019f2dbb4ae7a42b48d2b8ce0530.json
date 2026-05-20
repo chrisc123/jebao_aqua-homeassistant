@@ -6,143 +6,203 @@
       "display_name": "Main Switch",
       "name": "switch",
       "data_type": "bool",
+      "position": { "byte_offset": 0, "unit": "bit", "len": 1, "bit_offset": 0 },
       "type": "status_writable",
       "id": 0,
-      "desc": "Main power switch"
+      "desc": "Controls the power state of the pump."
+    },
+    {
+      "display_name": "Channel 1 Switch",
+      "name": "channe1",
+      "data_type": "bool",
+      "position": { "byte_offset": 0, "unit": "bit", "len": 1, "bit_offset": 1 },
+      "type": "status_writable",
+      "id": 1,
+      "desc": "Manages Channel 1's manual switch."
+    },
+    {
+      "display_name": "Channel 2 Switch",
+      "name": "channe2",
+      "data_type": "bool",
+      "position": { "byte_offset": 0, "unit": "bit", "len": 1, "bit_offset": 2 },
+      "type": "status_writable",
+      "id": 2,
+      "desc": "Manages Channel 2's manual switch."
+    },
+    {
+      "display_name": "Channel 3 Switch",
+      "name": "channe3",
+      "data_type": "bool",
+      "position": { "byte_offset": 0, "unit": "bit", "len": 1, "bit_offset": 3 },
+      "type": "status_writable",
+      "id": 3,
+      "desc": "Manages Channel 3's manual switch."
+    },
+    {
+      "display_name": "Channel 4 Switch",
+      "name": "channe4",
+      "data_type": "bool",
+      "position": { "byte_offset": 0, "unit": "bit", "len": 1, "bit_offset": 4 },
+      "type": "status_writable",
+      "id": 4,
+      "desc": "Manages Channel 4's manual switch."
+    },
+    {
+      "display_name": "Channel 5 Switch",
+      "name": "channe5",
+      "data_type": "bool",
+      "position": { "byte_offset": 0, "unit": "bit", "len": 1, "bit_offset": 5 },
+      "type": "status_writable",
+      "id": 15,
+      "desc": "Manages Channel 5's manual switch."
     },
     {
       "display_name": "Timer 1 Switch",
       "name": "Timer1ON",
       "data_type": "bool",
+      "position": { "byte_offset": 0, "unit": "bit", "len": 1, "bit_offset": 6 },
       "type": "status_writable",
-      "id": 1,
-      "desc": "Channel 1 timer enable"
+      "id": 5,
+      "desc": "Enables or disables Timer 1."
     },
     {
       "display_name": "Timer 2 Switch",
       "name": "Timer2ON",
       "data_type": "bool",
+      "position": { "byte_offset": 0, "unit": "bit", "len": 1, "bit_offset": 7 },
       "type": "status_writable",
-      "id": 2,
-      "desc": "Channel 2 timer enable"
+      "id": 6,
+      "desc": "Enables or disables Timer 2."
     },
     {
       "display_name": "Timer 3 Switch",
       "name": "Timer3ON",
       "data_type": "bool",
+      "position": { "byte_offset": 1, "unit": "bit", "len": 1, "bit_offset": 0 },
       "type": "status_writable",
-      "id": 3,
-      "desc": "Channel 3 timer enable"
+      "id": 7,
+      "desc": "Enables or disables Timer 3."
     },
     {
       "display_name": "Timer 4 Switch",
       "name": "Timer4ON",
       "data_type": "bool",
+      "position": { "byte_offset": 1, "unit": "bit", "len": 1, "bit_offset": 1 },
       "type": "status_writable",
-      "id": 4,
-      "desc": "Channel 4 timer enable"
+      "id": 8,
+      "desc": "Enables or disables Timer 4."
     },
     {
       "display_name": "Timer 5 Switch",
       "name": "Timer5ON",
       "data_type": "bool",
+      "position": { "byte_offset": 1, "unit": "bit", "len": 1, "bit_offset": 2 },
       "type": "status_writable",
-      "id": 5,
-      "desc": "Channel 5 timer enable"
+      "id": 17,
+      "desc": "Enables or disables Timer 5."
     },
     {
       "display_name": "Calibration Switch",
       "name": "CALSW",
       "data_type": "bool",
+      "position": { "byte_offset": 1, "unit": "bit", "len": 1, "bit_offset": 3 },
       "type": "status_writable",
       "id": 9,
-      "desc": "Calibration mode switch"
+      "desc": "Toggles the calibration switch."
     },
     {
-      "display_name": "Channel 1 Status",
-      "name": "channe1",
-      "data_type": "bool",
-      "type": "status_readonly",
+      "display_name": "Calibration Channel",
+      "name": "CALSet",
+      "data_type": "enum",
+      "enum": ["Calibration1", "Calibration2", "Calibration3", "Calibration4", "Calibration5"],
+      "position": { "byte_offset": 1, "unit": "bit", "len": 3, "bit_offset": 4 },
+      "type": "status_writable",
       "id": 10,
-      "desc": "Channel 1 running status"
+      "desc": "Selects the calibration channel."
     },
     {
-      "display_name": "Channel 2 Status",
-      "name": "channe2",
-      "data_type": "bool",
-      "type": "status_readonly",
+      "display_name": "Interval Time 1",
+      "name": "IntervalT1",
+      "data_type": "uint8",
+      "position": { "byte_offset": 2, "unit": "byte", "len": 1, "bit_offset": 0 },
+      "uint_spec": { "addition": 0, "max": 30, "ratio": 1, "min": 0 },
+      "type": "status_writable",
       "id": 11,
-      "desc": "Channel 2 running status"
+      "desc": "Interval time for Channel 1.",
+      "unit": "min"
     },
     {
-      "display_name": "Channel 3 Status",
-      "name": "channe3",
-      "data_type": "bool",
-      "type": "status_readonly",
+      "display_name": "Interval Time 2",
+      "name": "IntervalT2",
+      "data_type": "uint8",
+      "position": { "byte_offset": 3, "unit": "byte", "len": 1, "bit_offset": 0 },
+      "uint_spec": { "addition": 0, "max": 30, "ratio": 1, "min": 0 },
+      "type": "status_writable",
       "id": 12,
-      "desc": "Channel 3 running status"
+      "desc": "Interval time for Channel 2.",
+      "unit": "min"
     },
     {
-      "display_name": "Channel 4 Status",
-      "name": "channe4",
-      "data_type": "bool",
-      "type": "status_readonly",
+      "display_name": "Interval Time 3",
+      "name": "IntervalT3",
+      "data_type": "uint8",
+      "position": { "byte_offset": 4, "unit": "byte", "len": 1, "bit_offset": 0 },
+      "uint_spec": { "addition": 0, "max": 30, "ratio": 1, "min": 0 },
+      "type": "status_writable",
       "id": 13,
-      "desc": "Channel 4 running status"
+      "desc": "Interval time for Channel 3.",
+      "unit": "min"
     },
     {
-      "display_name": "Channel 5 Status",
-      "name": "channe5",
-      "data_type": "bool",
-      "type": "status_readonly",
+      "display_name": "Interval Time 4",
+      "name": "IntervalT4",
+      "data_type": "uint8",
+      "position": { "byte_offset": 5, "unit": "byte", "len": 1, "bit_offset": 0 },
+      "uint_spec": { "addition": 0, "max": 30, "ratio": 1, "min": 0 },
+      "type": "status_writable",
       "id": 14,
-      "desc": "Channel 5 running status"
+      "desc": "Interval time for Channel 4.",
+      "unit": "min"
     },
     {
-      "display_name": "Open Circuit Fault",
-      "name": "OpenCircuit",
-      "data_type": "bool",
-      "type": "fault",
-      "id": 18,
-      "desc": "Open circuit fault"
-    },
-    {
-      "display_name": "UART Fault",
-      "name": "Fault_UART",
-      "data_type": "bool",
-      "type": "fault",
-      "id": 19,
-      "desc": "UART communication fault"
+      "display_name": "Interval Time 5",
+      "name": "IntervalT5",
+      "data_type": "uint8",
+      "position": { "byte_offset": 6, "unit": "byte", "len": 1, "bit_offset": 0 },
+      "uint_spec": { "addition": 0, "max": 30, "ratio": 1, "min": 0 },
+      "type": "status_writable",
+      "id": 16,
+      "desc": "Interval time for Channel 5.",
+      "unit": "min"
     },
     {
       "display_name": "Calibration Value",
       "name": "Calib1",
       "data_type": "uint8",
+      "position": { "byte_offset": 7, "unit": "byte", "len": 1, "bit_offset": 0 },
+      "uint_spec": { "addition": 0, "max": 100, "ratio": 1, "min": 1 },
       "type": "status_writable",
       "id": 20,
-      "desc": "Calibration value",
-      "unit": "mL",
-      "min": 1,
-      "max": 100
+      "desc": "Calibration value.",
+      "unit": "mL"
     },
     {
-      "display_name": "Channel Total",
-      "name": "channelTTL",
-      "data_type": "uint8",
-      "type": "status_readonly",
-      "id": 21,
-      "desc": "Total number of channels"
+      "display_name": "Open Circuit Fault",
+      "name": "OpenCircuit",
+      "data_type": "bool",
+      "position": { "byte_offset": 8, "unit": "bit", "len": 1, "bit_offset": 0 },
+      "type": "fault",
+      "id": 18,
+      "desc": "Open circuit fault."
     },
     {
-      "display_name": "Dose Duration",
-      "name": "time1",
-      "data_type": "uint8",
-      "type": "status_writable",
-      "id": 22,
-      "desc": "Dosing duration in seconds",
-      "unit": "s",
-      "min": 1,
-      "max": 60
+      "display_name": "UART Fault",
+      "name": "Fault_UART",
+      "data_type": "bool",
+      "position": { "byte_offset": 8, "unit": "bit", "len": 1, "bit_offset": 1 },
+      "type": "fault",
+      "id": 19,
+      "desc": "UART communication fault."
     }
   ]
 }

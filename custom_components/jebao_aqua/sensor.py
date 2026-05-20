@@ -7,6 +7,7 @@ from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 
@@ -63,12 +64,12 @@ async def async_setup_entry(
         async_add_entities(entities)
 
 
-class JebaoChannelScheduleSensor(SensorEntity):
+class JebaoChannelScheduleSensor(CoordinatorEntity, SensorEntity):
     """Sensor showing channel dosing schedule."""
 
     def __init__(self, coordinator, device_id: str, channel: int, attribute_models, channel_name: str = None) -> None:
         """Initialize the sensor."""
-        self._coordinator = coordinator
+        super().__init__(coordinator)
         self._device_id = device_id
         self._channel = channel
         self._attribute_models = attribute_models
@@ -83,7 +84,7 @@ class JebaoChannelScheduleSensor(SensorEntity):
         
         # Get device info from inventory
         device_info = next(
-            (d for d in self._coordinator.device_inventory if d["did"] == self._device_id),
+            (d for d in self.coordinator.device_inventory if d["did"] == self._device_id),
             None
         )
         if device_info:
@@ -123,7 +124,7 @@ class JebaoChannelScheduleSensor(SensorEntity):
     
     def _get_raw_schedule(self) -> str:
         """Get raw CHxSWTime data."""
-        device = self._coordinator.data.get(self._device_id, {})
+        device = self.coordinator.data.get(self._device_id, {})
         attr = device.get("attr", {})
         field_name = f"CH{self._channel}SWTime"
         return attr.get(field_name, "")
@@ -183,12 +184,3 @@ class JebaoChannelScheduleSensor(SensorEntity):
                 continue
         
         return entries
-    
-    @property
-    def available(self) -> bool:
-        """Return if entity is available."""
-        return self._device_id in self._coordinator.data
-
-    async def async_update(self):
-        """Update the sensor."""
-        await self._coordinator.async_request_refresh()

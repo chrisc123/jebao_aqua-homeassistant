@@ -375,13 +375,6 @@ class GizwitsApi:
             shift += 7
         return None, 0
 
-    def _swap_endian(self, hex_str):
-        """Swap the endianness of the first two bytes of the hex string."""
-        if len(hex_str) >= 4:
-            swapped = hex_str[2:4] + hex_str[0:2] + hex_str[4:]
-            return swapped
-        return hex_str
-
     def _parse_device_status(self, payload, attribute_model):
         """Parse the device status payload based on the attribute model."""
         status_data = {}
@@ -391,47 +384,52 @@ class GizwitsApi:
                 LOGGER.debug("Model does not have position data for local parsing, skipping")
                 return status_data
 
-            # Convert bytes payload to a hexadecimal string if needed
-            if isinstance(payload, bytes):
-                payload = payload.hex()
-
-            # Check if endianness swap is needed
-            swap_needed = any(
-                "position" in attr
-                and attr["position"]["byte_offset"] == 0
-                and (attr["position"]["bit_offset"] + attr["position"]["len"] > 8)
-                for attr in attribute_model["attrs"]
-            )
-
-            # Perform endianness swap only once if needed
-            if swap_needed:
-                payload = self._swap_endian(payload)
-
-            # Convert hex payload to a byte array
-            payload_bytes = bytes.fromhex(payload)
+            # Ensure we have a bytes object to index into
+            if isinstance(payload, str):
+                payload_bytes = bytes.fromhex(payload)
+            else:
+                payload_bytes = payload
 
             # Process each attribute in the attribute model
             for attr in attribute_model["attrs"]:
                 # Skip attributes without position data
                 if "position" not in attr:
                     continue
-                    
+
                 byte_offset = attr["position"]["byte_offset"]
                 bit_offset = attr["position"]["bit_offset"]
                 length = attr["position"]["len"]
                 data_type = attr.get("data_type", "unknown")
 
+                # For bit-addressed types (bool/enum), bit_offset may be >= 8 when the
+                # model encodes all flags as a flat bit-stream from byte 0.  Resolve the
+                # real byte and the in-byte bit position before reading.
+                if data_type in ("bool", "enum"):
+                    actual_byte = byte_offset + bit_offset // 8
+                    actual_bit = bit_offset % 8
+                else:
+                    actual_byte = byte_offset
+                    actual_bit = bit_offset
+
+                # Bounds check
+                if actual_byte >= len(payload_bytes):
+                    LOGGER.debug(
+                        "Skipping attribute '%s': byte %d exceeds payload length %d",
+                        attr.get("name", "?"), actual_byte, len(payload_bytes)
+                    )
+                    continue
+
+                value = None
+
                 # Extract value based on data type
                 if data_type == "bool":
                     value = bool(
-                        self._extract_bits(
-                            payload_bytes[byte_offset], bit_offset, length
-                        )
+                        self._extract_bits(payload_bytes[actual_byte], actual_bit, length)
                     )
                 elif data_type == "enum":
                     enum_values = attr.get("enum", [])
                     enum_index = self._extract_bits(
-                        payload_bytes[byte_offset], bit_offset, length
+                        payload_bytes[actual_byte], actual_bit, length
                     )
                     value = (
                         enum_values[enum_index]
@@ -439,9 +437,24 @@ class GizwitsApi:
                         else None
                     )
                 elif data_type == "uint8":
-                    value = payload_bytes[byte_offset]
+                    value = payload_bytes[actual_byte]
+                elif data_type == "uint16":
+                    if actual_byte + 1 < len(payload_bytes):
+                        value = (payload_bytes[actual_byte] << 8) | payload_bytes[actual_byte + 1]
+                    else:
+                        LOGGER.debug(
+                            "Skipping uint16 attribute '%s': not enough bytes at offset %d",
+                            attr.get("name", "?"), actual_byte
+                        )
+                        continue
                 elif data_type == "binary":
-                    value = payload_bytes[byte_offset : byte_offset + length].hex()
+                    value = payload_bytes[actual_byte : actual_byte + length].hex()
+                else:
+                    LOGGER.debug(
+                        "Skipping attribute '%s': unhandled data_type '%s'",
+                        attr.get("name", "?"), data_type
+                    )
+                    continue
 
                 status_data[attr["name"]] = value
         except Exception as e:

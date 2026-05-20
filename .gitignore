@@ -37,9 +37,13 @@ Thumbs.db
 *.log
 mode_debug_*.log
 
+# Credentials
+.env
+
 # Temporary files
 *.tmp
 *.bak
 
 # Scripts output
 scripts/__pycache__/
+/.kilocode/package-lock.json

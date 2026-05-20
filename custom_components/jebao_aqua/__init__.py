@@ -185,12 +185,35 @@ class GizwitsDataUpdateCoordinator(DataUpdateCoordinator):
                     LOGGER.debug(
                         f"Getting local data for device {device_id} at {device_info['lan_ip']}"
                     )
-                    data = await self.api.get_local_device_data(
+                    local_data = await self.api.get_local_device_data(
                         device_info["lan_ip"], product_key, device_id
                     )
-                    
-                    # If local fails, fall back to cloud
-                    if not data or not is_device_data_valid(data):
+
+                    if local_data and is_device_data_valid(local_data):
+                        # Also fetch cloud data to pick up fields that only exist there
+                        # (e.g. CHxSWTime schedule blobs, calibration history, timer config).
+                        # The local LAN payload only encodes instantaneous run state (is the
+                        # pump/channel actively running right now?).  Timer-enabled flags and
+                        # other configuration attributes reported by the cloud are authoritative
+                        # for their configured values; we must NOT let a local "False" (meaning
+                        # "not running right now") overwrite a cloud "True" (meaning "enabled").
+                        # Only override cloud with local for genuine live-state keys: the main
+                        # power switch and the per-channel running status (channe*).
+                        cloud_data = await self.api.get_device_data(device_id)
+                        if cloud_data and is_device_data_valid(cloud_data):
+                            LIVE_STATE_PREFIXES = ("switch", "channe", "SwitchON")
+                            live_overrides = {
+                                k: v for k, v in local_data["attr"].items()
+                                if any(k == p or k.startswith(p) for p in LIVE_STATE_PREFIXES)
+                            }
+                            merged_attrs = {**cloud_data["attr"], **live_overrides}
+                            data = {**cloud_data, "attr": merged_attrs}
+                            LOGGER.debug(
+                                f"Merged local+cloud for {device_id}: live overrides={list(live_overrides.keys())}"
+                            )
+                        else:
+                            data = local_data
+                    else:
                         LOGGER.warning(
                             f"Local data failed for {device_id}, falling back to cloud API"
                         )
