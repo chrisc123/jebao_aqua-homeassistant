@@ -15,17 +15,18 @@ _Note: I'm not a developer. This code was almost entirely written by ChatGPT bas
 
 | Device Model            | Compatibility  |
 |-------------------------|----------------|
+| Jebao MDP Series DC Return Pump | ✅ Tested and working |
+| Jebao DMP Series Wavemaker | ✅ Tested and working |
+| Jebao DLW Series Wavemaker | ✅ Tested and working |
 | Jebao MCP Series Crossflow Wavemaker | ✅ Tested and working |
-| Jebao MCP Series Crossflow Wavemaker | ✅ Tested and working |
-| Jebao MLW Series Wavemaker      | ✅ Tested and working |
-| Jebao SLW Series Wavemaker      | ⚠️ Added but not confirmed working |
-| Jebao EP Series Pump | ⚠️ Added but not confirmed working  |
+| Jebao MLW Series Wavemaker | ✅ Tested and working |
+| Jebao SLW Series Wavemaker | ⚠️ Added but not confirmed working |
+| Jebao EP Series Pump | ⚠️ Added but not confirmed working |
 | Jebao Smart Doser 3.1 | ✅ Added by @jeffcybulski |
 | Jebao MD 4.4 Dosing Pump | ✅ Added by @jeffcybulski |
 | Jebao MD 2.4 Dosing Pump | ✅ Added by @joluan01 |
-| Any WiFi+Bluetooth enabled Jebao device | ❌ Not working but under investigation | 
-| Other Jeabo Pumps | Not tested |
-
+| Any WiFi+Bluetooth enabled Jebao device | ✅ Supported via Local TCP / Cloud API |
+| Other Jebao Pumps | Not tested |
 
 ## Background
 * The pump control unit houses an Espressif ESP8266 microcontroller, this is running a version of the [Gizwits GAgent](https://docs.gizwits.com/en-us/DeviceDev/GAgent.html#Features) code.
