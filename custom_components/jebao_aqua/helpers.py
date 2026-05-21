@@ -3,8 +3,8 @@
 import json
 from pathlib import Path
 from homeassistant.core import HomeAssistant
+from homeassistant.util import slugify
 from .const import DOMAIN, LOGGER
-
 
 def get_device_info(device):
     """Return standardized device information dictionary."""
@@ -20,10 +20,7 @@ def get_device_info(device):
 
     if lan_ip:
         info["connections"] = {("ip", lan_ip)}
-
-    LOGGER.debug(f"Device info for {device_name}: {info}")
     return info
-
 
 async def load_attribute_models(hass: HomeAssistant) -> dict:
     """Load attribute models asynchronously."""
@@ -31,13 +28,19 @@ async def load_attribute_models(hass: HomeAssistant) -> dict:
     attribute_models = {}
 
     def _load_model(file_path):
-        """Load a single model file."""
-        with open(file_path, "r") as file:
+        """Load a single model file with UTF-8 support."""
+        with open(file_path, "r", encoding="utf-8") as file:
             model = json.load(file)
             return model["product_key"], model
 
-    # Load all model files in executor
-    for model_file in models_path.glob("*.json"):
+    def _get_model_files():
+        """Retrieve files securely outside the event loop."""
+        return list(models_path.glob("*.json"))
+
+    # 🔧 修復 Blocking Call: 把它包裝在安全執行緒中執行
+    model_files = await hass.async_add_executor_job(_get_model_files)
+
+    for model_file in model_files:
         try:
             product_key, model = await hass.async_add_executor_job(
                 _load_model, model_file
@@ -48,41 +51,28 @@ async def load_attribute_models(hass: HomeAssistant) -> dict:
 
     return attribute_models
 
-
 def create_entity_name(device_name: str, attr_name: str) -> str:
-    """Create standardized entity name."""
-    # Only return the attribute name since we're using has_entity_name = True
     return attr_name
 
-
 def create_entity_id(platform: str, device_name: str, attr_name: str) -> str:
-    """Create standardized entity ID."""
-    device_name_underscore = device_name.replace(" ", "_").lower()
-    attr_name_underscore = attr_name.replace(" ", "_").lower()
-    return f"{platform}.{device_name_underscore}_{attr_name_underscore}"
-
+    """使用 slugify 安全處理中文命名"""
+    return f"{platform}.{slugify(device_name)}_{slugify(attr_name)}"
 
 def create_unique_id(device_id: str, attr_name: str) -> str:
-    """Create standardized unique ID."""
-    return f"{device_id}_{attr_name.replace(' ', '_').lower()}"
-
+    return f"{device_id}_{slugify(attr_name)}"
 
 def is_device_data_valid(device_data: dict) -> bool:
-    """Check if device data is valid."""
-    LOGGER.debug(f"Checking device data validity: {device_data}")  # Add debug logging
     if not device_data:
         return False
     if not isinstance(device_data, dict):
         return False
     if "attr" not in device_data:
         return False
-    if not device_data.get("attr"):  # Add check for empty attr dict
+    if not device_data.get("attr"):  
         return False
     return True
 
-
 def get_attribute_value(device_data: dict, attribute: str):
-    """Safely get attribute value from device data."""
     if not is_device_data_valid(device_data):
         return None
     return device_data.get("attr", {}).get(attribute)
