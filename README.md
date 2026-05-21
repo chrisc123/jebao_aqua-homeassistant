@@ -63,7 +63,7 @@ This integration fully supports **HACS (Home Assistant Community Store)** custom
 4. Select **"Custom repositories"**.
 5. Paste the official repository URL into the **Repository** field:
    ```text
-   [https://github.com/chrisc123/jebao_aqua-homeassistant](https://github.com/chrisc123/jebao_aqua-homeassistant)
+   [https://github.com/chrisc123/jebao_aqua-homeassistant]
 
 ### Manual Installation
 
