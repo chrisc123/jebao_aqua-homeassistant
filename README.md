@@ -53,6 +53,18 @@ TODO:
 
 ## Installation
 
+## 📦 Installation via HACS (Recommended)
+
+This integration fully supports **HACS (Home Assistant Community Store)** custom repository installation with persistent model storage. Your custom hardware configurations inside the `models/` folder will remain completely intact even after updating the integration.
+
+1. Open **HACS** from your Home Assistant sidebar.
+2. Navigate to **"Integrations"**.
+3. Click the **three dots** icon in the top right corner.
+4. Select **"Custom repositories"**.
+5. Paste the official repository URL into the **Repository** field:
+   ```text
+   [https://github.com/chrisc123/jebao_aqua-homeassistant](https://github.com/chrisc123/jebao_aqua-homeassistant)
+
 ### Manual Installation
 
 1. The pumps must already be setup with the Jebao Aqua app and connected to a Wi-Fi network that is routable from your Home Assistant installation.
