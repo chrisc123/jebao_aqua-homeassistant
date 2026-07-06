@@ -35,8 +35,13 @@ async def load_attribute_models(hass: HomeAssistant) -> dict:
             model = json.load(file)
             return model["product_key"], model
 
+    def _get_model_files():
+        """Get list of model files."""
+        return list(models_path.glob("*.json"))
+
     # Load all model files in executor
-    for model_file in models_path.glob("*.json"):
+    model_files = await hass.async_add_executor_job(_get_model_files)
+    for model_file in model_files:
         try:
             product_key, model = await hass.async_add_executor_job(
                 _load_model, model_file

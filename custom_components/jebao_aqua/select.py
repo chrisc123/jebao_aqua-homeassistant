@@ -3,8 +3,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, LOGGER
 from .helpers import (
     get_device_info,
-    create_entity_name,
-    create_entity_id,
     create_unique_id,
     is_device_data_valid,
     get_attribute_value,
@@ -19,12 +17,10 @@ class JebaoPumpSelect(CoordinatorEntity, SelectEntity):
         self._device = device
         self._attribute = attribute
         device_id = device.get("did")
-        device_name = device.get("dev_alias") or device.get("did")
 
         # Use helper functions for consistent entity properties
-        self._attr_name = create_entity_name(device_name, attribute["display_name"])
+        self._attr_name = attribute["display_name"]
         self._attr_unique_id = create_unique_id(device_id, attribute["name"])
-        self.entity_id = create_entity_id("select", device_name, attribute["name"])
 
         # Mapping the enum values to their descriptions
         self._option_mapping = dict(zip(attribute["desc"], attribute["enum"]))
@@ -92,7 +88,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
     selects = []
     for device in coordinator.device_inventory:
-        LOGGER.debug("Device structure: %s", device)
         product_key = device.get("product_key")
         model = attribute_models.get(product_key)
 

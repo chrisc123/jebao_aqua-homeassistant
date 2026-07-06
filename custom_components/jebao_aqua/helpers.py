@@ -10,7 +10,6 @@ def get_device_info(device):
     """Return standardized device information dictionary."""
     device_name = device.get("dev_alias") or f"Device {device['did']}"
     lan_ip = device.get("lan_ip")
-    product_key = device.get("product_key", "")
 
     info = {
         "identifiers": {(DOMAIN, device["did"])},
@@ -21,7 +20,6 @@ def get_device_info(device):
     if lan_ip:
         info["connections"] = {("ip", lan_ip)}
 
-    LOGGER.debug(f"Device info for {device_name}: {info}")
     return info
 
 
@@ -36,8 +34,13 @@ async def load_attribute_models(hass: HomeAssistant) -> dict:
             model = json.load(file)
             return model["product_key"], model
 
+    def _get_model_files():
+        """Get list of model files."""
+        return list(models_path.glob("*.json"))
+
     # Load all model files in executor
-    for model_file in models_path.glob("*.json"):
+    model_files = await hass.async_add_executor_job(_get_model_files)
+    for model_file in model_files:
         try:
             product_key, model = await hass.async_add_executor_job(
                 _load_model, model_file
@@ -49,19 +52,6 @@ async def load_attribute_models(hass: HomeAssistant) -> dict:
     return attribute_models
 
 
-def create_entity_name(device_name: str, attr_name: str) -> str:
-    """Create standardized entity name."""
-    # Only return the attribute name since we're using has_entity_name = True
-    return attr_name
-
-
-def create_entity_id(platform: str, device_name: str, attr_name: str) -> str:
-    """Create standardized entity ID."""
-    device_name_underscore = device_name.replace(" ", "_").lower()
-    attr_name_underscore = attr_name.replace(" ", "_").lower()
-    return f"{platform}.{device_name_underscore}_{attr_name_underscore}"
-
-
 def create_unique_id(device_id: str, attr_name: str) -> str:
     """Create standardized unique ID."""
     return f"{device_id}_{attr_name.replace(' ', '_').lower()}"
@@ -69,14 +59,13 @@ def create_unique_id(device_id: str, attr_name: str) -> str:
 
 def is_device_data_valid(device_data: dict) -> bool:
     """Check if device data is valid."""
-    LOGGER.debug(f"Checking device data validity: {device_data}")  # Add debug logging
     if not device_data:
         return False
     if not isinstance(device_data, dict):
         return False
     if "attr" not in device_data:
         return False
-    if not device_data.get("attr"):  # Add check for empty attr dict
+    if not device_data.get("attr"):
         return False
     return True
 

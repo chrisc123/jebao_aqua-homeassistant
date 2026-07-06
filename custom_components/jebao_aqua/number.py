@@ -3,11 +3,9 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, LOGGER
 from .helpers import (
     get_device_info,
-    create_entity_name,
-    create_entity_id,
     create_unique_id,
-    is_device_data_valid,  # Add this import
-    get_attribute_value,  # Add this import
+    is_device_data_valid,
+    get_attribute_value,
 )
 
 
@@ -19,12 +17,10 @@ class JebaoPumpNumber(CoordinatorEntity, NumberEntity):
         self._device = device
         self._attribute = attribute
         device_id = device.get("did")
-        device_name = device.get("dev_alias") or device.get("did")
 
         # Use helper functions for consistent entity properties
-        self._attr_name = create_entity_name(device_name, attribute["display_name"])
+        self._attr_name = attribute["display_name"]
         self._attr_unique_id = create_unique_id(device_id, attribute["name"])
-        self.entity_id = create_entity_id("number", device_name, attribute["name"])
 
         # Set native min, max, step, and unit from the attribute's specification
         self._attr_native_min_value = attribute["uint_spec"]["min"]
@@ -83,7 +79,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
     numbers = []
     for device in coordinator.device_inventory:
-        LOGGER.debug("Device structure: %s", device)
         product_key = device.get("product_key")
         model = attribute_models.get(product_key)
 

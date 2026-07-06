@@ -73,13 +73,9 @@ class GizwitsApi:
                 self.login_url, json=data, headers=headers, timeout=TIMEOUT
             ) as response:
                 response_text = await response.text()
-                LOGGER.debug("Login response status: %s", response.status)
-                LOGGER.debug("Login response headers: %s", response.headers)
-                LOGGER.debug("Login response body: %s", response_text)
 
                 try:
                     json_response = json.loads(response_text)
-                    LOGGER.debug("Parsed JSON response: %s", json_response)
 
                     # Check for error codes first
                     if json_response.get("error", False):
@@ -91,7 +87,6 @@ class GizwitsApi:
                     # If no error, process the token
                     if json_response and isinstance(json_response, dict):
                         data = json_response.get("data", {})
-                        LOGGER.debug("Data field content: %s", data)
 
                         if isinstance(data, dict):
                             token = data.get("userToken")
@@ -135,13 +130,11 @@ class GizwitsApi:
             "X-Gizwits-Application-Id": GIZWITS_APP_ID,
             "Accept": "application/json",
         }
-        LOGGER.debug("Trying to get devices - Headers are: %s", headers)
         try:
             async with self._session.get(
                 self.devices_url, headers=headers, timeout=TIMEOUT
             ) as response:
                 result = await response.text()
-                LOGGER.debug("Response from Gizwits API: %s", result)
                 if response.status == 200:
                     return json.loads(result)
                 else:
@@ -156,7 +149,6 @@ class GizwitsApi:
     async def get_device_data(self, device_id: str):
         """Get the latest attribute status values from a device."""
         url = self.device_data_url.format(device_id=device_id)
-        LOGGER.debug("Trying to get device data from URL: %s", url)
         headers = {
             "X-Gizwits-User-token": self._token,
             "X-Gizwits-Application-Id": GIZWITS_APP_ID,
@@ -167,7 +159,6 @@ class GizwitsApi:
                 url, headers=headers, timeout=TIMEOUT
             ) as response:
                 result = await response.text()
-                LOGGER.debug("Response from Gizwits API - Device Data: %s", result)
                 if response.status == 200:
                     return json.loads(result)
                 else:
@@ -190,12 +181,6 @@ class GizwitsApi:
             "Accept": "application/json",
         }
         data = {"attrs": attributes}
-        LOGGER.debug(
-            "Sending control command to Gizwits API - URL: %s, Data: %s, Headers: %s",
-            url,
-            data,
-            headers,
-        )
 
         # Create a new session for the control command
         async with aiohttp.ClientSession() as session:
@@ -204,10 +189,6 @@ class GizwitsApi:
                     url, json=data, headers=headers, timeout=TIMEOUT
                 ) as response:
                     result = await response.text()
-                    LOGGER.debug(
-                        "Response from Gizwits API to Control Command - Device Data: %s",
-                        result,
-                    )
                     if response.status == 200:
                         return json.loads(result)
                     else:
@@ -232,11 +213,6 @@ class GizwitsApi:
                 product_key,
             )
             return None
-        LOGGER.debug(
-            "Attempting to get local device data - IP: %s, Device ID: %s",
-            device_ip,
-            device_id,
-        )
 
         try:
             # Establish a connection with the local device
