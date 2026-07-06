@@ -11,6 +11,7 @@ from .const import (
     LAN_PORT,
     GIZWITS_API_URLS,
     DEFAULT_REGION,
+    CONTENT_TYPE_JSON,
 )
 
 GIZWITS_ERROR_CODES = {
@@ -44,10 +45,6 @@ class GizwitsApi:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self._session.__aexit__(exc_type, exc_val, exc_tb)
 
-    async def get_session(self):
-        """Create and return a new aiohttp ClientSession."""
-        return aiohttp.ClientSession()
-
     async def async_login(self, email: str, password: str) -> Tuple[str, str]:
         """Login to Gizwits and return the token and any error code.
 
@@ -66,7 +63,7 @@ class GizwitsApi:
         }
         headers = {
             "X-Gizwits-Application-Id": GIZWITS_APP_ID,
-            "Content-Type": "application/json",
+            "Content-Type": CONTENT_TYPE_JSON,
         }
         try:
             async with self._session.post(
@@ -152,7 +149,7 @@ class GizwitsApi:
         headers = {
             "X-Gizwits-User-token": self._token,
             "X-Gizwits-Application-Id": GIZWITS_APP_ID,
-            "Accept": "application/json",
+            "Accept": CONTENT_TYPE_JSON,
         }
         try:
             async with self._session.get(
@@ -177,31 +174,29 @@ class GizwitsApi:
         headers = {
             "X-Gizwits-User-token": self._token,
             "X-Gizwits-Application-Id": GIZWITS_APP_ID,
-            "Content-Type": "application/json",
-            "Accept": "application/json",
+            "Content-Type": CONTENT_TYPE_JSON,
+            "Accept": CONTENT_TYPE_JSON,
         }
         data = {"attrs": attributes}
 
-        # Create a new session for the control command
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.post(
-                    url, json=data, headers=headers, timeout=TIMEOUT
-                ) as response:
-                    result = await response.text()
-                    if response.status == 200:
-                        return json.loads(result)
-                    else:
-                        LOGGER.error(
-                            "Failed to send control command to Gizwits API: %s",
-                            response.status,
-                        )
-                        return None
-            except Exception as e:
-                LOGGER.error(
-                    "Exception while sending control command to Gizwits API: %s", e
-                )
-                return None
+        try:
+            async with self._session.post(
+                url, json=data, headers=headers, timeout=TIMEOUT
+            ) as response:
+                result = await response.text()
+                if response.status == 200:
+                    return json.loads(result)
+                else:
+                    LOGGER.error(
+                        "Failed to send control command to Gizwits API: %s",
+                        response.status,
+                    )
+                    return None
+        except Exception as e:
+            LOGGER.error(
+                "Exception while sending control command to Gizwits API: %s", e
+            )
+            return None
 
     async def get_local_device_data(self, device_ip, product_key, device_id):
         """Poll the local device for its status."""
@@ -302,7 +297,7 @@ class GizwitsApi:
 
             # Start evaluating bytes after the pattern for LEB128 encoded length
             leb128_bytes = response[start_index + len(pattern) :]
-            length, leb128_length = self._decode_leb128(leb128_bytes)
+            length, _ = self._decode_leb128(leb128_bytes)
             if length is None:
                 LOGGER.error(
                     "Failed to decode LEB128 encoded payload length from device response"

@@ -1,6 +1,7 @@
 """Constants for the Jebao Aqua Pump integration."""
 
 DOMAIN = "jebao_aqua"
+
 # Logger
 import logging
 
@@ -8,6 +9,13 @@ LOGGER = logging.getLogger(__package__)
 
 # API constants
 GIZWITS_APP_ID = "c3703c4888ec4736a3a0d9425c321604"  # This is used by the Android app, iOS may use a different one?
+CONTENT_TYPE_JSON = "application/json"
+
+# Timeouts and intervals
+TIMEOUT = 10
+DISCOVERY_TIMEOUT = 5  # seconds
+CONTROL_COMMAND_DELAY = 3  # seconds to wait after control command before refresh
+LAN_PORT = 12416
 
 # Gizwits API URLs by Region
 GIZWITS_API_URLS = {
@@ -30,11 +38,6 @@ GIZWITS_API_URLS = {
         "CONTROL_URL": "https://api.gizwits.com/app/control/{device_id}",
     },
 }
-
-TIMEOUT = 10
-DISCOVERY_TIMEOUT = 5  # seconds
-
-LAN_PORT = 12416
 
 # Update interval
 from datetime import timedelta

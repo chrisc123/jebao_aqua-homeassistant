@@ -112,8 +112,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                                 device["lan_ip"] = None
                             return await self.async_step_device_setup()
 
-                        except Exception as e:
-                            _LOGGER.error(f"Error during discovery: {e}")
+                        except Exception:
+                            _LOGGER.exception("Error during discovery")
                             errors["base"] = "discovery_failed"
 
                     else:
@@ -142,7 +142,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         country_schema = vol.Schema(
             {
                 vol.Required("country", default=default_country): vol.In(
-                    {code: name for code, name in self._country_choices}
+                    dict(self._country_choices)
                 ),
                 vol.Required("email"): str,
                 vol.Required("password"): str,
@@ -307,10 +307,18 @@ class JebaoPumpOptionsFlowHandler(config_entries.OptionsFlow):
                             self._device_index = 0
                             return await self.async_step_device_setup()
 
-                        except (asyncio.TimeoutError, Exception) as e:
-                            LOGGER.warning(
-                                f"Discovery failed, falling back to manual setup: {e}"
+                        except asyncio.TimeoutError:
+                            _LOGGER.warning(
+                                "Discovery timed out, falling back to manual setup"
                             )
+                            # Mark all devices for manual IP entry
+                            for device in self._devices["devices"]:
+                                device["lan_ip"] = None
+                            self._device_index = 0
+                            return await self.async_step_device_setup()
+                        
+                        except Exception:
+                            _LOGGER.exception("Discovery failed, falling back to manual setup")
                             # Mark all devices for manual IP entry
                             for device in self._devices["devices"]:
                                 device["lan_ip"] = None
@@ -331,7 +339,7 @@ class JebaoPumpOptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Required("country", default=stored_country): vol.In(
-                        {code: name for code, name in self._country_choices}
+                        dict(self._country_choices)
                     ),
                     vol.Required(
                         "email", default=self.config_entry.data.get("email", "")
@@ -403,8 +411,8 @@ class JebaoPumpOptionsFlowHandler(config_entries.OptionsFlow):
                             self.config_entry.entry_id
                         )
 
-                    except Exception as ex:
-                        _LOGGER.error(f"Error during entry reload: {ex}")
+                    except Exception:
+                        _LOGGER.exception("Error during entry reload")
                         errors["base"] = "reload_failed"
                         return self.async_show_form(
                             step_id="device_setup",
@@ -414,8 +422,8 @@ class JebaoPumpOptionsFlowHandler(config_entries.OptionsFlow):
 
                     return self.async_create_entry(title="", data={})
 
-            except Exception as ex:
-                _LOGGER.error(f"Error processing device IPs: {ex}")
+            except Exception:
+                _LOGGER.exception("Error processing device IPs")
                 errors["base"] = "unknown"
 
         # Create schema using aliases as field names

@@ -1,7 +1,8 @@
 {
   "name": "Jebao Aqua Integration",
-  "homeassistant": "2023.12.0",
+  "homeassistant": "2024.1.0",
   "country": "GB",
-  "homeassistant": "2023.12.0",
-  "persistent_directory": "models"
+  "persistent_directory": "models",
+  "render_readme": true,
+  "zip_release": true
 }
