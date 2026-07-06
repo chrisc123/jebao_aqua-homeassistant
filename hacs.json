@@ -3,6 +3,5 @@
   "homeassistant": "2024.1.0",
   "country": "GB",
   "persistent_directory": "models",
-  "render_readme": true,
-  "zip_release": true
+  "render_readme": true
 }
