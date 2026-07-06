@@ -1,11 +1,11 @@
+"""Jebao Aqua Aquarium Pump integration for Home Assistant."""
+
 import asyncio
 import json
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from homeassistant.config_entries import ConfigEntries  # Add this import
-import async_timeout
 from pathlib import Path
 from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 from homeassistant.helpers.device_registry import async_get as async_get_device_registry
@@ -13,15 +13,7 @@ from homeassistant.helpers.device_registry import async_get as async_get_device_
 from .const import DOMAIN, PLATFORMS, UPDATE_INTERVAL, LOGGER, GIZWITS_API_URLS
 from .api import GizwitsApi
 from .discovery import discover_devices
-from .helpers import is_device_data_valid  # Add this import
-
-PLATFORMS = ["switch", "binary_sensor", "select", "number"]
-
-
-async def async_setup(hass: HomeAssistant, config: dict):
-    """Set up the Jebao Pump component."""
-    hass.data[DOMAIN] = {}  # Initialize the DOMAIN space in hass.data
-    return True
+from .helpers import is_device_data_valid
 
 
 async def load_attribute_models(hass: HomeAssistant) -> dict:
@@ -35,8 +27,13 @@ async def load_attribute_models(hass: HomeAssistant) -> dict:
             model = json.load(file)
             return model["product_key"], model
 
+    def _get_model_files():
+        """Get list of model files."""
+        return list(models_path.glob("*.json"))
+
     # Load all model files in executor
-    for model_file in models_path.glob("*.json"):
+    model_files = await hass.async_add_executor_job(_get_model_files)
+    for model_file in model_files:
         try:
             product_key, model = await hass.async_add_executor_job(
                 _load_model, model_file

@@ -71,6 +71,6 @@ async def discover_devices():
         finally:
             transport.close()
 
-    except Exception as e:
-        _LOGGER.error(f"Error during device discovery: {e}")
+    except Exception:
+        _LOGGER.exception("Error during device discovery")
         return {}
