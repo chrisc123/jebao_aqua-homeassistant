@@ -39,7 +39,7 @@ LAN_PORT = 12416
 # Update interval
 from datetime import timedelta
 
-UPDATE_INTERVAL = timedelta(seconds=2)
+UPDATE_INTERVAL = timedelta(seconds=30)
 
 # Platform types
 PLATFORMS = ["switch", "sensor", "select", "number"]
