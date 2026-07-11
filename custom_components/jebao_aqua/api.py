@@ -137,7 +137,7 @@ class GizwitsApi:
         }
         LOGGER.debug("Trying to get devices - Headers are: %s", headers)
         try:
-            async with self._session.get(
+            async with aiohttp.ClientSession() as _s, _s.get(
                 self.devices_url, headers=headers, timeout=TIMEOUT
             ) as response:
                 result = await response.text()
@@ -163,7 +163,7 @@ class GizwitsApi:
             "Accept": "application/json",
         }
         try:
-            async with self._session.get(
+            async with aiohttp.ClientSession() as _s, _s.get(
                 url, headers=headers, timeout=TIMEOUT
             ) as response:
                 result = await response.text()
