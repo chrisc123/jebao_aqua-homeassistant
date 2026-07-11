@@ -161,7 +161,7 @@ class GizwitsDataUpdateCoordinator(DataUpdateCoordinator):
                 ),
                 None,
             )
-            if device_info and "lan_ip" in device_info:
+            if device_info and device_info.get("lan_ip"):
                 LOGGER.debug(
                     f"Getting local data for device {device_id} at {device_info['lan_ip']}"
                 )
