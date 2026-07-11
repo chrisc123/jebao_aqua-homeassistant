@@ -194,7 +194,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema[
                 vol.Optional(
                     alias,
-                    default=device.get("lan_ip", ""),
+                    default=device.get("lan_ip") or "",
                 )
             ] = str
 
@@ -425,7 +425,7 @@ class JebaoPumpOptionsFlowHandler(config_entries.OptionsFlow):
             data_schema[
                 vol.Optional(
                     alias,
-                    default=device.get("lan_ip", ""),
+                    default=device.get("lan_ip") or "",
                 )
             ] = str
 
