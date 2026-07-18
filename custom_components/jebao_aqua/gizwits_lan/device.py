@@ -28,6 +28,20 @@ def need_swapped_16bits(all_attrs) -> bool:
                 return True
     return False
 
+def bitgroup_bytes_at_zero(all_attrs) -> int:
+    """Width in bytes of the bit-packed group at byte_offset 0.
+
+    Devices serialize this group as a single big-endian integer (bit_offset
+    counted from the LSB), so bit 0 lives in the group's LAST byte. Most
+    devices use a 16-bit group; the 5/8-channel dosers use 21 bits (3 bytes).
+    """
+    max_end = 0
+    for a in all_attrs:
+        pos = a["position"]
+        if pos["byte_offset"] == 0 and pos["unit"] == "bit":
+            max_end = max(max_end, pos["bit_offset"] + pos["len"])
+    return (max_end + 7) // 8
+
 class Device:
     """
     Represents a Gizwits device accessible via LAN protocol.
@@ -62,8 +76,11 @@ class Device:
         self._pending_requests = {}
         self.current_status = None 
 
-        self.max_status_len = self._compute_status_len_from_all()
         self.swapped_16 = need_swapped_16bits(self.all_attrs)
+        # Big-endian group width; keep the historical 2-byte minimum so
+        # behavior is unchanged for all existing 16-bit devices.
+        self.bitgroup_bytes = max(2, bitgroup_bytes_at_zero(self.all_attrs))
+        self.max_status_len = self._compute_status_len_from_all()
 
         self.last_pong = 0.0 # We want to try and keep our connection alive with Ping/Pongs so that we recieve status updates.
         self.ping_interval = 4 # 10 Seconds seems to be the maximum interval - anything longer and the device will close the connection.
@@ -111,6 +128,10 @@ class Device:
             length_bits = pos["len"]
             if pos["unit"] == "byte":
                 end = bo + length_bits
+            elif bo == 0:
+                # Bit attrs at byte 0 belong to the packed group, which can
+                # span multiple bytes (e.g. 21 bits -> 3 bytes).
+                end = (pos["bit_offset"] + length_bits + 7) // 8
             else:
                 end = bo + 1
             if end > max_len:
@@ -293,8 +314,10 @@ class Device:
             end = bo + pos["len"] if pos["unit"] == "byte" else bo + 1
             if end > max_offset:
                 max_offset = end
-        if max_offset < 2 and any(a["position"]["byte_offset"] == 0 for a in self.writable_attrs):
-            max_offset = 2
+        if any(a["position"]["byte_offset"] == 0 for a in self.writable_attrs):
+            # Reserve the full width of the bit group at byte 0 (2 bytes for
+            # classic devices, 3+ for dosers with >16 packed bits).
+            max_offset = max(max_offset, self.bitgroup_bytes)
         attr_values = bytearray(max_offset)
 
         name_map = {a["name"]: a for a in self.writable_attrs}
@@ -334,7 +357,8 @@ class Device:
                 val_int = int(user_value)
             if unit == "bit":
                 if (bo == 0 and self.swapped_16):
-                    set_swapped_bits(attr_values, bit_off, length_bits, val_int)
+                    set_swapped_bits(attr_values, bit_off, length_bits, val_int,
+                                     self.bitgroup_bytes)
                 elif bo == 0:
                     set_normal_bits_in_first_16(attr_values, bit_off, length_bits, val_int)
                 else:
@@ -555,11 +579,14 @@ class Device:
             return data[bo]
 
     def _get_swapped_bits(self, data: bytes, bit_off: int, length_bits: int) -> int:
-        if len(data) < 2:
+        # The group is a big-endian integer: bit 0 is the LSB of the LAST
+        # byte. bitgroup_bytes is 2 for classic devices, 3+ for the dosers.
+        n = self.bitgroup_bytes
+        if len(data) < n:
             return 0
-        av16 = (data[0] << 8) | data[1]
+        avn = int.from_bytes(data[:n], "big")
         mask = (1 << length_bits) - 1
-        return (av16 >> bit_off) & mask
+        return (avn >> bit_off) & mask
 
     def _get_normal_bits_16(self, data: bytes, bit_off: int, length_bits: int) -> int:
         if len(data) < 2:

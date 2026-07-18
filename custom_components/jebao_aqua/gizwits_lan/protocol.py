@@ -77,16 +77,19 @@ def parse_response_prefix(data: bytes) -> Tuple[bytes, bytes]:
 ##########################################################################
 # Functions for partial-update "set bits"
 ##########################################################################
-def set_swapped_bits(av: bytearray, bit_offset: int, length_bits: int, value: int):
+def set_swapped_bits(av: bytearray, bit_offset: int, length_bits: int, value: int,
+                     group_bytes: int = 2):
     """
-    "Swapped" approach for the first 2 bytes => av[0]=[15..8], av[1]=[7..0].
+    "Swapped" approach: the bit group at byte 0 is a big-endian integer of
+    group_bytes bytes, so bit 0 is the LSB of av[group_bytes-1]. The default
+    of 2 gives the classic av[0]=[15..8], av[1]=[7..0] layout; the 5/8-channel
+    dosers use a 3-byte (21-bit) group.
     """
-    av16 = (av[0] << 8) | av[1]
+    avn = int.from_bytes(av[:group_bytes], "big")
     mask = (1 << length_bits) - 1
-    av16 &= ~(mask << bit_offset)
-    av16 |= ((value & mask) << bit_offset)
-    av[0] = (av16 >> 8) & 0xFF
-    av[1] = av16 & 0xFF
+    avn &= ~(mask << bit_offset)
+    avn |= ((value & mask) << bit_offset)
+    av[0:group_bytes] = avn.to_bytes(group_bytes, "big")
 
 def set_normal_bits_in_first_16(av: bytearray, bit_offset: int, length_bits: int, value: int):
     """
