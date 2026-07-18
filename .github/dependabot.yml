@@ -1,0 +1,11 @@
+version: 2
+updates:
+  # Keep GitHub Actions (checkout, hassfest, HACS action) up to date.
+  # The integration itself has no Python requirements to track.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:
+        patterns: ["*"]
