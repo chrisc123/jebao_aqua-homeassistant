@@ -320,8 +320,18 @@ class JebaoDevice:
     def register_status_callback(
         self, callback: Callable[[DeviceStatus], None]
     ) -> None:
-        """Entity can register to be notified when device status changes."""
+        """Entity can register to be notified when device status changes.
+
+        The last known status is replayed immediately: LAN devices only push
+        on change, so an entity registering after the initial status fetch
+        would otherwise stay stateless until the device next changes.
+        """
         self._status_callbacks.add(callback)
+        if self.giz_device is not None and self.giz_device.current_status:
+            try:
+                callback(self.giz_device.current_status)
+            except Exception:
+                _LOGGER.exception("Error replaying status to new callback")
 
     def remove_status_callback(self, callback: Callable[[DeviceStatus], None]) -> None:
         """Entity unsubscribes from updates."""

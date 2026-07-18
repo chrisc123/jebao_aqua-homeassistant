@@ -76,11 +76,11 @@ class JebaoNumberEntity(JebaoEntity, NumberEntity):
         self._current_value: float | None = None
 
     @property
-    def value(self) -> float | None:
+    def native_value(self) -> float | None:
         """Return the current value."""
         return self._current_value
 
-    async def async_set_value(self, value: float) -> None:
+    async def async_set_native_value(self, value: float) -> None:
         """Set new value."""
         # Clamp within allowed range
         int_value = int(max(min(value, self.native_max_value), self.native_min_value))

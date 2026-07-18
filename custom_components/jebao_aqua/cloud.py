@@ -328,8 +328,18 @@ class JebaoCloudDevice:
     def register_status_callback(
         self, callback: Callable[[DeviceStatus], None]
     ) -> None:
-        """Entity subscribes to status updates."""
+        """Entity subscribes to status updates; replay the last known state.
+
+        Entities may register after the initial poll completed (entity
+        addition is scheduled as a task), so without a replay they would
+        show no state until the next poll interval.
+        """
         self._status_callbacks.add(callback)
+        if self._data:
+            try:
+                callback(DeviceStatus(data=dict(self._data)))
+            except Exception:
+                _LOGGER.exception("Error replaying status to new callback")
 
     def remove_status_callback(self, callback: Callable[[DeviceStatus], None]) -> None:
         """Entity unsubscribes from status updates."""
