@@ -182,8 +182,10 @@ class JebaoLightLevelSensor(JebaoEntity, SensorEntity):
         if self._attribute_name not in status.data:
             return
         device_value = status.data[self._attribute_name]
-        # Use HA's built-in value_to_brightness like we do in light.py
-        self._value = value_to_brightness(device_value, self._value_max)
+        # Convert the device's value range to 0-255, like light.py does
+        self._value = value_to_brightness(
+            (self._value_min, self._value_max), device_value
+        )
         self.async_write_ha_state()
 
 

@@ -9,8 +9,7 @@ from homeassistant.components.light import ColorMode, LightEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.util.color import value_to_brightness
-from homeassistant.util.percentage import percentage_to_ranged_value
+from homeassistant.util.color import brightness_to_value, value_to_brightness
 
 from .entity import JebaoEntity
 from .gizwits_lan.device_status import DeviceStatus
@@ -95,11 +94,9 @@ class JebaoLightEntity(JebaoEntity, LightEntity):
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the light on."""
         brightness = kwargs.get("brightness", 255)
-        # Convert HA brightness (0-255) to device value range using percentage_to_ranged_value
+        # Convert HA brightness (0-255) to the device's value range
         device_value = round(
-            percentage_to_ranged_value(
-                self._value_min, self._value_max, (brightness / 255) * 100
-            )
+            brightness_to_value((self._value_min, self._value_max), brightness)
         )
         await self._device.async_set_attribute(self._attribute_name, device_value)
 
@@ -123,6 +120,8 @@ class JebaoLightEntity(JebaoEntity, LightEntity):
         if self._attribute_name not in status.data:
             return
         device_value = status.data[self._attribute_name]
-        # Use HA's built-in value_to_brightness
-        self._brightness = value_to_brightness(device_value, self._value_max)
+        # Convert the device's value range to HA brightness (0-255)
+        self._brightness = value_to_brightness(
+            (self._value_min, self._value_max), device_value
+        )
         self.async_write_ha_state()
