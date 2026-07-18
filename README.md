@@ -48,6 +48,13 @@ You can switch between local and cloud mode at any time from the integration's *
 
 Pre-release versions are published as GitHub pre-releases and are **not** installed automatically. To try them in HACS: open the integration in HACS → ⋮ menu → **Redownload** → enable **Show beta versions** and pick the pre-release.
 
+## Removal
+
+1. Go to **Settings → Devices & Services**, open the **Jebao Aqua** integration, and delete it. This removes all its devices and entities, and deletes any stored data — including cloud login credentials if you used cloud mode.
+2. If installed via HACS, remove the repository from HACS to delete the integration files, then restart Home Assistant.
+
+The devices themselves are unaffected and continue to work with the Jebao Aqua app.
+
 ## Upgrading from v0.1.x
 
 v0.4.0 migrates old installs automatically: config entries, devices, entities, and their `entity_id`s are preserved, so automations and dashboards keep working. Installs that were running cloud-only (no LAN IPs configured) are migrated to the new cloud mode automatically. Cloud login credentials from v0.1.x are no longer used in local mode and are removed from storage during migration.

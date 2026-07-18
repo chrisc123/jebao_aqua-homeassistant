@@ -1,83 +1,117 @@
 rules:
   # Bronze
   action-setup:
-    status: done
-  appropriate-polling:
     status: exempt
-    comment: |
-      - Todo Development.
-  brands:
+    comment: The integration does not register any custom service actions.
+  appropriate-polling:
     status: done
+    comment: |
+      Local mode is push-based (no polling). Cloud mode polls the Gizwits API
+      at a fixed 30 second interval; the interval is not user-configurable.
+  brands:
+    status: todo
+    comment: Logo/branding not yet submitted to home-assistant/brands.
   common-modules:
     status: done
+    comment: |
+      Shared entity base class in entity.py; hub.py provides the shared
+      device/connection layer (push-based, so no DataUpdateCoordinator).
   config-flow:
     status: done
+    comment: |
+      UI config flow with local/cloud mode selection; input fields carry
+      data_description context in strings.json.
   config-flow-test-coverage:
-    status: exempt
-    comment: |
-      - Todo Development.
+    status: todo
+    comment: No test suite yet.
   dependency-transparency:
-    status: exempt
-    comment: |
-      - Todo Development.
-  docs-actions:
     status: done
+    comment: |
+      No external requirements. Note: the gizwits_lan protocol library is
+      currently vendored inside the integration; publishing it to PyPI and
+      listing it in requirements is planned (tracked as tech debt).
+  docs-actions:
+    status: exempt
+    comment: The integration does not register any custom service actions.
   docs-high-level-description:
-    status: exempt
-    comment: |
-      - Todo Development.
+    status: done
+    comment: README covers what the integration is and how it works.
   docs-installation-instructions:
-    status: exempt
-    comment: |
-      - Todo Development.
+    status: done
+    comment: README covers HACS and manual installation and both setup modes.
   docs-removal-instructions:
-    status: exempt
-    comment: |
-      - Todo Development.
+    status: done
+    comment: README includes a removal section.
   entity-event-setup:
-    status: exempt
+    status: done
     comment: |
-      - Todo Development.
+      Entities subscribe to device status/connection callbacks in
+      async_added_to_hass and unsubscribe symmetrically in
+      async_will_remove_from_hass.
   entity-unique-id:
     status: done
+    comment: Unique IDs are {device_uid}_{attribute}_{platform}.
   has-entity-name:
     status: done
   runtime-data:
-    status: exempt
-    comment: |
-      - Todo Development.
+    status: done
+    comment: Devices are stored in ConfigEntry.runtime_data.
   test-before-configure:
-    status: exempt
+    status: done
     comment: |
-      - Todo Development.
+      Local flows verify the device answers discovery before creating the
+      entry; the cloud flow validates credentials and device bindings.
   test-before-setup:
-    status: exempt
+    status: done
     comment: |
-      - Todo Development.
+      Setup raises ConfigEntryNotReady when no device can be prepared or
+      cloud login fails. Individual devices that are briefly offline are
+      kept and retried in the background.
   unique-config-entry:
     status: done
+    comment: |
+      Devices are deduplicated by UID across entries in both discovery and
+      manual flows; the cloud flow aborts if an entry already exists.
 
   # Silver
   action-exceptions: todo
-  config-entry-unloading: todo
+  config-entry-unloading:
+    status: done
+    comment: async_unload_entry unloads platforms and disconnects devices.
   docs-configuration-parameters: todo
   docs-installation-parameters: todo
-  entity-unavailable: todo
-  integration-owner: todo
+  entity-unavailable:
+    status: done
+    comment: Availability tracks device connection/poll state via callbacks.
+  integration-owner:
+    status: done
+    comment: codeowners set in manifest.json.
   log-when-unavailable: todo
   parallel-updates: todo
-  reauthentication-flow: todo
+  reauthentication-flow:
+    status: todo
+    comment: |
+      Cloud mode re-logs-in automatically when credentials are stored, but
+      there is no reauth flow for token-only (migrated) entries.
   test-coverage: todo
 
   # Gold
-  devices: todo
+  devices:
+    status: done
+    comment: Entities are grouped under devices with model/fw/MAC metadata.
   diagnostics: todo
-  discovery-update-info: todo
-  discovery: todo
+  discovery-update-info:
+    status: done
+    comment: Discovery refreshes stored IPs by device UID on every setup.
+  discovery:
+    status: done
+    comment: LAN broadcast discovery at setup and via the options flow.
   docs-data-update: todo
   docs-examples: todo
   docs-known-limitations: todo
-  docs-supported-devices: todo
+  docs-supported-devices:
+    status: done
+    comment: README compatibility table by device type.
   docs-supported-functions: todo
   docs-troubleshooting: todo
   docs-use-cases: todo
@@ -85,14 +119,22 @@ rules:
   entity-category: todo
   entity-device-class: todo
   entity-disabled-by-default: todo
-  entity-translations: todo
+  entity-translations:
+    status: done
+    comment: Entity names and enum states are translated via strings.json.
   exception-translations: todo
   icon-translations: todo
-  reconfiguration-flow: todo
+  reconfiguration-flow:
+    status: done
+    comment: Options flow supports mode switching and device rediscovery.
   repair-issues: todo
   stale-devices: todo
 
   # Platinum
-  async-dependency: todo
-  inject-websession: todo
+  async-dependency:
+    status: done
+    comment: All device I/O is asyncio-based.
+  inject-websession:
+    status: done
+    comment: Cloud mode uses Home Assistant's shared aiohttp session.
   strict-typing: todo

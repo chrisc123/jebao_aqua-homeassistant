@@ -26,6 +26,10 @@
         "data": {
           "ip": "Device IP Address",
           "name": "Name (optional)"
+        },
+        "data_description": {
+          "ip": "The device's IP address on your network, e.g. 192.168.1.50. Consider giving the device a DHCP reservation in your router.",
+          "name": "Optional friendly name for this device in Home Assistant."
         }
       },
       "user": {
@@ -43,6 +47,11 @@
           "region": "Account region",
           "email": "Email address",
           "password": "Password"
+        },
+        "data_description": {
+          "region": "The Gizwits region your Jebao account was created in. Most users in Europe/Africa should pick Europe; the Americas and Asia-Pacific mostly use the Americas region.",
+          "email": "The email address you use to sign in to the Jebao Aqua app.",
+          "password": "Your Jebao Aqua app password. It is stored so the integration can refresh its access token automatically."
         }
       }
     }
@@ -279,6 +288,10 @@
         "data": {
           "mode": "Control mode",
           "rediscover": "Rediscover devices"
+        },
+        "data_description": {
+          "mode": "Local control talks to the devices directly on your LAN with instant updates (recommended). Cloud control polls the Gizwits cloud service instead.",
+          "rediscover": "Scan the network again to find new devices and update stored IP addresses (local mode only)."
         }
       },
       "cloud": {
@@ -288,6 +301,11 @@
           "region": "Account region",
           "email": "Email address",
           "password": "Password"
+        },
+        "data_description": {
+          "region": "The Gizwits region your Jebao account was created in. Most users in Europe/Africa should pick Europe; the Americas and Asia-Pacific mostly use the Americas region.",
+          "email": "The email address you use to sign in to the Jebao Aqua app.",
+          "password": "Your Jebao Aqua app password. It is stored so the integration can refresh its access token automatically."
         }
       }
     },
