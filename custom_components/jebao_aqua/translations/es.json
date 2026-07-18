@@ -1,0 +1,323 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Este dispositivo ya está configurado.",
+      "auto_discovery_complete": "Descubrimiento automático completado; dispositivos añadidos.",
+      "device_added": "El nuevo dispositivo Jebao se añadió a tu configuración existente",
+      "devices_added": "Los nuevos dispositivos Jebao se añadieron a tu configuración existente",
+      "devices_already_configured": "Todos los dispositivos descubiertos ya están configurados."
+    },
+    "error": {
+      "cannot_connect": "No se pudo conectar con el dispositivo. Comprueba la IP e inténtalo de nuevo.",
+      "already_configured": "El dispositivo ya está configurado en tu sistema. Prueba con otra IP.",
+      "user_not_exist": "No existe ninguna cuenta con este correo en la región seleccionada.",
+      "invalid_password": "Contraseña incorrecta.",
+      "connection_error": "No se pudo contactar con el servicio en la nube de Gizwits. Comprueba tu conexión a internet.",
+      "unknown_error": "El servicio en la nube de Gizwits devolvió un error inesperado.",
+      "invalid_json": "El servicio en la nube de Gizwits devolvió una respuesta no válida.",
+      "invalid_response": "La respuesta del servicio Gizwits no incluía un token de acceso.",
+      "auth": "Error de inicio de sesión. Comprueba tu correo y contraseña.",
+      "no_devices": "No hay dispositivos vinculados a esta cuenta de Gizwits."
+    },
+    "step": {
+      "user": {
+        "title": "Configuración de dispositivos Jebao",
+        "description": "Elige cómo debe comunicarse Home Assistant con tus dispositivos Jebao. El control local (recomendado) se comunica directamente con las bombas en tu red con actualizaciones instantáneas. El control por nube consulta el servicio Gizwits y funciona cuando las bombas no son accesibles por LAN.",
+        "menu_options": {
+          "local": "Control local (LAN, recomendado)",
+          "cloud": "Control por nube (cuenta Gizwits)"
+        }
+      },
+      "cloud": {
+        "title": "Inicio de sesión en la nube Gizwits",
+        "description": "Inicia sesión con la cuenta que usas en la app Jebao Aqua. Tus dispositivos se importarán desde la nube y se consultarán cada 30 segundos.",
+        "data": {
+          "region": "Región de la cuenta",
+          "email": "Correo electrónico",
+          "password": "Contraseña"
+        },
+        "data_description": {
+          "region": "La región de Gizwits donde se creó tu cuenta Jebao. La mayoría de los usuarios de Europa/África deben elegir Europa; América y Asia-Pacífico usan principalmente la región de América.",
+          "email": "El correo electrónico con el que inicias sesión en la app Jebao Aqua.",
+          "password": "Tu contraseña de la app Jebao Aqua. Se guarda para que la integración pueda renovar automáticamente su token de acceso."
+        }
+      },
+      "manual": {
+        "title": "Configuración manual",
+        "description": "No se encontraron dispositivos automáticamente. Introduce la dirección IP de un dispositivo Jebao. Después podrás añadir más dispositivos desde la página de integraciones de HA.",
+        "data": {
+          "ip": "Dirección IP del dispositivo",
+          "name": "Nombre (opcional)"
+        },
+        "data_description": {
+          "ip": "La dirección IP del dispositivo en tu red, p. ej. 192.168.1.50. Considera asignarle una reserva DHCP en tu router.",
+          "name": "Nombre descriptivo opcional para este dispositivo en Home Assistant."
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opciones de Jebao Aqua",
+        "description": "Esta integración gestiona actualmente {device_count} dispositivo(s). Puedes cambiar entre control local y por nube, o redescubrir dispositivos para gestionar cambios de dirección IP (solo en modo local).",
+        "data": {
+          "mode": "Modo de control",
+          "rediscover": "Redescubrir dispositivos"
+        },
+        "data_description": {
+          "mode": "El control local se comunica directamente con los dispositivos en tu LAN con actualizaciones instantáneas (recomendado). El control por nube consulta el servicio Gizwits.",
+          "rediscover": "Vuelve a escanear la red para encontrar dispositivos nuevos y actualizar las direcciones IP guardadas (solo en modo local)."
+        }
+      },
+      "cloud": {
+        "title": "Inicio de sesión en la nube Gizwits",
+        "description": "Cambiar al control por nube requiere las credenciales de tu cuenta Gizwits (la cuenta usada en la app Jebao Aqua).",
+        "data": {
+          "region": "Región de la cuenta",
+          "email": "Correo electrónico",
+          "password": "Contraseña"
+        },
+        "data_description": {
+          "region": "La región de Gizwits donde se creó tu cuenta Jebao. La mayoría de los usuarios de Europa/África deben elegir Europa; América y Asia-Pacífico usan principalmente la región de América.",
+          "email": "El correo electrónico con el que inicias sesión en la app Jebao Aqua.",
+          "password": "Tu contraseña de la app Jebao Aqua. Se guarda para que la integración pueda renovar automáticamente su token de acceso."
+        }
+      }
+    },
+    "error": {
+      "user_not_exist": "No existe ninguna cuenta con este correo en la región seleccionada.",
+      "invalid_password": "Contraseña incorrecta.",
+      "connection_error": "No se pudo contactar con el servicio en la nube de Gizwits. Comprueba tu conexión a internet.",
+      "unknown_error": "El servicio en la nube de Gizwits devolvió un error inesperado.",
+      "invalid_json": "El servicio en la nube de Gizwits devolvió una respuesta no válida.",
+      "invalid_response": "La respuesta del servicio Gizwits no incluía un token de acceso.",
+      "auth": "Error de inicio de sesión. Comprueba tu correo y contraseña.",
+      "no_devices": "No hay dispositivos vinculados a esta cuenta de Gizwits."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "fault_fan": {
+        "name": "Fallo del ventilador"
+      },
+      "fault_lockedrotor": {
+        "name": "Motor bloqueado"
+      },
+      "fault_no_liveload": {
+        "name": "Sin carga"
+      },
+      "fault_overcurrent": {
+        "name": "Sobrecorriente del motor"
+      },
+      "fault_overtemp": {
+        "name": "Sobretemperatura"
+      },
+      "fault_overvoltage": {
+        "name": "Sobretensión del motor"
+      },
+      "fault_uart": {
+        "name": "Error de comunicación"
+      },
+      "fault_undervoltage": {
+        "name": "Subtensión del motor"
+      },
+      "opencircuit": {
+        "name": "Circuito abierto"
+      },
+      "overcurrent": {
+        "name": "Sobrecorriente"
+      },
+      "overtemp": {
+        "name": "Sobretemperatura"
+      }
+    },
+    "light": {
+      "color_blue1": {
+        "name": "Azul 1"
+      },
+      "color_blue2": {
+        "name": "Azul 2"
+      },
+      "color_green": {
+        "name": "Verde"
+      },
+      "color_red": {
+        "name": "Rojo"
+      },
+      "color_white": {
+        "name": "Blanco"
+      },
+      "volor_violet": {
+        "name": "Violeta"
+      }
+    },
+    "number": {
+      "autoflow": {
+        "name": "Flujo programado"
+      },
+      "autofreq": {
+        "name": "Frecuencia programada"
+      },
+      "feedtime": {
+        "name": "Duración de alimentación"
+      },
+      "flow": {
+        "name": "Caudal"
+      },
+      "frequency": {
+        "name": "Frecuencia"
+      },
+      "intervalt1": {
+        "name": "Intervalo T1"
+      },
+      "intervalt2": {
+        "name": "Intervalo T2"
+      },
+      "intervalt3": {
+        "name": "Intervalo T3"
+      },
+      "intervalt4": {
+        "name": "Intervalo T4"
+      },
+      "motorspeed": {
+        "name": "Velocidad del motor"
+      },
+      "nightflow": {
+        "name": "Flujo nocturno"
+      }
+    },
+    "select": {
+      "automode": {
+        "state": {
+          "停机": "Apagado",
+          "喂食": "Alimentación",
+          "恒流造浪": "Flujo constante",
+          "正弦造浪": "Onda sinusoidal",
+          "经典造浪": "Onda cuadrada",
+          "随机造浪": "Onda aleatoria",
+          "自动": "Automático"
+        }
+      },
+      "calset": {
+        "state": {
+          "校准1": "Calibración 1",
+          "校准2": "Calibración 2",
+          "校准3": "Calibración 3",
+          "校准4": "Calibración 4",
+          "校准5": "Calibración 5",
+          "校准6": "Calibración 6",
+          "校准7": "Calibración 7",
+          "校准8": "Calibración 8"
+        }
+      },
+      "linkage": {
+        "state": {
+          "主机": "Principal",
+          "从机": "Secundario",
+          "独立": "Independiente"
+        }
+      },
+      "mode": {
+        "state": {
+          "夜晚": "Noche",
+          "定时": "Programado",
+          "恒流造浪": "Flujo constante",
+          "手动": "Manual",
+          "日出": "Amanecer",
+          "日落": "Atardecer",
+          "早晨": "Mañana",
+          "正弦造浪": "Onda sinusoidal",
+          "白天": "Día",
+          "经典造浪": "Onda cuadrada",
+          "随机造浪": "Onda aleatoria"
+        }
+      }
+    },
+    "sensor": {
+      "color_blue1": {
+        "name": "Azul 1"
+      },
+      "color_blue2": {
+        "name": "Azul 2"
+      },
+      "color_green": {
+        "name": "Verde"
+      },
+      "color_red": {
+        "name": "Rojo"
+      },
+      "color_white": {
+        "name": "Blanco"
+      },
+      "volor_violet": {
+        "name": "Violeta"
+      }
+    },
+    "switch": {
+      "asyc": {
+        "name": "Control asíncrono"
+      },
+      "calsw": {
+        "name": "Modo de calibración"
+      },
+      "channe1": {
+        "name": "Canal 1"
+      },
+      "channe2": {
+        "name": "Canal 2"
+      },
+      "channe3": {
+        "name": "Canal 3"
+      },
+      "channe4": {
+        "name": "Canal 4"
+      },
+      "channe5": {
+        "name": "Canal 5"
+      },
+      "feedswitch": {
+        "name": "Alimentación"
+      },
+      "feedtimer": {
+        "name": "Temporizador de alimentación"
+      },
+      "master": {
+        "name": "Control maestro"
+      },
+      "mode": {
+        "name": "Modo automático"
+      },
+      "pulsetide": {
+        "name": "Pulso"
+      },
+      "switch": {
+        "name": "Interruptor principal"
+      },
+      "switchon": {
+        "name": "Encendido"
+      },
+      "timer": {
+        "name": "Temporizador"
+      },
+      "timer1on": {
+        "name": "Temporizador 1"
+      },
+      "timer2on": {
+        "name": "Temporizador 2"
+      },
+      "timer3on": {
+        "name": "Temporizador 3"
+      },
+      "timer4on": {
+        "name": "Temporizador 4"
+      },
+      "timer5on": {
+        "name": "Temporizador 5"
+      },
+      "timeron": {
+        "name": "Programador"
+      }
+    }
+  }
+}
