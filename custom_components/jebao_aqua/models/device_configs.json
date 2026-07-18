@@ -161,6 +161,33 @@
         "binary_sensor": ["OpenCircuit", "Fault_UART"]
       }
     },
+    "1aa33c38ba9d4b78a9e7796705b2fad7": {
+      "device_type": "doser",
+      "platforms": {
+        "switch": [
+          "switch",
+          "channe1",
+          "channe2",
+          "channe3",
+          "channe4",
+          "Timer1ON",
+          "Timer2ON",
+          "Timer3ON",
+          "Timer4ON",
+          "CALSW"
+        ],
+        "number": [
+          "IntervalT1",
+          "IntervalT2",
+          "IntervalT3",
+          "IntervalT4",
+          "Calib1",
+          "channelTTL"
+        ],
+        "select": ["CALSet"],
+        "binary_sensor": ["OpenCircuit", "Fault_UART"]
+      }
+    },
     "5ab6019f2dbb4ae7a42b48d2b8ce0530": {
       "device_type": "doser",
       "platforms": {
