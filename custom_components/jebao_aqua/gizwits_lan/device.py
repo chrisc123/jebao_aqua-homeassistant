@@ -470,22 +470,22 @@ class Device:
             # Check if this is a response we're waiting for
             fut = self._pending_requests.pop((cmd_int, None), None)
             if fut:
-                logger.info("Expected status update cmd=0x91 or 0x93 from %s, payload=%s", self.ip, payload.hex())
+                logger.debug("Expected status update cmd=0x91 or 0x93 from %s, payload=%s", self.ip, payload.hex())
                 fut.set_result(payload)
                 return
                 
             # If not a response we're waiting for, treat as unsolicited
-            logger.info("Unsolicited status update cmd=0x91 or 0x93 from %s, payload=%s", self.ip, payload.hex())
+            logger.debug("Unsolicited status update cmd=0x91 or 0x93 from %s, payload=%s", self.ip, payload.hex())
             needed = self.max_status_len
             if len(payload) < needed:
-                logger.warning("Status update payload len=%d < %d, too short, ignoring", len(payload), needed)
+                logger.debug("Status update payload len=%d < %d, too short, ignoring", len(payload), needed)
                 return
             status_data = payload[-self.max_status_len:]
             logger.debug("Raw status bytes: %s", ' '.join(f'{b:02x}' for b in status_data))
             parsed_dict = self._unpack_status_data(status_data)
             # We should really validate the status data is sane first - use the datapoint model to verify 
             self.current_status = DeviceStatus(parsed_dict)
-            logger.info("Device status updated => %s", self.current_status)
+            logger.debug("Device status updated => %s", self.current_status)
             for callback in self._status_callbacks:
                 try:
                     callback(self.current_status)
@@ -503,12 +503,12 @@ class Device:
             if fut:
                 fut.set_result(payload[(-self.max_status_len)-1:]) # Ugh. So the newer firmware ESP32C3 devices prefix their 0x94 responses with UID. This handles both old and new firmware by working backwards as status bytes are last for both device types.
             else:
-                logger.info("Unsolicited cmd=0x94 with seq=%s not found in pending", seq_echo.hex())
+                logger.debug("Unsolicited cmd=0x94 with seq=%s not found in pending", seq_echo.hex())
             return
         
         # If we get here, it's some other (possibly extra) command
         # we haven't specifically handled:
-        logger.info("Unexpected cmd=0x%02x from %s, len=%d, payload=%s", 
+        logger.debug("Unexpected cmd=0x%02x from %s, len=%d, payload=%s", 
                     cmd_int, self.ip, len(payload), payload.hex())
 
     async def _send_command_no_seq(self, cmd_send: int, cmd_recv: int, payload: bytes, timeout: float) -> bytes:

@@ -23,7 +23,14 @@ Both hardware generations are supported:
 > [!CAUTION]
 > **Dosing pump support is community-contributed and not tested by the maintainer** (I don't own a doser). The model definitions, protocol handling for these devices, and the dosing schedule sensors are based on pull requests and protocol captures from users who do ([#54](https://github.com/chrisc123/jebao_aqua-homeassistant/pull/54), [#49](https://github.com/chrisc123/jebao_aqua-homeassistant/pull/49)). Exercise caution: verify switches and schedules do what you expect before relying on them — a misbehaving doser can harm livestock. Feedback and issue reports from doser owners are very welcome.
 
-If your device isn't recognised ("Device definition not found"), please open an issue with your device model — adding support is usually just a matter of adding its product definition file.
+### Adding support for a new device
+
+If your device isn't recognised (log shows `Device definition not found`), support can usually be added quickly — the device's *product key* (a 32-character hex string) is all that's needed, since the full device definition can be fetched from the Gizwits API using it. Please [open an issue](https://github.com/chrisc123/jebao_aqua-homeassistant/issues) including the product key and your device's model name.
+
+**Where to find the product key:**
+
+- **In the error itself** — the `Device definition not found: .../models/<product_key>.json` log message contains it.
+- **In the discovery log** — enable debug logging for `custom_components.jebao_aqua` (Settings → Devices & Services → Jebao Aqua → Enable debug logging), reload the integration, and look for lines like `Found device: ip=... mac=... uid=... product_key=...`.
 
 ## Features
 
