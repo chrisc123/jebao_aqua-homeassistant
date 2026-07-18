@@ -128,7 +128,11 @@ rules:
     status: done
     comment: Options flow supports mode switching and device rediscovery.
   repair-issues: todo
-  stale-devices: todo
+  stale-devices:
+    status: done
+    comment: |
+      async_remove_config_entry_device lets users delete stale devices from
+      the UI; the device is stripped from the config entry.
 
   # Platinum
   async-dependency:
