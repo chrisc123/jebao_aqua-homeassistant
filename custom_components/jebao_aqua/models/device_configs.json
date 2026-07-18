@@ -155,9 +155,17 @@
           "Timer1ON",
           "Timer2ON",
           "Timer3ON",
-          "Timer4ON"
+          "Timer4ON",
+          "CALSW"
         ],
-        "number": ["IntervalT1", "IntervalT2", "IntervalT3", "IntervalT4"],
+        "number": [
+          "IntervalT1",
+          "IntervalT2",
+          "IntervalT3",
+          "IntervalT4",
+          "Calib1"
+        ],
+        "select": ["CALSet"],
         "binary_sensor": ["OpenCircuit", "Fault_UART"]
       }
     },

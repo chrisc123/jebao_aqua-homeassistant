@@ -427,3 +427,41 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.runtime_data = None
 
     return unload_ok
+
+
+async def async_remove_config_entry_device(
+    hass: HomeAssistant, entry: ConfigEntry, device_entry: dr.DeviceEntry
+) -> bool:
+    """Allow removing a device from the UI.
+
+    Strips the device from the config entry so stale/ghost devices (e.g. a
+    pump that was replaced or re-added under a new identity) stop being
+    retried forever. The entry is reloaded so the connection is torn down.
+    """
+    uids = {
+        ident for domain, ident in device_entry.identifiers if domain == DOMAIN
+    }
+    if not uids:
+        return False
+
+    remaining = [
+        dev
+        for dev in entry.data.get("devices", [])
+        if dev.get("uid") not in uids
+    ]
+    if len(remaining) == len(entry.data.get("devices", [])):
+        # Not in the config entry (already stale); just let HA remove it.
+        return True
+
+    _LOGGER.info("Removed device %s from configuration", ", ".join(uids))
+    if not remaining:
+        # Last device removed; a reload would just fail ConfigEntryNotReady,
+        # so remove the whole entry instead.
+        hass.async_create_task(hass.config_entries.async_remove(entry.entry_id))
+        return True
+
+    hass.config_entries.async_update_entry(
+        entry, data={**entry.data, "devices": remaining}
+    )
+    hass.async_create_task(hass.config_entries.async_reload(entry.entry_id))
+    return True
