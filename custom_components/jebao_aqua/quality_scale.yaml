@@ -9,8 +9,8 @@ rules:
       Local mode is push-based (no polling). Cloud mode polls the Gizwits API
       at a fixed 30 second interval; the interval is not user-configurable.
   brands:
-    status: todo
-    comment: Logo/branding not yet submitted to home-assistant/brands.
+    status: done
+    comment: Branding is published at brands.home-assistant.io/jebao_aqua.
   common-modules:
     status: done
     comment: |
