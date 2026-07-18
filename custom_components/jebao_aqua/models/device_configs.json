@@ -54,7 +54,8 @@
     "returnpump_default": {
       "device_type": "returnpump",
       "platforms": {
-        "switch": ["SwitchON", "FeedSwitch", "TimerON"],
+        "switch": ["SwitchON", "FeedSwitch", "TimerON", "Mode"],
+        "select": ["AutoMode"],
         "number": ["Motor_Speed", "FeedTime"],
         "binary_sensor": [
           "Fault_Overcurrent",
