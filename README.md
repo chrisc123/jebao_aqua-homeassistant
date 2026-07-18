@@ -79,6 +79,21 @@ Once installed and configured, the integration allows you to:
 - Adjust flow, frequency settings, mode. 
 - Monitor status and any fault indicators.
 
+## Unsupported device? Provide the product key
+
+If your device shows up but gets no entities (or you see `Invalid product key or missing attribute model` in the logs), support can usually be added quickly — all that's needed is the device's **product key**, a 32-character hex string that identifies the model. The full device definition can then be fetched from the Gizwits API using that key.
+
+To find it:
+
+1. Enable debug logging for the integration — either via **Settings → Devices & Services → Jebao Aqua → Enable debug logging**, or by adding to `configuration.yaml`:
+   ```yaml
+   logger:
+     logs:
+       custom_components.jebao_aqua: debug
+   ```
+2. Reload the integration and check the Home Assistant logs for your device — the product key appears in the device list output (look for `"product_key": "..."` next to your device's name) and in any `Invalid product key or missing attribute model for product key: ...` error.
+3. [Open an issue](https://github.com/chrisc123/jebao_aqua-homeassistant/issues) including the product key and your device's model name.
+
 ## Troubleshooting
 
 If you encounter issues, enable Debug logging, and check the Home Assistant logs. You can also raise an issue in this repository.
