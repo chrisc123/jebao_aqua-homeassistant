@@ -44,10 +44,13 @@ class JebaoEntity(Entity):
         # Use product key as model if available
         model = device.product_key or "Unknown Model"
 
-        # Create a stable device name that doesn't change with IP
-        # Use UID suffix or MAC suffix for human-readable identification
+        # Prefer the configured name (migrated cloud alias or manual entry);
+        # otherwise create a stable name that doesn't change with IP, using a
+        # UID suffix or MAC suffix for human-readable identification
         device_name = "Jebao Device"
-        if device.uid:
+        if device.name:
+            device_name = device.name
+        elif device.uid:
             # Use last 6 characters of UID for identification
             uid_suffix = device.uid[-6:] if len(device.uid) >= 6 else device.uid
             device_name = f"Jebao Device {uid_suffix}"

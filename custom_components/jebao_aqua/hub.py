@@ -138,58 +138,161 @@ async def get_device_config_for_product_key(product_key: str) -> dict:
     return {}
 
 
+async def async_load_product_attrs(hass: HomeAssistant, product_key: str) -> list[dict]:
+    """Load the full attribute list for a product key from its model JSON.
+
+    Raises FileNotFoundError if no definition exists for the product key.
+    """
+    manager = await get_manager(hass)
+    return await manager._load_device_definition(product_key)
+
+
 class JebaoDevice:
     """Wraps a single Gizwits Device."""
+
+    REDISCOVERY_INTERVAL = 60.0
 
     def __init__(
         self,
         hass: HomeAssistant,
         ip: str,
         product_key: str,
-        uid: str | None = None,  # Add uid parameter
+        uid: str | None = None,
         mac: str | None = None,
         firmware_version: str | None = None,
+        name: str | None = None,
     ) -> None:
         """Initialize the JebaoDevice wrapper."""
         self.hass = hass
         self.ip = ip
         self.product_key = product_key
-        self.uid = uid  # Store the UID
+        self.uid = uid
         self.mac = mac
         self.firmware_version = firmware_version
+        self.name = name
+        # Channel number -> user-assigned name (only known via the cloud;
+        # populated in cloud mode, empty for LAN-only setups).
+        self.channel_names: dict[int, str] = {}
         self.device_config: dict = {}
         self.giz_device = None
         self._status_callbacks: set[Callable[[DeviceStatus], None]] = set()
         self._connection_callbacks: set[Callable[[bool], None]] = set()
+        self._ip_changed_callback: Callable[[str, str], None] | None = None
+        self._rediscovery_task: asyncio.Task | None = None
+
+    def set_ip_changed_callback(self, callback: Callable[[str, str], None]) -> None:
+        """Register a callback(uid, new_ip) invoked when rediscovery finds a new IP."""
+        self._ip_changed_callback = callback
 
     async def async_connect(self) -> None:
-        """Connect to the device via gizwits_lan, subscribe to updates."""
+        """Connect to the device via gizwits_lan, subscribe to updates.
+
+        A failed initial connection is not fatal: the underlying connection
+        manager keeps retrying in the background and a rediscovery loop is
+        started to find the device again if its IP changed (e.g. new DHCP
+        lease). Raises FileNotFoundError if there is no model definition for
+        this product key - that cannot be fixed by retrying.
+        """
         manager = await get_manager(self.hass)
-        self.device_config = await get_device_config_for_product_key(
-            self.product_key
-        )  # Add await here
+        self.device_config = await get_device_config_for_product_key(self.product_key)
+
+        # May raise FileNotFoundError when no definition exists - let that
+        # propagate, the caller has to skip this device.
+        self.giz_device = await manager.create_device(
+            ip=self.ip, product_key=self.product_key, port=12416
+        )
+        self.giz_device.add_connection_callback(self._handle_connection_state)
+        self.giz_device.add_status_callback(self._handle_status_update)
 
         try:
-            self.giz_device = await manager.create_device(
-                ip=self.ip, product_key=self.product_key, port=12416
-            )
-            # Register callbacks
-            self.giz_device.add_connection_callback(self._handle_connection_state)
-            self.giz_device.add_status_callback(self._handle_status_update)
             await self.giz_device.connect()
-        except GizwitsError as err:
-            _LOGGER.error("Failed to connect to device at %s: %s", self.ip, err)
-            raise
+        except (GizwitsError, TimeoutError, OSError) as err:
+            # The connection manager was already started by connect() and
+            # retries with backoff; the retries only target the stored IP, so
+            # also start rediscovery in case the device moved.
+            _LOGGER.warning(
+                "Initial connection to device at %s failed (%s); retrying in "
+                "the background",
+                self.ip,
+                err,
+            )
+            self._start_rediscovery()
+            return
 
         _LOGGER.info("Jebao device connected: %s", self)
 
     async def async_disconnect(self) -> None:
         """Disconnect from device."""
         if self.giz_device:
+            # Remove our callbacks first so the disconnect notification does
+            # not restart the rediscovery loop.
+            self.giz_device.remove_connection_callback(self._handle_connection_state)
             self.giz_device.remove_status_callback(self._handle_status_update)
             await self.giz_device.disconnect()
             self.giz_device = None
             _LOGGER.info("Disconnected from Jebao device at %s", self.ip)
+        self._stop_rediscovery()
+
+    def _start_rediscovery(self) -> None:
+        """Start the background rediscovery loop if it isn't running."""
+        if not self.uid:
+            _LOGGER.debug(
+                "Cannot rediscover device at %s without a UID", self.ip
+            )
+            return
+        if self._rediscovery_task is None or self._rediscovery_task.done():
+            self._rediscovery_task = self.hass.async_create_background_task(
+                self._async_rediscovery_loop(),
+                name=f"jebao_aqua_rediscovery_{self.uid}",
+            )
+
+    def _stop_rediscovery(self) -> None:
+        """Cancel the rediscovery loop if it is running."""
+        if self._rediscovery_task is not None and not self._rediscovery_task.done():
+            self._rediscovery_task.cancel()
+        self._rediscovery_task = None
+
+    async def _async_rediscovery_loop(self) -> None:
+        """While disconnected, periodically look for the device on the network.
+
+        Handles the device's IP changing (DHCP lease renewal on the router):
+        broadcast discovery is matched on the device UID and, if the IP moved,
+        the connection manager is pointed at the new address.
+        """
+        try:
+            while True:
+                await asyncio.sleep(self.REDISCOVERY_INTERVAL)
+                if self.available:
+                    return
+                try:
+                    found = await async_discover_devices(self.hass, timeout=5.0)
+                except Exception as exc:
+                    _LOGGER.debug("Rediscovery attempt failed: %s", exc)
+                    continue
+                for dev in found:
+                    if dev.get("uid") != self.uid:
+                        continue
+                    if dev["ip"] != self.ip:
+                        _LOGGER.info(
+                            "Device %s found at new IP %s (was %s); reconnecting",
+                            self.uid,
+                            dev["ip"],
+                            self.ip,
+                        )
+                        self.ip = dev["ip"]
+                        if self.giz_device:
+                            self.giz_device.ip = dev["ip"]
+                        if self._ip_changed_callback:
+                            self._ip_changed_callback(self.uid, dev["ip"])
+                    else:
+                        _LOGGER.debug(
+                            "Device %s still at %s; waiting for reconnect",
+                            self.uid,
+                            self.ip,
+                        )
+                    break
+        except asyncio.CancelledError:
+            raise
 
     def _handle_status_update(self, status: DeviceStatus) -> None:
         """Internal callback from giz_device when status changes. Notify all entity listeners."""
@@ -202,6 +305,12 @@ class JebaoDevice:
 
     def _handle_connection_state(self, connected: bool) -> None:
         """Handle connection state changes from gizwits device."""
+        if connected:
+            self._stop_rediscovery()
+        else:
+            # Lost connection: the connection manager retries the current IP;
+            # rediscovery handles the case where the IP itself changed.
+            self._start_rediscovery()
         for callback in self._connection_callbacks:
             try:
                 callback(connected)
