@@ -26,3 +26,7 @@ venv/
 # Operating System
 .DS_Store
 Thumbs.db
+
+# Claude Code session tooling
+.claude/
+skills-lock.json
