@@ -9,19 +9,40 @@
     },
     "error": {
       "cannot_connect": "Failed to connect to the device. Please check IP and try again.",
-      "already_configured": "Device is already configured in your system. Please try a different IP."
+      "already_configured": "Device is already configured in your system. Please try a different IP.",
+      "user_not_exist": "No account exists with this email address in the selected region.",
+      "invalid_password": "Incorrect password.",
+      "connection_error": "Could not reach the Gizwits cloud service. Check your internet connection.",
+      "unknown_error": "The Gizwits cloud service returned an unexpected error.",
+      "invalid_json": "The Gizwits cloud service returned an invalid response.",
+      "invalid_response": "The Gizwits cloud service response did not include a login token.",
+      "auth": "Login failed. Check your email address and password.",
+      "no_devices": "No devices are bound to this Gizwits account."
     },
     "step": {
-      "introduction": {
-        "title": "Jebao Device Setup",
-        "description": "The integration will attempt to automatically discover Jebao devices on your network. If no devices are found, you'll be able to configure one manually by providing an IP address."
-      },
       "manual": {
         "title": "Manual Configuration",
         "description": "No devices were found automatically. Enter the IP address of a Jebao device. Additional devices can then be added from the integration page in HA.",
         "data": {
           "ip": "Device IP Address",
           "name": "Name (optional)"
+        }
+      },
+      "user": {
+        "title": "Jebao Device Setup",
+        "description": "Choose how Home Assistant should communicate with your Jebao devices. Local control (recommended) talks to the pumps directly on your network with instant push updates. Cloud control polls the Gizwits cloud service and works when the pumps are not reachable over the LAN.",
+        "menu_options": {
+          "local": "Local control (LAN, recommended)",
+          "cloud": "Cloud control (Gizwits account)"
+        }
+      },
+      "cloud": {
+        "title": "Gizwits Cloud Login",
+        "description": "Sign in with the account you use in the Jebao Aqua app. Your devices will be imported from the cloud and polled every 30 seconds.",
+        "data": {
+          "region": "Account region",
+          "email": "Email address",
+          "password": "Password"
         }
       }
     }
@@ -78,6 +99,18 @@
       },
       "timer4on": {
         "name": "Timer 4"
+      },
+      "mode": {
+        "name": "Auto Mode"
+      },
+      "channe5": {
+        "name": "Channel 5"
+      },
+      "timer5on": {
+        "name": "Timer 5"
+      },
+      "calsw": {
+        "name": "Calibration Mode"
       }
     },
     "binary_sensor": {
@@ -145,7 +178,8 @@
           "正弦造浪": "Sine Wave",
           "随机造浪": "Random Wave",
           "恒流造浪": "Constant Flow",
-          "喂食": "Feeding"
+          "喂食": "Feeding",
+          "自动": "Auto"
         }
       },
       "calset": {
@@ -235,6 +269,37 @@
       "volor_violet": {
         "name": "Violet"
       }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Jebao Aqua Options",
+        "description": "This integration currently manages {device_count} device(s). You can switch between local and cloud control, or rediscover devices to handle IP address changes (local mode only).",
+        "data": {
+          "mode": "Control mode",
+          "rediscover": "Rediscover devices"
+        }
+      },
+      "cloud": {
+        "title": "Gizwits Cloud Login",
+        "description": "Switching to cloud control requires your Gizwits account credentials (the account used in the Jebao Aqua app).",
+        "data": {
+          "region": "Account region",
+          "email": "Email address",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "user_not_exist": "No account exists with this email address in the selected region.",
+      "invalid_password": "Incorrect password.",
+      "connection_error": "Could not reach the Gizwits cloud service. Check your internet connection.",
+      "unknown_error": "The Gizwits cloud service returned an unexpected error.",
+      "invalid_json": "The Gizwits cloud service returned an invalid response.",
+      "invalid_response": "The Gizwits cloud service response did not include a login token.",
+      "auth": "Login failed. Check your email address and password.",
+      "no_devices": "No devices are bound to this Gizwits account."
     }
   }
 }

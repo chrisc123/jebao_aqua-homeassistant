@@ -13,7 +13,14 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.device_registry import format_mac
 
 from . import hub
-from .const import DOMAIN
+from .cloud import GizwitsCloudApi, did_to_uid
+from .const import (
+    CONF_MODE,
+    DEFAULT_REGION,
+    DOMAIN,
+    MODE_CLOUD,
+    MODE_LOCAL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,6 +30,25 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Optional("name", default=""): str,
     }
 )
+
+REGION_OPTIONS = {
+    "eu": "Europe",
+    "us": "Americas / Asia-Pacific",
+    "cn": "China",
+}
+
+
+def _cloud_schema(
+    region: str = DEFAULT_REGION, email: str = ""
+) -> vol.Schema:
+    """Schema for the cloud credentials step."""
+    return vol.Schema(
+        {
+            vol.Required("region", default=region): vol.In(REGION_OPTIONS),
+            vol.Required("email", default=email): str,
+            vol.Required("password"): str,
+        }
+    )
 
 
 @dataclass
@@ -39,7 +65,7 @@ class DeviceCandidate:
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Jebao Aqua integration."""
 
-    VERSION = 1
+    VERSION = 2
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_PUSH
 
     def __init__(self) -> None:
@@ -49,17 +75,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Handle the initial step."""
-        return self.async_show_form(step_id="introduction")
+        """Let the user pick between local (LAN) and cloud control."""
+        return self.async_show_menu(step_id="user", menu_options=["local", "cloud"])
 
-    async def async_step_introduction(
+    async def async_step_local(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Handle the introduction step."""
-        if user_input is None:
-            return self.async_show_form(step_id="introduction")
-
-        # Do discovery
+        """Set up local (LAN push) mode: discover devices on the network."""
         discovered = await hub.async_discover_devices(self.hass, timeout=5.0)
 
         # Get existing entries
@@ -95,22 +117,79 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if new_devices:
             if existing_entry:
-                # Add new devices to existing entry
+                # Add new devices to existing entry. Build a new list: mutating
+                # the nested list in place makes async_update_entry see no
+                # change and skip persisting it.
                 new_data = dict(existing_entry.data)
-                new_data["devices"].extend(new_devices)
+                new_data["devices"] = [
+                    *existing_entry.data.get("devices", []),
+                    *new_devices,
+                ]
                 self.hass.config_entries.async_update_entry(existing_entry, data=new_data)
                 return self.async_abort(reason="devices_added")
             else:
                 # Create new entry with discovered devices
                 return self.async_create_entry(
                     title="Jebao Devices",
-                    data={"devices": new_devices},
+                    data={CONF_MODE: MODE_LOCAL, "devices": new_devices},
                 )
 
         # If no new devices found, show manual entry form
         return self.async_show_form(
             step_id="manual",
             data_schema=STEP_USER_DATA_SCHEMA,
+        )
+
+    async def async_step_cloud(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Set up cloud mode: log in to Gizwits and import bound devices."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            if self.hass.config_entries.async_entries(DOMAIN):
+                return self.async_abort(reason="already_configured")
+
+            api = GizwitsCloudApi(self.hass, user_input["region"])
+            token, err = await api.async_login(
+                user_input["email"], user_input["password"]
+            )
+            if not token:
+                errors["base"] = err or "auth"
+            else:
+                response = await api.async_get_devices()
+                cloud_devices = (response or {}).get("devices", [])
+                if not cloud_devices:
+                    errors["base"] = "no_devices"
+                else:
+                    devices = [
+                        {
+                            "uid": did_to_uid(dev["did"]),
+                            "product_key": dev.get("product_key", ""),
+                            "name": dev.get("dev_alias"),
+                            "ip": None,
+                            "mac": None,
+                            "firmware_version": None,
+                        }
+                        for dev in cloud_devices
+                        if dev.get("did")
+                    ]
+                    return self.async_create_entry(
+                        title="Jebao Devices (Cloud)",
+                        data={
+                            CONF_MODE: MODE_CLOUD,
+                            "region": user_input["region"],
+                            "email": user_input["email"],
+                            "password": user_input["password"],
+                            "token": token,
+                            "devices": devices,
+                        },
+                    )
+
+        return self.async_show_form(
+            step_id="cloud",
+            data_schema=_cloud_schema(),
+            errors=errors,
         )
 
     async def async_step_manual(
@@ -149,19 +228,26 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             "uid": device_uid,
                             "mac": mac,
                             "firmware_version": dev.get("firmware_version"),
+                            "name": friendly_name or None,
                         }
 
                         if existing_entry:
-                            # Add to existing entry
+                            # Add to existing entry (new list, see note above)
                             new_data = dict(existing_entry.data)
-                            new_data["devices"].append(new_device)
+                            new_data["devices"] = [
+                                *existing_entry.data.get("devices", []),
+                                new_device,
+                            ]
                             self.hass.config_entries.async_update_entry(existing_entry, data=new_data)
                             return self.async_abort(reason="device_added")
                         else:
                             # Create new entry
                             return self.async_create_entry(
                                 title=friendly_name or "Jebao Devices",
-                                data={"devices": [new_device]},
+                                data={
+                                    CONF_MODE: MODE_LOCAL,
+                                    "devices": [new_device],
+                                },
                             )
 
             except Exception:
@@ -177,33 +263,97 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     def async_get_options_flow(config_entry: config_entries.ConfigEntry) -> OptionsFlowHandler:
         """Return the options flow."""
-        return OptionsFlowHandler(config_entry)
+        return OptionsFlowHandler()
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle options flow for Jebao Aqua integration."""
+    """Handle options flow for Jebao Aqua integration.
 
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize options flow."""
-        self.config_entry = config_entry
+    self.config_entry is provided by the OptionsFlow base class; assigning it
+    explicitly has been rejected by Home Assistant since 2025.12.
+    """
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Manage the options."""
+        current_mode = self.config_entry.data.get(CONF_MODE, MODE_LOCAL)
+
         if user_input is not None:
-            if user_input.get("rediscover"):
+            new_mode = user_input.get(CONF_MODE, current_mode)
+            if new_mode != current_mode:
+                if new_mode == MODE_CLOUD:
+                    # Cloud mode needs credentials before we can switch.
+                    return await self.async_step_cloud()
+                # Switch to local: devices reconnect over LAN by UID via
+                # discovery on reload. Cloud credentials are kept so the user
+                # can switch back without re-entering them.
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry,
+                    data={**self.config_entry.data, CONF_MODE: MODE_LOCAL},
+                )
+                await self.hass.config_entries.async_reload(
+                    self.config_entry.entry_id
+                )
+                return self.async_create_entry(title="", data={})
+            if user_input.get("rediscover") and current_mode == MODE_LOCAL:
                 return await self.async_step_rediscover()
             return self.async_create_entry(title="", data={})
 
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema({
+                vol.Required(CONF_MODE, default=current_mode): vol.In(
+                    {
+                        MODE_LOCAL: "Local (LAN, recommended)",
+                        MODE_CLOUD: "Cloud (Gizwits API)",
+                    }
+                ),
                 vol.Optional("rediscover", default=False): bool,
             }),
             description_placeholders={
                 "device_count": str(len(self.config_entry.data.get("devices", []))),
             },
+        )
+
+    async def async_step_cloud(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Collect cloud credentials when switching an entry to cloud mode."""
+        errors: dict[str, str] = {}
+        data = self.config_entry.data
+
+        if user_input is not None:
+            api = GizwitsCloudApi(self.hass, user_input["region"])
+            token, err = await api.async_login(
+                user_input["email"], user_input["password"]
+            )
+            if not token:
+                errors["base"] = err or "auth"
+            else:
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry,
+                    data={
+                        **data,
+                        CONF_MODE: MODE_CLOUD,
+                        "region": user_input["region"],
+                        "email": user_input["email"],
+                        "password": user_input["password"],
+                        "token": token,
+                    },
+                )
+                await self.hass.config_entries.async_reload(
+                    self.config_entry.entry_id
+                )
+                return self.async_create_entry(title="", data={})
+
+        return self.async_show_form(
+            step_id="cloud",
+            data_schema=_cloud_schema(
+                region=data.get("region", DEFAULT_REGION),
+                email=data.get("email") or "",
+            ),
+            errors=errors,
         )
 
     async def async_step_rediscover(
@@ -242,9 +392,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "mac": mac,
                 "firmware_version": dev.get("firmware_version"),
             }
-            
+
             if uid in existing_devices:
-                # Update existing device
+                # Update existing device, keeping fields discovery doesn't
+                # know about (e.g. the configured name)
+                if existing_devices[uid].get("name"):
+                    device_data["name"] = existing_devices[uid]["name"]
                 updated_devices.append(device_data)
             else:
                 # New device found

@@ -1,251 +1,305 @@
 {
-    "config": {
-        "abort": {
-            "already_configured": "This device is already configured.",
-            "auto_discovery_complete": "Auto-discovery complete; devices added.",
-            "device_added": "New Jebao device was added to your existing configuration",
-            "devices_added": "New Jebao devices were added to your existing configuration",
-            "devices_already_configured": "All discovered devices are already configured."
-        },
-        "error": {
-            "cannot_connect": "Failed to connect to the device. Please check IP and try again.",
-            "already_configured": "Device is already configured in your system. Please try a different IP."
-        },
-        "step": {
-            "introduction": {
-                "description": "The integration will attempt to automatically discover Jebao devices on your network. If no devices are found, you'll be able to configure one manually by providing an IP address.",
-                "title": "Jebao Device Setup"
-            },
-            "manual": {
-                "data": {
-                    "ip": "Device IP Address",
-                    "name": "Name (optional)"
-                },
-                "description": "No devices were found automatically. Enter the IP address of a Jebao device. Additional devices can then be added from the integration page in HA.",
-                "title": "Manual Configuration"
-            }
-        }
+  "config": {
+    "abort": {
+      "already_configured": "This device is already configured.",
+      "auto_discovery_complete": "Auto-discovery complete; devices added.",
+      "device_added": "New Jebao device was added to your existing configuration",
+      "devices_added": "New Jebao devices were added to your existing configuration",
+      "devices_already_configured": "All discovered devices are already configured."
     },
-    "options": {
-        "step": {
-            "init": {
-                "data": {
-                    "rediscover": "Rediscover devices"
-                },
-                "description": "This integration currently manages {device_count} device(s). You can rediscover devices to handle IP address changes.",
-                "title": "Jebao Aqua Options"
-            }
-        }
+    "error": {
+      "cannot_connect": "Failed to connect to the device. Please check IP and try again.",
+      "already_configured": "Device is already configured in your system. Please try a different IP.",
+      "user_not_exist": "No account exists with this email address in the selected region.",
+      "invalid_password": "Incorrect password.",
+      "connection_error": "Could not reach the Gizwits cloud service. Check your internet connection.",
+      "unknown_error": "The Gizwits cloud service returned an unexpected error.",
+      "invalid_json": "The Gizwits cloud service returned an invalid response.",
+      "invalid_response": "The Gizwits cloud service response did not include a login token.",
+      "auth": "Login failed. Check your email address and password.",
+      "no_devices": "No devices are bound to this Gizwits account."
     },
-    "entity": {
-        "binary_sensor": {
-            "fault_fan": {
-                "name": "Fan Fault"
-            },
-            "fault_lockedrotor": {
-                "name": "Motor Stall"
-            },
-            "fault_no_liveload": {
-                "name": "No Load"
-            },
-            "fault_overcurrent": {
-                "name": "Motor Overcurrent"
-            },
-            "fault_overtemp": {
-                "name": "Over Temperature"
-            },
-            "fault_overvoltage": {
-                "name": "Motor Overvoltage"
-            },
-            "fault_uart": {
-                "name": "Communication Error"
-            },
-            "fault_undervoltage": {
-                "name": "Motor Undervoltage"
-            },
-            "opencircuit": {
-                "name": "Open Circuit"
-            },
-            "overcurrent": {
-                "name": "Over Current"
-            },
-            "overtemp": {
-                "name": "Over Temperature"
-            }
+    "step": {
+      "manual": {
+        "data": {
+          "ip": "Device IP Address",
+          "name": "Name (optional)"
         },
-        "light": {
-            "color_blue1": {
-                "name": "Blue 1"
-            },
-            "color_blue2": {
-                "name": "Blue 2"
-            },
-            "color_green": {
-                "name": "Green"
-            },
-            "color_red": {
-                "name": "Red"
-            },
-            "color_white": {
-                "name": "White"
-            },
-            "volor_violet": {
-                "name": "Violet"
-            }
-        },
-        "number": {
-            "autoflow": {
-                "name": "Scheduled Flow"
-            },
-            "autofreq": {
-                "name": "Scheduled Frequency"
-            },
-            "feedtime": {
-                "name": "Feed duration"
-            },
-            "flow": {
-                "name": "Flow Rate"
-            },
-            "frequency": {
-                "name": "Frequency"
-            },
-            "intervalt1": {
-                "name": "Interval T1"
-            },
-            "intervalt2": {
-                "name": "Interval T2"
-            },
-            "intervalt3": {
-                "name": "Interval T3"
-            },
-            "intervalt4": {
-                "name": "Interval T4"
-            },
-            "motorspeed": {
-                "name": "Motor Speed"
-            },
-            "nightflow": {
-                "name": "Night Flow"
-            }
-        },
-        "select": {
-            "automode": {
-                "state": {
-                    "\u505c\u673a": "Off",
-                    "\u5582\u98df": "Feeding",
-                    "\u6052\u6d41\u9020\u6d6a": "Constant Flow",
-                    "\u6b63\u5f26\u9020\u6d6a": "Sine Wave",
-                    "\u7ecf\u5178\u9020\u6d6a": "Square Wave",
-                    "\u968f\u673a\u9020\u6d6a": "Random Wave"
-                }
-            },
-            "calset": {
-                "state": {
-                    "\u6821\u51c61": "Calibration 1",
-                    "\u6821\u51c62": "Calibration 2",
-                    "\u6821\u51c63": "Calibration 3",
-                    "\u6821\u51c64": "Calibration 4",
-                    "\u6821\u51c65": "Calibration 5",
-                    "\u6821\u51c66": "Calibration 6",
-                    "\u6821\u51c67": "Calibration 7",
-                    "\u6821\u51c68": "Calibration 8"
-                }
-            },
-            "linkage": {
-                "state": {
-                    "\u4e3b\u673a": "Primary",
-                    "\u4ece\u673a": "Secondary",
-                    "\u72ec\u7acb": "Independent"
-                }
-            },
-            "mode": {
-                "state": {
-                    "\u591c\u665a": "Night",
-                    "\u5b9a\u65f6": "Timed",
-                    "\u6052\u6d41\u9020\u6d6a": "Constant Flow",
-                    "\u624b\u52a8": "Manual",
-                    "\u65e5\u51fa": "Sunrise",
-                    "\u65e5\u843d": "Sunset",
-                    "\u65e9\u6668": "Morning",
-                    "\u6b63\u5f26\u9020\u6d6a": "Sine Wave",
-                    "\u767d\u5929": "Daytime",
-                    "\u7ecf\u5178\u9020\u6d6a": "Square Wave",
-                    "\u968f\u673a\u9020\u6d6a": "Random Wave"
-                }
-            }
-        },
-        "sensor": {
-            "color_blue1": {
-                "name": "Blue 1"
-            },
-            "color_blue2": {
-                "name": "Blue 2"
-            },
-            "color_green": {
-                "name": "Green"
-            },
-            "color_red": {
-                "name": "Red"
-            },
-            "color_white": {
-                "name": "White"
-            },
-            "volor_violet": {
-                "name": "Violet"
-            }
-        },
-        "switch": {
-            "asyc": {
-                "name": "Async Control"
-            },
-            "channe1": {
-                "name": "Channel 1"
-            },
-            "channe2": {
-                "name": "Channel 2"
-            },
-            "channe3": {
-                "name": "Channel 3"
-            },
-            "channe4": {
-                "name": "Channel 4"
-            },
-            "feedswitch": {
-                "name": "Feeding"
-            },
-            "feedtimer": {
-                "name": "Feeding Timer"
-            },
-            "master": {
-                "name": "Master Control"
-            },
-            "pulsetide": {
-                "name": "Pulse"
-            },
-            "switch": {
-                "name": "Main Switch"
-            },
-            "switchon": {
-                "name": "Power"
-            },
-            "timer": {
-                "name": "Timer"
-            },
-            "timer1on": {
-                "name": "Timer 1"
-            },
-            "timer2on": {
-                "name": "Timer 2"
-            },
-            "timer3on": {
-                "name": "Timer 3"
-            },
-            "timer4on": {
-                "name": "Timer 4"
-            },
-            "timeron": {
-                "name": "Scheduler"
-            }
+        "description": "No devices were found automatically. Enter the IP address of a Jebao device. Additional devices can then be added from the integration page in HA.",
+        "title": "Manual Configuration"
+      },
+      "user": {
+        "title": "Jebao Device Setup",
+        "description": "Choose how Home Assistant should communicate with your Jebao devices. Local control (recommended) talks to the pumps directly on your network with instant push updates. Cloud control polls the Gizwits cloud service and works when the pumps are not reachable over the LAN.",
+        "menu_options": {
+          "local": "Local control (LAN, recommended)",
+          "cloud": "Cloud control (Gizwits account)"
         }
+      },
+      "cloud": {
+        "title": "Gizwits Cloud Login",
+        "description": "Sign in with the account you use in the Jebao Aqua app. Your devices will be imported from the cloud and polled every 30 seconds.",
+        "data": {
+          "region": "Account region",
+          "email": "Email address",
+          "password": "Password"
+        }
+      }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Jebao Aqua Options",
+        "description": "This integration currently manages {device_count} device(s). You can switch between local and cloud control, or rediscover devices to handle IP address changes (local mode only).",
+        "data": {
+          "mode": "Control mode",
+          "rediscover": "Rediscover devices"
+        }
+      },
+      "cloud": {
+        "title": "Gizwits Cloud Login",
+        "description": "Switching to cloud control requires your Gizwits account credentials (the account used in the Jebao Aqua app).",
+        "data": {
+          "region": "Account region",
+          "email": "Email address",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "user_not_exist": "No account exists with this email address in the selected region.",
+      "invalid_password": "Incorrect password.",
+      "connection_error": "Could not reach the Gizwits cloud service. Check your internet connection.",
+      "unknown_error": "The Gizwits cloud service returned an unexpected error.",
+      "invalid_json": "The Gizwits cloud service returned an invalid response.",
+      "invalid_response": "The Gizwits cloud service response did not include a login token.",
+      "auth": "Login failed. Check your email address and password.",
+      "no_devices": "No devices are bound to this Gizwits account."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "fault_fan": {
+        "name": "Fan Fault"
+      },
+      "fault_lockedrotor": {
+        "name": "Motor Stall"
+      },
+      "fault_no_liveload": {
+        "name": "No Load"
+      },
+      "fault_overcurrent": {
+        "name": "Motor Overcurrent"
+      },
+      "fault_overtemp": {
+        "name": "Over Temperature"
+      },
+      "fault_overvoltage": {
+        "name": "Motor Overvoltage"
+      },
+      "fault_uart": {
+        "name": "Communication Error"
+      },
+      "fault_undervoltage": {
+        "name": "Motor Undervoltage"
+      },
+      "opencircuit": {
+        "name": "Open Circuit"
+      },
+      "overcurrent": {
+        "name": "Over Current"
+      },
+      "overtemp": {
+        "name": "Over Temperature"
+      }
+    },
+    "light": {
+      "color_blue1": {
+        "name": "Blue 1"
+      },
+      "color_blue2": {
+        "name": "Blue 2"
+      },
+      "color_green": {
+        "name": "Green"
+      },
+      "color_red": {
+        "name": "Red"
+      },
+      "color_white": {
+        "name": "White"
+      },
+      "volor_violet": {
+        "name": "Violet"
+      }
+    },
+    "number": {
+      "autoflow": {
+        "name": "Scheduled Flow"
+      },
+      "autofreq": {
+        "name": "Scheduled Frequency"
+      },
+      "feedtime": {
+        "name": "Feed duration"
+      },
+      "flow": {
+        "name": "Flow Rate"
+      },
+      "frequency": {
+        "name": "Frequency"
+      },
+      "intervalt1": {
+        "name": "Interval T1"
+      },
+      "intervalt2": {
+        "name": "Interval T2"
+      },
+      "intervalt3": {
+        "name": "Interval T3"
+      },
+      "intervalt4": {
+        "name": "Interval T4"
+      },
+      "motorspeed": {
+        "name": "Motor Speed"
+      },
+      "nightflow": {
+        "name": "Night Flow"
+      }
+    },
+    "select": {
+      "automode": {
+        "state": {
+          "停机": "Off",
+          "喂食": "Feeding",
+          "恒流造浪": "Constant Flow",
+          "正弦造浪": "Sine Wave",
+          "经典造浪": "Square Wave",
+          "随机造浪": "Random Wave",
+          "自动": "Auto"
+        }
+      },
+      "calset": {
+        "state": {
+          "校准1": "Calibration 1",
+          "校准2": "Calibration 2",
+          "校准3": "Calibration 3",
+          "校准4": "Calibration 4",
+          "校准5": "Calibration 5",
+          "校准6": "Calibration 6",
+          "校准7": "Calibration 7",
+          "校准8": "Calibration 8"
+        }
+      },
+      "linkage": {
+        "state": {
+          "主机": "Primary",
+          "从机": "Secondary",
+          "独立": "Independent"
+        }
+      },
+      "mode": {
+        "state": {
+          "夜晚": "Night",
+          "定时": "Timed",
+          "恒流造浪": "Constant Flow",
+          "手动": "Manual",
+          "日出": "Sunrise",
+          "日落": "Sunset",
+          "早晨": "Morning",
+          "正弦造浪": "Sine Wave",
+          "白天": "Daytime",
+          "经典造浪": "Square Wave",
+          "随机造浪": "Random Wave"
+        }
+      }
+    },
+    "sensor": {
+      "color_blue1": {
+        "name": "Blue 1"
+      },
+      "color_blue2": {
+        "name": "Blue 2"
+      },
+      "color_green": {
+        "name": "Green"
+      },
+      "color_red": {
+        "name": "Red"
+      },
+      "color_white": {
+        "name": "White"
+      },
+      "volor_violet": {
+        "name": "Violet"
+      }
+    },
+    "switch": {
+      "asyc": {
+        "name": "Async Control"
+      },
+      "channe1": {
+        "name": "Channel 1"
+      },
+      "channe2": {
+        "name": "Channel 2"
+      },
+      "channe3": {
+        "name": "Channel 3"
+      },
+      "channe4": {
+        "name": "Channel 4"
+      },
+      "feedswitch": {
+        "name": "Feeding"
+      },
+      "feedtimer": {
+        "name": "Feeding Timer"
+      },
+      "master": {
+        "name": "Master Control"
+      },
+      "pulsetide": {
+        "name": "Pulse"
+      },
+      "switch": {
+        "name": "Main Switch"
+      },
+      "switchon": {
+        "name": "Power"
+      },
+      "timer": {
+        "name": "Timer"
+      },
+      "timer1on": {
+        "name": "Timer 1"
+      },
+      "timer2on": {
+        "name": "Timer 2"
+      },
+      "timer3on": {
+        "name": "Timer 3"
+      },
+      "timer4on": {
+        "name": "Timer 4"
+      },
+      "timeron": {
+        "name": "Scheduler"
+      },
+      "mode": {
+        "name": "Auto Mode"
+      },
+      "channe5": {
+        "name": "Channel 5"
+      },
+      "timer5on": {
+        "name": "Timer 5"
+      },
+      "calsw": {
+        "name": "Calibration Mode"
+      }
+    }
+  }
 }
