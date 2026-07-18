@@ -1,11 +1,11 @@
 # Home Assistant Custom Integration: Jebao Aquarium Pumps
 
 > [!IMPORTANT]
-> **A major new version is available for beta testing: [v0.4.1-beta](https://github.com/chrisc123/jebao_aqua-homeassistant/releases/tag/v0.4.1-beta)** (on the [`dev` branch](https://github.com/chrisc123/jebao_aqua-homeassistant/tree/dev)). It's a ground-up rework: fully local, push-based control by default (instant updates, no cloud), an optional cloud mode, support for the newer Wi-Fi+BLE (ESP32-C3) hardware, new device support including dosing pumps, and automatic migration from v0.1.x that preserves your entities and automations.
+> **A major new version is available for beta testing — see the [latest pre-release](https://github.com/chrisc123/jebao_aqua-homeassistant/releases)** (developed on the [`dev` branch](https://github.com/chrisc123/jebao_aqua-homeassistant/tree/dev)). It's a ground-up rework: fully local, push-based control by default (instant updates, no cloud), an optional cloud mode, support for the newer Wi-Fi+BLE (ESP32-C3) hardware, new device support including dosing pumps, and automatic migration from v0.1.x that preserves your entities and automations.
 >
 > **Testers wanted — especially dosing pump owners** (MD-4.4 / Doser 2.4 / MD-4.5): doser support is community-contributed and I don't own one to test with, so real-hardware feedback is essential before this becomes the stable release. Please report results (good or bad) via [issues](https://github.com/chrisc123/jebao_aqua-homeassistant/issues).
 >
-> **To install the beta via HACS:** open **Jebao Aqua** in HACS → **⋮** menu → **Redownload** → enable **Show beta versions** → select **v0.4.1-beta**, then restart Home Assistant. To revert, repeat and select the previous version.
+> **To install the beta via HACS:** open **Jebao Aqua** in HACS → **⋮** menu → **Redownload** → enable **Show beta versions** → select the latest beta, then restart Home Assistant. To revert, repeat and select the previous version.
 
 ![Logo](jebao-m-series-pump-controller.png)
 
