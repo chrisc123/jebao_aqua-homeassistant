@@ -3,6 +3,7 @@
   "name": "Jebao Aqua",
   "config_flow": true,
   "documentation": "https://github.com/chrisc123/jebao_aqua-homeassistant",
+  "issue_tracker": "https://github.com/chrisc123/jebao_aqua-homeassistant/issues",
   "requirements": [],
   "dependencies": [],
   "codeowners": ["@chrisc123"],

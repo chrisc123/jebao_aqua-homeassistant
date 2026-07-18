@@ -160,47 +160,47 @@
     "select": {
       "mode": {
         "state": {
-          "经典造浪": "Square Wave",
-          "正弦造浪": "Sine Wave",
-          "随机造浪": "Random Wave",
-          "恒流造浪": "Constant Flow",
-          "夜晚": "Night",
-          "定时": "Timed",
-          "手动": "Manual",
-          "日出": "Sunrise",
-          "日落": "Sunset",
-          "早晨": "Morning",
-          "白天": "Daytime"
+          "square_wave": "Square Wave",
+          "sine_wave": "Sine Wave",
+          "random_wave": "Random Wave",
+          "constant_flow": "Constant Flow",
+          "night": "Night",
+          "timed": "Timed",
+          "manual": "Manual",
+          "sunrise": "Sunrise",
+          "sunset": "Sunset",
+          "morning": "Morning",
+          "daytime": "Daytime"
         }
       },
       "linkage": {
         "state": {
-          "独立": "Independent",
-          "主机": "Primary",
-          "从机": "Secondary"
+          "independent": "Independent",
+          "primary": "Primary",
+          "secondary": "Secondary"
         }
       },
       "automode": {
         "state": {
-          "停机": "Off",
-          "经典造浪": "Square Wave",
-          "正弦造浪": "Sine Wave",
-          "随机造浪": "Random Wave",
-          "恒流造浪": "Constant Flow",
-          "喂食": "Feeding",
-          "自动": "Auto"
+          "off": "Off",
+          "square_wave": "Square Wave",
+          "sine_wave": "Sine Wave",
+          "random_wave": "Random Wave",
+          "constant_flow": "Constant Flow",
+          "feeding": "Feeding",
+          "auto": "Auto"
         }
       },
       "calset": {
         "state": {
-          "校准1": "Calibration 1",
-          "校准2": "Calibration 2",
-          "校准3": "Calibration 3",
-          "校准4": "Calibration 4",
-          "校准5": "Calibration 5",
-          "校准6": "Calibration 6",
-          "校准7": "Calibration 7",
-          "校准8": "Calibration 8"
+          "calibration_1": "Calibration 1",
+          "calibration_2": "Calibration 2",
+          "calibration_3": "Calibration 3",
+          "calibration_4": "Calibration 4",
+          "calibration_5": "Calibration 5",
+          "calibration_6": "Calibration 6",
+          "calibration_7": "Calibration 7",
+          "calibration_8": "Calibration 8"
         }
       }
     },

@@ -190,47 +190,47 @@
     "select": {
       "automode": {
         "state": {
-          "停机": "Off",
-          "喂食": "Feeding",
-          "恒流造浪": "Constant Flow",
-          "正弦造浪": "Sine Wave",
-          "经典造浪": "Square Wave",
-          "随机造浪": "Random Wave",
-          "自动": "Auto"
+          "off": "Off",
+          "feeding": "Feeding",
+          "constant_flow": "Constant Flow",
+          "sine_wave": "Sine Wave",
+          "square_wave": "Square Wave",
+          "random_wave": "Random Wave",
+          "auto": "Auto"
         }
       },
       "calset": {
         "state": {
-          "校准1": "Calibration 1",
-          "校准2": "Calibration 2",
-          "校准3": "Calibration 3",
-          "校准4": "Calibration 4",
-          "校准5": "Calibration 5",
-          "校准6": "Calibration 6",
-          "校准7": "Calibration 7",
-          "校准8": "Calibration 8"
+          "calibration_1": "Calibration 1",
+          "calibration_2": "Calibration 2",
+          "calibration_3": "Calibration 3",
+          "calibration_4": "Calibration 4",
+          "calibration_5": "Calibration 5",
+          "calibration_6": "Calibration 6",
+          "calibration_7": "Calibration 7",
+          "calibration_8": "Calibration 8"
         }
       },
       "linkage": {
         "state": {
-          "主机": "Primary",
-          "从机": "Secondary",
-          "独立": "Independent"
+          "primary": "Primary",
+          "secondary": "Secondary",
+          "independent": "Independent"
         }
       },
       "mode": {
         "state": {
-          "夜晚": "Night",
-          "定时": "Timed",
-          "恒流造浪": "Constant Flow",
-          "手动": "Manual",
-          "日出": "Sunrise",
-          "日落": "Sunset",
-          "早晨": "Morning",
-          "正弦造浪": "Sine Wave",
-          "白天": "Daytime",
-          "经典造浪": "Square Wave",
-          "随机造浪": "Random Wave"
+          "night": "Night",
+          "timed": "Timed",
+          "constant_flow": "Constant Flow",
+          "manual": "Manual",
+          "sunrise": "Sunrise",
+          "sunset": "Sunset",
+          "morning": "Morning",
+          "sine_wave": "Sine Wave",
+          "daytime": "Daytime",
+          "square_wave": "Square Wave",
+          "random_wave": "Random Wave"
         }
       }
     },

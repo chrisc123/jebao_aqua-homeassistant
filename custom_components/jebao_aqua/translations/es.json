@@ -190,47 +190,47 @@
     "select": {
       "automode": {
         "state": {
-          "停机": "Apagado",
-          "喂食": "Alimentación",
-          "恒流造浪": "Flujo constante",
-          "正弦造浪": "Onda sinusoidal",
-          "经典造浪": "Onda cuadrada",
-          "随机造浪": "Onda aleatoria",
-          "自动": "Automático"
+          "off": "Apagado",
+          "feeding": "Alimentación",
+          "constant_flow": "Flujo constante",
+          "sine_wave": "Onda sinusoidal",
+          "square_wave": "Onda cuadrada",
+          "random_wave": "Onda aleatoria",
+          "auto": "Automático"
         }
       },
       "calset": {
         "state": {
-          "校准1": "Calibración 1",
-          "校准2": "Calibración 2",
-          "校准3": "Calibración 3",
-          "校准4": "Calibración 4",
-          "校准5": "Calibración 5",
-          "校准6": "Calibración 6",
-          "校准7": "Calibración 7",
-          "校准8": "Calibración 8"
+          "calibration_1": "Calibración 1",
+          "calibration_2": "Calibración 2",
+          "calibration_3": "Calibración 3",
+          "calibration_4": "Calibración 4",
+          "calibration_5": "Calibración 5",
+          "calibration_6": "Calibración 6",
+          "calibration_7": "Calibración 7",
+          "calibration_8": "Calibración 8"
         }
       },
       "linkage": {
         "state": {
-          "主机": "Principal",
-          "从机": "Secundario",
-          "独立": "Independiente"
+          "primary": "Principal",
+          "secondary": "Secundario",
+          "independent": "Independiente"
         }
       },
       "mode": {
         "state": {
-          "夜晚": "Noche",
-          "定时": "Programado",
-          "恒流造浪": "Flujo constante",
-          "手动": "Manual",
-          "日出": "Amanecer",
-          "日落": "Atardecer",
-          "早晨": "Mañana",
-          "正弦造浪": "Onda sinusoidal",
-          "白天": "Día",
-          "经典造浪": "Onda cuadrada",
-          "随机造浪": "Onda aleatoria"
+          "night": "Noche",
+          "timed": "Programado",
+          "constant_flow": "Flujo constante",
+          "manual": "Manual",
+          "sunrise": "Amanecer",
+          "sunset": "Atardecer",
+          "morning": "Mañana",
+          "sine_wave": "Onda sinusoidal",
+          "daytime": "Día",
+          "square_wave": "Onda cuadrada",
+          "random_wave": "Onda aleatoria"
         }
       }
     },

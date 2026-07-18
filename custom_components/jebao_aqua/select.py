@@ -10,6 +10,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from .const import ENUM_OPTION_SLUGS
 from .entity import JebaoEntity
 from .gizwits_lan.device_status import DeviceStatus
 from .hub import JebaoDevice
@@ -69,14 +70,14 @@ class JebaoSelectEntity(JebaoEntity, SelectEntity):
 
         super().__init__(entry, device, attr_def, "select")
 
-        # Get enum options - these will be translated at runtime
-        self._options = attr_def["enum"]
+        # The device speaks native enum values (Chinese strings, addressed by
+        # index); HA option keys must be [a-z0-9-_]+ slugs so they can be
+        # translated. Unknown values fall back to the raw string.
+        self._device_options: list[str] = attr_def["enum"]
+        self._attr_options = [
+            ENUM_OPTION_SLUGS.get(value, value) for value in self._device_options
+        ]
         self._current_option: str | None = None
-
-    @property
-    def options(self) -> list[str]:
-        """Return the list of selectable options (strings)."""
-        return self._options
 
     @property
     def current_option(self) -> str | None:
@@ -85,11 +86,13 @@ class JebaoSelectEntity(JebaoEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         """User selected a new option from the dropdown."""
-        if option not in self._options:
-            _LOGGER.warning("Option '%s' not in valid list %s", option, self._options)
+        if option not in self._attr_options:
+            _LOGGER.warning(
+                "Option '%s' not in valid list %s", option, self._attr_options
+            )
             return
         # Map to integer index
-        index_val = self._options.index(option)
+        index_val = self._attr_options.index(option)
         await self._device.async_set_attribute(self._attribute_name, index_val)
 
     async def async_added_to_hass(self) -> None:
@@ -105,16 +108,29 @@ class JebaoSelectEntity(JebaoEntity, SelectEntity):
 
     @callback
     def _update_state_from_device(self, status: DeviceStatus) -> None:
-        """Update state from device status."""
+        """Update state from device status.
+
+        The LAN protocol reports enums as integer indexes; the cloud API
+        reports the native enum value string. Accept either.
+        """
         if self._attribute_name not in status.data:
             return
 
-        try:
-            int_val = int(status.data[self._attribute_name])
-            self._current_option = (
-                self._options[int_val] if 0 <= int_val < len(self._options) else None
-            )
-        except (TypeError, ValueError, IndexError):
-            self._current_option = None
+        raw = status.data[self._attribute_name]
+        index: int | None = None
+        if isinstance(raw, bool):
+            index = None
+        elif isinstance(raw, (int, float)):
+            index = int(raw)
+        elif isinstance(raw, str):
+            if raw in self._device_options:
+                index = self._device_options.index(raw)
+            elif raw in self._attr_options:
+                index = self._attr_options.index(raw)
 
+        self._current_option = (
+            self._attr_options[index]
+            if index is not None and 0 <= index < len(self._attr_options)
+            else None
+        )
         self.async_write_ha_state()
