@@ -1,88 +1,323 @@
 {
   "config": {
-    "title": "Jebao Aquarium Pumps",
-    "step": {
-      "user": {
-        "title": "Log in to Jebao",
-        "description": "Please enter your Jebao credentials and select your country.",
-        "data": {
-          "email": "Email",
-          "password": "Password",
-          "country": "Country"
-        }
-      },
-      "device_setup": {
-        "title": "Device Setup",
-        "description": "Configure IP addresses for {number_of_devices} devices. Leave empty for cloud-only mode.",
-        "data": {
-          "device_ips": "Device IP Addresses"
-        }
-      }
+    "abort": {
+      "already_configured": "This device is already configured.",
+      "auto_discovery_complete": "Auto-discovery complete; devices added.",
+      "device_added": "New Jebao device was added to your existing configuration",
+      "devices_added": "New Jebao devices were added to your existing configuration",
+      "devices_already_configured": "All discovered devices are already configured."
     },
     "error": {
-      "auth": "Failed to authenticate. Check your credentials.",
-      "no_devices": "No devices found. Make sure your devices are registered in the Jebao App first.",
-      "cannot_connect": "Failed to connect to the device. Check the LAN IP address.",
-      "discovery_failed": "Automatic discovery failed. Please enter the LAN IP address manually.",
-      "invalid_ip": "Invalid IP address format",
-      "user_not_exist": "User account does not exist",
-      "invalid_password": "Incorrect password",
-      "invalid_json": "Invalid response from server",
-      "invalid_response": "Unexpected response from server",
-      "connection_error": "Could not connect to server",
-      "unknown_error": "Unknown error occurred"
+      "cannot_connect": "Failed to connect to the device. Please check IP and try again.",
+      "already_configured": "Device is already configured in your system. Please try a different IP.",
+      "user_not_exist": "No account exists with this email address in the selected region.",
+      "invalid_password": "Incorrect password.",
+      "connection_error": "Could not reach the Gizwits cloud service. Check your internet connection.",
+      "unknown_error": "The Gizwits cloud service returned an unexpected error.",
+      "invalid_json": "The Gizwits cloud service returned an invalid response.",
+      "invalid_response": "The Gizwits cloud service response did not include a login token.",
+      "auth": "Login failed. Check your email address and password.",
+      "no_devices": "No devices are bound to this Gizwits account."
     },
-    "abort": {
-      "already_configured": "This account is already configured.",
-      "no_devices": "No devices available for setup.",
-      "device_index_error": "Error accessing device information."
-    },
-    "success": {
-      "discovery_complete": "All devices discovered successfully."
+    "step": {
+      "manual": {
+        "data": {
+          "ip": "Device IP Address",
+          "name": "Name (optional)"
+        },
+        "description": "No devices were found automatically. Enter the IP address of a Jebao device. Additional devices can then be added from the integration page in HA.",
+        "title": "Manual Configuration",
+        "data_description": {
+          "ip": "The device's IP address on your network, e.g. 192.168.1.50. Consider giving the device a DHCP reservation in your router.",
+          "name": "Optional friendly name for this device in Home Assistant."
+        }
+      },
+      "user": {
+        "title": "Jebao Device Setup",
+        "description": "Choose how Home Assistant should communicate with your Jebao devices. Local control (recommended) talks to the pumps directly on your network with instant push updates. Cloud control polls the Gizwits cloud service and works when the pumps are not reachable over the LAN.",
+        "menu_options": {
+          "local": "Local control (LAN, recommended)",
+          "cloud": "Cloud control (Gizwits account)"
+        }
+      },
+      "cloud": {
+        "title": "Gizwits Cloud Login",
+        "description": "Sign in with the account you use in the Jebao Aqua app. Your devices will be imported from the cloud and polled every 30 seconds.",
+        "data": {
+          "region": "Account region",
+          "email": "Email address",
+          "password": "Password"
+        },
+        "data_description": {
+          "region": "The Gizwits region your Jebao account was created in. Most users in Europe/Africa should pick Europe; the Americas and Asia-Pacific mostly use the Americas region.",
+          "email": "The email address you use to sign in to the Jebao Aqua app.",
+          "password": "Your Jebao Aqua app password. It is stored so the integration can refresh its access token automatically."
+        }
+      }
     }
   },
   "options": {
-    "title": "Jebao Aquarium Pumps Options",
     "step": {
       "init": {
-        "title": "Configure Jebao Aquarium Pumps",
-        "description": "Current settings:\nEmail: {current_email}\nRegion: {current_region}",
+        "title": "Jebao Aqua Options",
+        "description": "This integration currently manages {device_count} device(s). You can switch between local and cloud control, or rediscover devices to handle IP address changes (local mode only).",
         "data": {
-          "next_step": "Select an option"
+          "mode": "Control mode",
+          "rediscover": "Rediscover devices"
+        },
+        "data_description": {
+          "mode": "Local control talks to the devices directly on your LAN with instant updates (recommended). Cloud control polls the Gizwits cloud service instead.",
+          "rediscover": "Scan the network again to find new devices and update stored IP addresses (local mode only)."
         }
       },
-      "reconfigure": {
-        "title": "Update Credentials",
-        "description": "Update your Jebao credentials and rediscover devices.",
+      "cloud": {
+        "title": "Gizwits Cloud Login",
+        "description": "Switching to cloud control requires your Gizwits account credentials (the account used in the Jebao Aqua app).",
         "data": {
-          "email": "Email",
-          "password": "Password",
-          "country": "Country"
-        }
-      },
-      "device_setup": {
-        "title": "Update Device Configuration",
-        "description": "Configure IP addresses for {number_of_devices} devices. Leave empty for cloud-only mode.",
-        "data": {
-          "device_ips": "Device IP Addresses"
+          "region": "Account region",
+          "email": "Email address",
+          "password": "Password"
+        },
+        "data_description": {
+          "region": "The Gizwits region your Jebao account was created in. Most users in Europe/Africa should pick Europe; the Americas and Asia-Pacific mostly use the Americas region.",
+          "email": "The email address you use to sign in to the Jebao Aqua app.",
+          "password": "Your Jebao Aqua app password. It is stored so the integration can refresh its access token automatically."
         }
       }
     },
     "error": {
-      "auth": "Failed to authenticate. Check your credentials.",
-      "no_devices": "No devices found. Make sure your devices are registered in the Jebao App first.",
-      "cannot_connect": "Failed to connect to the device. Check the LAN IP address.",
-      "discovery_failed": "Automatic discovery failed. Please enter the LAN IP address manually.",
-      "invalid_ip": "Invalid IP address format",
-      "user_not_exist": "User account does not exist",
-      "invalid_password": "Incorrect password",
-      "invalid_json": "Invalid response from server",
-      "invalid_response": "Unexpected response from server",
-      "connection_error": "Could not connect to server",
-      "unknown_error": "Unknown error occurred"
+      "user_not_exist": "No account exists with this email address in the selected region.",
+      "invalid_password": "Incorrect password.",
+      "connection_error": "Could not reach the Gizwits cloud service. Check your internet connection.",
+      "unknown_error": "The Gizwits cloud service returned an unexpected error.",
+      "invalid_json": "The Gizwits cloud service returned an invalid response.",
+      "invalid_response": "The Gizwits cloud service response did not include a login token.",
+      "auth": "Login failed. Check your email address and password.",
+      "no_devices": "No devices are bound to this Gizwits account."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "fault_fan": {
+        "name": "Fan Fault"
+      },
+      "fault_lockedrotor": {
+        "name": "Motor Stall"
+      },
+      "fault_no_liveload": {
+        "name": "No Load"
+      },
+      "fault_overcurrent": {
+        "name": "Motor Overcurrent"
+      },
+      "fault_overtemp": {
+        "name": "Over Temperature"
+      },
+      "fault_overvoltage": {
+        "name": "Motor Overvoltage"
+      },
+      "fault_uart": {
+        "name": "Communication Error"
+      },
+      "fault_undervoltage": {
+        "name": "Motor Undervoltage"
+      },
+      "opencircuit": {
+        "name": "Open Circuit"
+      },
+      "overcurrent": {
+        "name": "Over Current"
+      },
+      "overtemp": {
+        "name": "Over Temperature"
+      }
     },
-    "abort": {
-      "already_configured": "Device already configured"
+    "light": {
+      "color_blue1": {
+        "name": "Blue 1"
+      },
+      "color_blue2": {
+        "name": "Blue 2"
+      },
+      "color_green": {
+        "name": "Green"
+      },
+      "color_red": {
+        "name": "Red"
+      },
+      "color_white": {
+        "name": "White"
+      },
+      "volor_violet": {
+        "name": "Violet"
+      }
+    },
+    "number": {
+      "autoflow": {
+        "name": "Scheduled Flow"
+      },
+      "autofreq": {
+        "name": "Scheduled Frequency"
+      },
+      "feedtime": {
+        "name": "Feed duration"
+      },
+      "flow": {
+        "name": "Flow Rate"
+      },
+      "frequency": {
+        "name": "Frequency"
+      },
+      "intervalt1": {
+        "name": "Interval T1"
+      },
+      "intervalt2": {
+        "name": "Interval T2"
+      },
+      "intervalt3": {
+        "name": "Interval T3"
+      },
+      "intervalt4": {
+        "name": "Interval T4"
+      },
+      "motorspeed": {
+        "name": "Motor Speed"
+      },
+      "nightflow": {
+        "name": "Night Flow"
+      }
+    },
+    "select": {
+      "automode": {
+        "state": {
+          "off": "Off",
+          "feeding": "Feeding",
+          "constant_flow": "Constant Flow",
+          "sine_wave": "Sine Wave",
+          "square_wave": "Square Wave",
+          "random_wave": "Random Wave",
+          "auto": "Auto"
+        }
+      },
+      "calset": {
+        "state": {
+          "calibration_1": "Calibration 1",
+          "calibration_2": "Calibration 2",
+          "calibration_3": "Calibration 3",
+          "calibration_4": "Calibration 4",
+          "calibration_5": "Calibration 5",
+          "calibration_6": "Calibration 6",
+          "calibration_7": "Calibration 7",
+          "calibration_8": "Calibration 8"
+        }
+      },
+      "linkage": {
+        "state": {
+          "primary": "Primary",
+          "secondary": "Secondary",
+          "independent": "Independent"
+        }
+      },
+      "mode": {
+        "state": {
+          "night": "Night",
+          "timed": "Timed",
+          "constant_flow": "Constant Flow",
+          "manual": "Manual",
+          "sunrise": "Sunrise",
+          "sunset": "Sunset",
+          "morning": "Morning",
+          "sine_wave": "Sine Wave",
+          "daytime": "Daytime",
+          "square_wave": "Square Wave",
+          "random_wave": "Random Wave"
+        }
+      }
+    },
+    "sensor": {
+      "color_blue1": {
+        "name": "Blue 1"
+      },
+      "color_blue2": {
+        "name": "Blue 2"
+      },
+      "color_green": {
+        "name": "Green"
+      },
+      "color_red": {
+        "name": "Red"
+      },
+      "color_white": {
+        "name": "White"
+      },
+      "volor_violet": {
+        "name": "Violet"
+      }
+    },
+    "switch": {
+      "asyc": {
+        "name": "Async Control"
+      },
+      "channe1": {
+        "name": "Channel 1"
+      },
+      "channe2": {
+        "name": "Channel 2"
+      },
+      "channe3": {
+        "name": "Channel 3"
+      },
+      "channe4": {
+        "name": "Channel 4"
+      },
+      "feedswitch": {
+        "name": "Feeding"
+      },
+      "feedtimer": {
+        "name": "Feeding Timer"
+      },
+      "master": {
+        "name": "Master Control"
+      },
+      "pulsetide": {
+        "name": "Pulse"
+      },
+      "switch": {
+        "name": "Main Switch"
+      },
+      "switchon": {
+        "name": "Power"
+      },
+      "timer": {
+        "name": "Timer"
+      },
+      "timer1on": {
+        "name": "Timer 1"
+      },
+      "timer2on": {
+        "name": "Timer 2"
+      },
+      "timer3on": {
+        "name": "Timer 3"
+      },
+      "timer4on": {
+        "name": "Timer 4"
+      },
+      "timeron": {
+        "name": "Scheduler"
+      },
+      "mode": {
+        "name": "Auto Mode"
+      },
+      "channe5": {
+        "name": "Channel 5"
+      },
+      "timer5on": {
+        "name": "Timer 5"
+      },
+      "calsw": {
+        "name": "Calibration Mode"
+      }
     }
   }
 }

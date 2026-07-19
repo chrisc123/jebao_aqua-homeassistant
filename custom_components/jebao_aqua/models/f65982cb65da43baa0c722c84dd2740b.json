@@ -1,0 +1,482 @@
+{
+  "name": "造浪泵",
+  "packetVersion": "0x00000004",
+  "protocolType": "standard",
+  "product_key": "f65982cb65da43baa0c722c84dd2740b",
+  "entities": [
+    {
+      "display_name": "机智云开发套件",
+      "attrs": [
+        {
+          "display_name": "开关",
+          "name": "switch",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 0,
+          "desc": ""
+        },
+        {
+          "display_name": "主机",
+          "name": "master",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 1
+          },
+          "type": "status_writable",
+          "id": 1,
+          "desc": "设置为主机"
+        },
+        {
+          "display_name": "同步异步",
+          "name": "ASYC",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 2
+          },
+          "type": "status_writable",
+          "id": 2,
+          "desc": "同步异步功能，同步功能：ASYC = 0，APP显示同步控制；异步功能:ASYC = 1, APP显示异步控制"
+        },
+        {
+          "display_name": "夜间模式开关",
+          "name": "TimerON",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 3
+          },
+          "type": "status_writable",
+          "id": 3,
+          "desc": "夜间模式开关，0：关闭，1：打开"
+        },
+        {
+          "display_name": "夜间发送数据",
+          "name": "Timer",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 4
+          },
+          "type": "status_writable",
+          "id": 4,
+          "desc": "夜间定时发送数据，0：不是，1：是"
+        },
+        {
+          "display_name": "喂食开关",
+          "name": "FeedSwitch",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 5
+          },
+          "type": "status_writable",
+          "id": 5,
+          "desc": "喂食开关，0：关闭，1：打开"
+        },
+        {
+          "display_name": "喂食发送数据",
+          "name": "FeedTimer",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 6
+          },
+          "type": "status_writable",
+          "id": 6,
+          "desc": "喂食定时发送数据：0：不是，1：是"
+        },
+        {
+          "display_name": "模式",
+          "name": "mode",
+          "data_type": "enum",
+          "enum": ["经典造浪", "正弦造浪", "随机造浪", "恒流造浪"],
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 2,
+            "bit_offset": 7
+          },
+          "type": "status_writable",
+          "id": 7,
+          "desc": "0.经典造浪 1.正弦造浪 2.随机造浪 3.恒流造浪"
+        },
+        {
+          "display_name": "流量",
+          "name": "flow",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 2,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 30
+          },
+          "type": "status_writable",
+          "id": 8,
+          "desc": "流量值"
+        },
+        {
+          "display_name": "频率",
+          "name": "frequency",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 3,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 5
+          },
+          "type": "status_writable",
+          "id": 9,
+          "desc": "频率值"
+        },
+        {
+          "display_name": "喂食时间",
+          "name": "feedTime",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 4,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 60,
+            "ratio": 1,
+            "min": 1
+          },
+          "type": "status_writable",
+          "id": 10,
+          "desc": "喂食时间"
+        },
+        {
+          "display_name": "夜间流量",
+          "name": "nightflow",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 5,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 100,
+            "ratio": 1,
+            "min": 30
+          },
+          "type": "status_writable",
+          "id": 11,
+          "desc": "夜间模式流量值"
+        },
+        {
+          "display_name": "电机过流",
+          "name": "Fault_Overcurrent",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 6,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "type": "fault",
+          "id": 12,
+          "desc": "电机电流过大，包括短路故障"
+        },
+        {
+          "display_name": "电机过压",
+          "name": "Fault_Overvoltage",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 6,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 1
+          },
+          "type": "fault",
+          "id": 13,
+          "desc": "电机过压"
+        },
+        {
+          "display_name": "温度过高",
+          "name": "Fault_OverTemp",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 6,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 2
+          },
+          "type": "fault",
+          "id": 14,
+          "desc": "电机温度过高"
+        },
+        {
+          "display_name": "电机欠压",
+          "name": "Fault_Undervoltage",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 6,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 3
+          },
+          "type": "fault",
+          "id": 15,
+          "desc": "电机欠压"
+        },
+        {
+          "display_name": "电机堵转",
+          "name": "Fault_Lockedrotor",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 6,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 4
+          },
+          "type": "fault",
+          "id": 16,
+          "desc": "电机堵转"
+        },
+        {
+          "display_name": "空载",
+          "name": "Fault_no_liveload",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 6,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 5
+          },
+          "type": "fault",
+          "id": 17,
+          "desc": "空载"
+        },
+        {
+          "display_name": "串口连接故障",
+          "name": "Fault_UART",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 6,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 6
+          },
+          "type": "fault",
+          "id": 18,
+          "desc": "模块与主板通讯不上"
+        }
+      ],
+      "name": "entity0",
+      "id": 0
+    }
+  ],
+  "ui": {
+    "object": {
+      "version": 4,
+      "showEditButton": false
+    },
+    "sections": [
+      {
+        "elements": [
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.switch"],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.switch",
+            "title": "开关"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.master"],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.master",
+            "title": "主机"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.ASYC"],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.ASYC",
+            "title": "同步异步"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.TimerON"],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.TimerON",
+            "title": "夜间模式开关"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.Timer"],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.Timer",
+            "title": "夜间发送数据"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.FeedSwitch"],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.FeedSwitch",
+            "title": "喂食开关"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.FeedTimer"],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.FeedTimer",
+            "title": "喂食发送数据"
+          },
+          {
+            "items": ["经典造浪", "正弦造浪", "随机造浪", "恒流造浪"],
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.mode"],
+              "perm": "W"
+            },
+            "type": "QRadioElement",
+            "key": "entity0.mode",
+            "title": "模式"
+          },
+          {
+            "title": "流量",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.flow"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 30
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.flow",
+            "maximumValue": 100,
+            "minimumValue": 30,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "频率",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.frequency"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 5
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.frequency",
+            "maximumValue": 100,
+            "minimumValue": 5,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "喂食时间",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.feedTime"],
+              "uint_spec": {
+                "max": 60,
+                "step": 1,
+                "min": 1
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.feedTime",
+            "maximumValue": 60,
+            "minimumValue": 1,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "夜间流量",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": ["entity0.nightflow"],
+              "uint_spec": {
+                "max": 100,
+                "step": 1,
+                "min": 30
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.nightflow",
+            "maximumValue": 100,
+            "minimumValue": 30,
+            "type": "QFloatElement"
+          }
+        ]
+      }
+    ]
+  }
+}

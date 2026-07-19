@@ -1,439 +1,424 @@
+"""Config flow for Jebao Aqua integration."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
 import logging
+from typing import Any
+
 import voluptuous as vol
-import homeassistant.helpers.config_validation as cv
+
 from homeassistant import config_entries
-from homeassistant.core import callback
-from functools import lru_cache
-import pycountry
-import asyncio
-import ipaddress
+from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers.device_registry import format_mac
+
+from . import hub
+from .cloud import GizwitsCloudApi, did_to_uid
 from .const import (
-    DOMAIN,
-    LOGGER,
-    GIZWITS_API_URLS,
+    CONF_MODE,
     DEFAULT_REGION,
-    SERVICE_MAP,
-    DISCOVERY_TIMEOUT,
+    DOMAIN,
+    MODE_CLOUD,
+    MODE_LOCAL,
 )
-from .api import GizwitsApi
-from .discovery import discover_devices
 
 _LOGGER = logging.getLogger(__name__)
 
+STEP_USER_DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required("ip"): str,
+        vol.Optional("name", default=""): str,
+    }
+)
 
-@lru_cache(maxsize=1)
-def get_country_choices():
-    """Cache the country choices to avoid repeated file operations."""
-    countries = list(pycountry.countries)
-    # Create list of tuples and sort by country name
-    choices = [
-        (country.alpha_2, country.name)
-        for country in countries
-        if country.alpha_2 in SERVICE_MAP
-    ]
-    return sorted(
-        choices, key=lambda x: x[1]
-    )  # Sort by country name (second element in tuple)
+REGION_OPTIONS = {
+    "eu": "Europe",
+    "us": "Americas / Asia-Pacific",
+    "cn": "China",
+}
+
+
+def _cloud_schema(
+    region: str = DEFAULT_REGION, email: str = ""
+) -> vol.Schema:
+    """Schema for the cloud credentials step."""
+    return vol.Schema(
+        {
+            vol.Required("region", default=region): vol.In(REGION_OPTIONS),
+            vol.Required("email", default=email): str,
+            vol.Required("password"): str,
+        }
+    )
+
+
+@dataclass
+class DeviceCandidate:
+    """Discovered device information."""
+
+    ip: str
+    product_key: str
+    uid: str
+    mac: str | None = None
+    firmware_version: str | None = None
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 1
+    """Handle a config flow for Jebao Aqua integration."""
 
-    def __init__(self):
-        self._api = None  # Initialize _api to None
-        self._devices = None
-        self._device_index = 0
-        self._config = {
-            "token": None,
-            "devices": [],
-            "region": None,
-            "email": None,
-            "country": None,  # Add country to config
-        }  # Add email to config
-        # Pre-load country choices during initialization
-        self._country_choices = None
+    VERSION = 2
+    CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_PUSH
 
-    async def async_step_user(self, user_input=None):
-        """Handle user step."""
-        errors = {}
+    def __init__(self) -> None:
+        """Initialize the config flow."""
+        self.discovered_devices: list[DeviceCandidate] = []
 
-        # Load country choices in executor if not already loaded
-        if self._country_choices is None:
-            self._country_choices = await self.hass.async_add_executor_job(
-                get_country_choices
-            )
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Let the user pick between local (LAN) and cloud control."""
+        return self.async_show_menu(step_id="user", menu_options=["local", "cloud"])
 
-        if user_input is not None:
-            country_code = user_input["country"]
-            self._config["country"] = country_code
-            region = SERVICE_MAP.get(country_code.upper(), DEFAULT_REGION)
-            self._config["region"] = region
-            self._config["email"] = user_input["email"]
+    async def async_step_local(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Set up local (LAN push) mode: discover devices on the network."""
+        discovered = await hub.async_discover_devices(self.hass, timeout=5.0)
 
-            self._api = GizwitsApi(
-                GIZWITS_API_URLS[region]["LOGIN_URL"],
-                GIZWITS_API_URLS[region]["DEVICES_URL"],
-                GIZWITS_API_URLS[region]["DEVICE_DATA_URL"],
-                GIZWITS_API_URLS[region]["CONTROL_URL"],
-            )
+        # Get existing entries
+        existing_entry = next(
+            (entry for entry in self.hass.config_entries.async_entries(DOMAIN)
+             if entry.data.get("devices")), None)
+        
+        # Get set of existing UIDs
+        existing_uids = {
+            device["uid"]
+            for entry in self.hass.config_entries.async_entries(DOMAIN)
+            for device in entry.data.get("devices", [])
+            if "uid" in device
+        }
 
-            async with self._api as api:
-                token, error_code = await api.async_login(
-                    user_input["email"], user_input["password"]
+        new_devices = []
+        for dev in discovered:
+            uid = dev.get("uid")
+            if not uid or uid in existing_uids:
+                continue
+
+            mac = dev.get("mac")
+            if mac:
+                mac = format_mac(mac)
+
+            new_devices.append({
+                "ip": dev["ip"],
+                "product_key": dev.get("product_key", ""),
+                "uid": uid,
+                "mac": mac,
+                "firmware_version": dev.get("firmware_version"),
+            })
+
+        if new_devices:
+            if existing_entry:
+                # Add new devices to existing entry. Build a new list: mutating
+                # the nested list in place makes async_update_entry see no
+                # change and skip persisting it.
+                new_data = dict(existing_entry.data)
+                new_data["devices"] = [
+                    *existing_entry.data.get("devices", []),
+                    *new_devices,
+                ]
+                self.hass.config_entries.async_update_entry(existing_entry, data=new_data)
+                return self.async_abort(reason="devices_added")
+            else:
+                # Create new entry with discovered devices
+                return self.async_create_entry(
+                    title="Jebao Devices",
+                    data={CONF_MODE: MODE_LOCAL, "devices": new_devices},
                 )
 
-                if token:
-                    api.set_token(token)
-                    self._config["token"] = token  # Store token in config
-                    self._devices = await api.get_devices()
+        # If no new devices found, show manual entry form
+        return self.async_show_form(
+            step_id="manual",
+            data_schema=STEP_USER_DATA_SCHEMA,
+        )
 
-                    if self._devices and "devices" in self._devices:
-                        try:
-                            # Set timeout for device discovery
-                            discovered_devices = await asyncio.wait_for(
-                                discover_devices(),
-                                timeout=DISCOVERY_TIMEOUT + 2,  # Add 2 seconds buffer
-                            )
+    async def async_step_cloud(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Set up cloud mode: log in to Gizwits and import bound devices."""
+        errors: dict[str, str] = {}
 
-                            # Continue even if no devices are discovered
-                            for device in self._devices["devices"]:
-                                device_id = device["did"]
-                                device["lan_ip"] = discovered_devices.get(device_id)
+        if user_input is not None:
+            if self.hass.config_entries.async_entries(DOMAIN):
+                return self.async_abort(reason="already_configured")
 
-                            _LOGGER.debug(f"Devices after discovery: {self._devices}")
-                            return await self.async_step_device_setup()
-
-                        except asyncio.TimeoutError:
-                            _LOGGER.warning(
-                                "Device discovery timed out, proceeding with cloud-only setup"
-                            )
-                            # Mark all devices as needing manual IP entry
-                            for device in self._devices["devices"]:
-                                device["lan_ip"] = None
-                            return await self.async_step_device_setup()
-
-                        except Exception as e:
-                            _LOGGER.error(f"Error during discovery: {e}")
-                            errors["base"] = "discovery_failed"
-
-                    else:
-                        _LOGGER.error(f"Invalid device data structure: {self._devices}")
-                        errors["base"] = "no_devices"
+            api = GizwitsCloudApi(self.hass, user_input["region"])
+            token, err = await api.async_login(
+                user_input["email"], user_input["password"]
+            )
+            if not token:
+                errors["base"] = err or "auth"
+            else:
+                response = await api.async_get_devices()
+                cloud_devices = (response or {}).get("devices", [])
+                if not cloud_devices:
+                    errors["base"] = "no_devices"
                 else:
-                    if error_code:
-                        errors["base"] = error_code  # Don't strip prefix
-                    else:
-                        errors["base"] = "auth"
-
-        # Get user's configured country from Home Assistant
-        ha_country = self.hass.config.country or ""
-        default_country = next(
-            (
-                code
-                for code, name in self._country_choices
-                if code == ha_country.upper()
-            ),
-            next(
-                (code for code, name in self._country_choices if code == "US"), None
-            ),  # Fallback to US if no match
-        )
-
-        # Use the cached country choices
-        country_schema = vol.Schema(
-            {
-                vol.Required("country", default=default_country): vol.In(
-                    {code: name for code, name in self._country_choices}
-                ),
-                vol.Required("email"): str,
-                vol.Required("password"): str,
-            }
-        )
+                    devices = [
+                        {
+                            "uid": did_to_uid(dev["did"]),
+                            "product_key": dev.get("product_key", ""),
+                            "name": dev.get("dev_alias"),
+                            "ip": None,
+                            "mac": None,
+                            "firmware_version": None,
+                        }
+                        for dev in cloud_devices
+                        if dev.get("did")
+                    ]
+                    return self.async_create_entry(
+                        title="Jebao Devices (Cloud)",
+                        data={
+                            CONF_MODE: MODE_CLOUD,
+                            "region": user_input["region"],
+                            "email": user_input["email"],
+                            "password": user_input["password"],
+                            "token": token,
+                            "devices": devices,
+                        },
+                    )
 
         return self.async_show_form(
-            step_id="user",
-            data_schema=country_schema,
+            step_id="cloud",
+            data_schema=_cloud_schema(),
             errors=errors,
         )
 
-    async def async_step_device_setup(self, user_input=None):
-        """Handle device setup."""
-        errors = {}
+    async def async_step_manual(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle manual device entry."""
+        errors: dict[str, str] = {}
 
-        # Create a mapping of device aliases to full device info for form processing
-        device_map = {
-            device.get("dev_alias", device["did"]): device
-            for device in self._devices["devices"]
-        }
+        if user_input:
+            ip = user_input["ip"]
+            friendly_name = user_input["name"].strip()
 
-        if user_input is not None:
             try:
-                devices = []
-                # Process each device while maintaining all original device information
-                for alias, device in device_map.items():
-                    ip = user_input.get(alias, "")
-                    device_data = device.copy()  # Preserve all original device data
-                    device_data["lan_ip"] = ip if ip else None
-                    devices.append(device_data)
+                dev = await hub.async_directed_discovery(self.hass, ip, timeout=5.0)
+                if not dev or not dev.get("uid"):
+                    errors["base"] = "cannot_connect"
+                else:
+                    device_uid = dev["uid"]
+                    # Simply check if any entry contains this device UID
+                    existing_entry = None
+                    for entry in self.hass.config_entries.async_entries(DOMAIN):
+                        if any(d.get("uid") == device_uid for d in entry.data.get("devices", [])):
+                            errors["base"] = "already_configured"
+                            break
+                        if not existing_entry and entry.data.get("devices"):
+                            existing_entry = entry
 
-                if not errors:
-                    self._config["devices"] = devices
-                    # Log the final configuration to verify device separation
-                    LOGGER.debug("Final device configuration: %s", devices)
-                    return self.async_create_entry(
-                        title="Jebao Aquarium Pumps", data=self._config
-                    )
+                    if not errors:
+                        mac = dev.get("mac")
+                        if mac:
+                            mac = format_mac(mac)
 
-            except Exception as ex:
-                LOGGER.error(f"Error processing device IPs: {ex}")
+                        new_device = {
+                            "ip": ip,
+                            "product_key": dev.get("product_key", ""),
+                            "uid": device_uid,
+                            "mac": mac,
+                            "firmware_version": dev.get("firmware_version"),
+                            "name": friendly_name or None,
+                        }
+
+                        if existing_entry:
+                            # Add to existing entry (new list, see note above)
+                            new_data = dict(existing_entry.data)
+                            new_data["devices"] = [
+                                *existing_entry.data.get("devices", []),
+                                new_device,
+                            ]
+                            self.hass.config_entries.async_update_entry(existing_entry, data=new_data)
+                            return self.async_abort(reason="device_added")
+                        else:
+                            # Create new entry
+                            return self.async_create_entry(
+                                title=friendly_name or "Jebao Devices",
+                                data={
+                                    CONF_MODE: MODE_LOCAL,
+                                    "devices": [new_device],
+                                },
+                            )
+
+            except Exception:
+                _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
 
-        # Create schema using aliases as field names
-        data_schema = {}
-        for device in self._devices["devices"]:
-            alias = device.get("dev_alias") or device["did"]
-            data_schema[
-                vol.Optional(
-                    alias,
-                    default=device.get("lan_ip", ""),
-                )
-            ] = str
-
         return self.async_show_form(
-            step_id="device_setup",
-            data_schema=vol.Schema(data_schema),
-            description_placeholders={
-                "number_of_devices": len(self._devices["devices"])
-            },
+            step_id="manual",
+            data_schema=STEP_USER_DATA_SCHEMA,
             errors=errors,
         )
 
     @staticmethod
-    @callback
-    def async_get_options_flow(config_entry):
-        """Get the options flow for this handler."""
-        return JebaoPumpOptionsFlowHandler()  # Remove config_entry parameter
+    def async_get_options_flow(config_entry: config_entries.ConfigEntry) -> OptionsFlowHandler:
+        """Return the options flow."""
+        return OptionsFlowHandler()
 
 
-class JebaoPumpOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle options flow for Jebao Pump integration."""
+class OptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle options flow for Jebao Aqua integration.
 
-    def __init__(self):  # Remove config_entry parameter
-        """Initialize options flow."""
-        # Remove self.config_entry assignment
-        self._api = None
-        self._devices = None
-        self._device_index = 0
-        self._country_choices = None
-        self._config = {}  # Add this to store temporary configuration
+    self.config_entry is provided by the OptionsFlow base class; assigning it
+    explicitly has been rejected by Home Assistant since 2025.12.
+    """
 
-    async def async_step_init(self, user_input=None):
-        """Manage options."""
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage the options."""
+        current_mode = self.config_entry.data.get(CONF_MODE, MODE_LOCAL)
+
         if user_input is not None:
-            if user_input["next_step"] == "reconfigure":
-                return await self.async_step_reconfigure()
-            return self.async_create_entry(title="", data=user_input)
-
-        email = self.config_entry.data.get("email")
-        region = self.config_entry.data.get("region")
-        _LOGGER.debug(
-            f"Current settings - Email: {email}, Region: {region}"
-        )  # Add debug logging
+            new_mode = user_input.get(CONF_MODE, current_mode)
+            if new_mode != current_mode:
+                if new_mode == MODE_CLOUD:
+                    # Cloud mode needs credentials before we can switch.
+                    return await self.async_step_cloud()
+                # Switch to local: devices reconnect over LAN by UID via
+                # discovery on reload. Cloud credentials are kept so the user
+                # can switch back without re-entering them.
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry,
+                    data={**self.config_entry.data, CONF_MODE: MODE_LOCAL},
+                )
+                await self.hass.config_entries.async_reload(
+                    self.config_entry.entry_id
+                )
+                return self.async_create_entry(title="", data={})
+            if user_input.get("rediscover") and current_mode == MODE_LOCAL:
+                return await self.async_step_rediscover()
+            return self.async_create_entry(title="", data={})
 
         return self.async_show_form(
             step_id="init",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("next_step"): vol.In(
-                        {"reconfigure": "Update credentials and rediscover devices"}
-                    )
-                }
-            ),
+            data_schema=vol.Schema({
+                vol.Required(CONF_MODE, default=current_mode): vol.In(
+                    {
+                        MODE_LOCAL: "Local (LAN, recommended)",
+                        MODE_CLOUD: "Cloud (Gizwits API)",
+                    }
+                ),
+                vol.Optional("rediscover", default=False): bool,
+            }),
             description_placeholders={
-                "current_email": email or "Not set",
-                "current_region": region or "Not set",
+                "device_count": str(len(self.config_entry.data.get("devices", []))),
             },
         )
 
-    async def async_step_reconfigure(self, user_input=None):
-        """Handle reconfiguration."""
-        errors = {}
-
-        # Load country choices in executor if not already loaded
-        if self._country_choices is None:
-            self._country_choices = await self.hass.async_add_executor_job(
-                get_country_choices
-            )
+    async def async_step_cloud(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Collect cloud credentials when switching an entry to cloud mode."""
+        errors: dict[str, str] = {}
+        data = self.config_entry.data
 
         if user_input is not None:
-            country_code = user_input["country"]
-            region = SERVICE_MAP.get(country_code.upper(), DEFAULT_REGION)
+            api = GizwitsCloudApi(self.hass, user_input["region"])
+            token, err = await api.async_login(
+                user_input["email"], user_input["password"]
+            )
+            if not token:
+                errors["base"] = err or "auth"
+            else:
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry,
+                    data={
+                        **data,
+                        CONF_MODE: MODE_CLOUD,
+                        "region": user_input["region"],
+                        "email": user_input["email"],
+                        "password": user_input["password"],
+                        "token": token,
+                    },
+                )
+                await self.hass.config_entries.async_reload(
+                    self.config_entry.entry_id
+                )
+                return self.async_create_entry(title="", data={})
 
-            # Store configuration for later use
-            self._config = {
-                "email": user_input["email"],
-                "country": country_code,
-                "region": region,
-                "devices": [],
+        return self.async_show_form(
+            step_id="cloud",
+            data_schema=_cloud_schema(
+                region=data.get("region", DEFAULT_REGION),
+                email=data.get("email") or "",
+            ),
+            errors=errors,
+        )
+
+    async def async_step_rediscover(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle rediscovery of devices."""
+        # Perform discovery
+        discovered = await hub.async_discover_devices(self.hass, timeout=10.0)
+        
+        # Get existing UIDs from this config entry
+        existing_devices = {
+            device["uid"]: device
+            for device in self.config_entry.data.get("devices", [])
+            if device.get("uid")
+        }
+        
+        # Track changes
+        updated_devices = []
+        new_devices = []
+        found_uids = set()
+        
+        for dev in discovered:
+            uid = dev.get("uid")
+            if not uid:
+                continue
+                
+            found_uids.add(uid)
+            mac = dev.get("mac")
+            if mac:
+                mac = format_mac(mac)
+            
+            device_data = {
+                "ip": dev["ip"],
+                "product_key": dev.get("product_key", ""),
+                "uid": uid,
+                "mac": mac,
+                "firmware_version": dev.get("firmware_version"),
             }
 
-            self._api = GizwitsApi(
-                GIZWITS_API_URLS[region]["LOGIN_URL"],
-                GIZWITS_API_URLS[region]["DEVICES_URL"],
-                GIZWITS_API_URLS[region]["DEVICE_DATA_URL"],
-                GIZWITS_API_URLS[region]["CONTROL_URL"],
-            )
-
-            async with self._api as api:
-                token, error_code = await api.async_login(  # Change this line
-                    user_input["email"], user_input["password"]
-                )
-                if token:  # Just check for token
-                    self._config["token"] = token
-                    api.set_token(token)
-                    self._devices = await api.get_devices()
-
-                    if self._devices and "devices" in self._devices:
-                        try:
-                            discovered_devices = await asyncio.wait_for(
-                                discover_devices(), timeout=DISCOVERY_TIMEOUT + 2
-                            )
-
-                            # Set discovered IPs or None for manual entry
-                            for device in self._devices["devices"]:
-                                device_id = device["did"]
-                                device["lan_ip"] = discovered_devices.get(device_id)
-
-                            # Reset device index for setup
-                            self._device_index = 0
-                            return await self.async_step_device_setup()
-
-                        except (asyncio.TimeoutError, Exception) as e:
-                            LOGGER.warning(
-                                f"Discovery failed, falling back to manual setup: {e}"
-                            )
-                            # Mark all devices for manual IP entry
-                            for device in self._devices["devices"]:
-                                device["lan_ip"] = None
-                            self._device_index = 0
-                            return await self.async_step_device_setup()
-                    else:
-                        errors["base"] = "no_devices"
-                else:
-                    if error_code:
-                        errors["base"] = error_code  # Don't strip prefix
-                    else:
-                        errors["base"] = "auth"
-
-        stored_country = self.config_entry.data.get("country", "US")
-
-        return self.async_show_form(
-            step_id="reconfigure",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("country", default=stored_country): vol.In(
-                        {code: name for code, name in self._country_choices}
-                    ),
-                    vol.Required(
-                        "email", default=self.config_entry.data.get("email", "")
-                    ): str,
-                    vol.Required("password"): str,
-                }
-            ),
-            errors=errors,
-        )
-
-    async def async_step_device_setup(self, user_input=None):
-        """Handle device setup during reconfiguration."""
-        errors = {}
-
-        # Create a mapping of device aliases to IDs for form processing
-        device_map = {
-            device.get("dev_alias", device["did"]): device["did"]
-            for device in self._devices["devices"]
-        }
-
-        if user_input is not None:
-            try:
-                # Get existing devices from config entry
-                existing_devices = {
-                    device["did"]: device
-                    for device in self.config_entry.data.get("devices", [])
-                }
-
-                new_devices = []
-                # Map the alias back to device ID when processing input
-                for alias, device_id in device_map.items():
-                    ip = user_input.get(alias, "")
-
-                    if ip:
-                        try:
-                            ipaddress.ip_address(ip)
-                        except ValueError:
-                            errors[alias] = "invalid_ip"
-                            continue
-
-                    # If device existed before, preserve any additional properties
-                    if device_id in existing_devices:
-                        device_data = existing_devices[device_id].copy()
-                        device_data["lan_ip"] = ip or None
-                        new_devices.append(device_data)
-                    else:
-                        new_devices.append({"did": device_id, "lan_ip": ip or None})
-
-                if not errors:
-                    # Create new config data first
-                    new_data = {
-                        "email": self._config["email"],
-                        "token": self._config["token"],
-                        "region": self._config["region"],
-                        "country": self._config["country"],
-                        "devices": new_devices,
-                    }
-
-                    try:
-                        # First update the entry with new data
-                        self.hass.config_entries.async_update_entry(
-                            self.config_entry,
-                            data=new_data,
-                            options={},  # Reset options
-                        )
-
-                        # Now reload the entry
-                        await self.hass.config_entries.async_reload(
-                            self.config_entry.entry_id
-                        )
-
-                    except Exception as ex:
-                        _LOGGER.error(f"Error during entry reload: {ex}")
-                        errors["base"] = "reload_failed"
-                        return self.async_show_form(
-                            step_id="device_setup",
-                            data_schema=vol.Schema(data_schema),
-                            errors=errors,
-                        )
-
-                    return self.async_create_entry(title="", data={})
-
-            except Exception as ex:
-                _LOGGER.error(f"Error processing device IPs: {ex}")
-                errors["base"] = "unknown"
-
-        # Create schema using aliases as field names
-        data_schema = {}
-        for device in self._devices["devices"]:
-            alias = device.get("dev_alias") or device["did"]
-            data_schema[
-                vol.Optional(
-                    alias,
-                    default=device.get("lan_ip", ""),
-                )
-            ] = str
-
-        return self.async_show_form(
-            step_id="device_setup",
-            data_schema=vol.Schema(data_schema),
-            description_placeholders={
-                "number_of_devices": len(self._devices["devices"])
-            },
-            errors=errors,
-        )
+            if uid in existing_devices:
+                # Update existing device, keeping fields discovery doesn't
+                # know about (e.g. the configured name)
+                if existing_devices[uid].get("name"):
+                    device_data["name"] = existing_devices[uid]["name"]
+                updated_devices.append(device_data)
+            else:
+                # New device found
+                new_devices.append(device_data)
+        
+        # Add devices that weren't found (keep original data)
+        for uid, device in existing_devices.items():
+            if uid not in found_uids:
+                updated_devices.append(device)
+        
+        # Update config entry
+        new_data = dict(self.config_entry.data)
+        new_data["devices"] = updated_devices + new_devices
+        
+        self.hass.config_entries.async_update_entry(self.config_entry, data=new_data)
+        
+        # Reload the integration to pick up changes
+        await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+        
+        result_message = f"Rediscovery complete. Found {len(found_uids)} devices."
+        if new_devices:
+            result_message += f" Added {len(new_devices)} new devices."
+        
+        return self.async_create_entry(title="", data={}, description=result_message)

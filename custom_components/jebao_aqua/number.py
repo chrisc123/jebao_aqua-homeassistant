@@ -1,95 +1,108 @@
-from homeassistant.components.number import NumberEntity
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from .const import DOMAIN, LOGGER
-from .helpers import (
-    get_device_info,
-    create_entity_name,
-    create_entity_id,
-    create_unique_id,
-    is_device_data_valid,  # Add this import
-    get_attribute_value,  # Add this import
-)
+"""Platform for number entities for Jebao Aqua integration."""
+
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+from homeassistant.components.number import NumberEntity, NumberEntityDescription
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from .entity import JebaoEntity
+from .gizwits_lan.device_status import DeviceStatus
+from .hub import JebaoDevice
+
+_LOGGER = logging.getLogger(__name__)
 
 
-class JebaoPumpNumber(CoordinatorEntity, NumberEntity):
-    """Representation of a Jebao Pump Number Entity."""
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
+    """Set up number entities for a given config entry."""
+    devices: list[JebaoDevice] = entry.runtime_data  # type: ignore
+    if not devices:
+        _LOGGER.warning("No Jebao devices found for entry %s", entry.title)
+        return
 
-    def __init__(self, coordinator, device, attribute):
-        super().__init__(coordinator)
-        self._device = device
-        self._attribute = attribute
-        device_id = device.get("did")
-        device_name = device.get("dev_alias") or device.get("did")
+    entities = []
+    for device in devices:
+        if not device.giz_device:
+            continue
 
-        # Use helper functions for consistent entity properties
-        self._attr_name = create_entity_name(device_name, attribute["display_name"])
-        self._attr_unique_id = create_unique_id(device_id, attribute["name"])
-        self.entity_id = create_entity_id("number", device_name, attribute["name"])
+        # Get device config and allowed attributes
+        device_cfg = device.device_config
+        allowed_number_attrs = set()
+        if device_cfg and "platforms" in device_cfg:
+            allowed_number_attrs = set(device_cfg["platforms"].get("number", []))
 
-        # Set native min, max, step, and unit from the attribute's specification
-        self._attr_native_min_value = attribute["uint_spec"]["min"]
-        self._attr_native_max_value = attribute["uint_spec"]["max"]
-        self._attr_native_step = attribute["uint_spec"].get(
-            "step", 1
-        )  # Default step to 1 if not specified
-        # Set the unit of measurement if applicable
-        self._attr_native_unit_of_measurement = attribute.get("unit")
+        # Create entities for each device's attributes
+        for attr_def in device.giz_device.all_attrs:
+            attr_name = attr_def["name"]
+            if attr_name not in allowed_number_attrs:
+                continue
+            if attr_def.get("type") != "status_writable":
+                continue
+            if attr_def.get("data_type") != "uint8":
+                continue
 
-    @property
-    def available(self) -> bool:
-        """Return if entity is available."""
-        device_data = self.coordinator.device_data.get(self._device["did"])
-        return is_device_data_valid(device_data)
+            entities.append(JebaoNumberEntity(entry, device, attr_def))
 
-    @property
-    def native_value(self):
-        """Return the current value."""
-        device_data = self.coordinator.device_data.get(self._device["did"])
-        value = get_attribute_value(device_data, self._attribute["name"])
-        return value if value is not None else self._attr_native_min_value
+    if entities:
+        async_add_entities(entities)
 
-    async def async_set_native_value(self, value: float):
-        """Set new value."""
-        await self.coordinator.api.control_device(
-            self._device["did"], {self._attribute["name"]: value}
+
+class JebaoNumberEntity(JebaoEntity, NumberEntity):
+    """A number entity for a writable uint8 attribute."""
+
+    def __init__(
+        self, entry: ConfigEntry, device: JebaoDevice, attr_def: dict[str, Any]
+    ) -> None:
+        """Initialize the number entity."""
+        uint_spec = attr_def.get("uint_spec") or {}
+
+        # Create the number specific entity description
+        self.entity_description = NumberEntityDescription(
+            key=attr_def["name"].lower(),
+            name=attr_def.get("name"),
+            native_min_value=uint_spec.get("min", 0),
+            native_max_value=uint_spec.get("max", 255),
+            native_step=1 / uint_spec.get("ratio", 1) if uint_spec.get("ratio") else 1,
         )
-        await self.coordinator.async_request_refresh()
+
+        super().__init__(entry, device, attr_def, "number")
+
+        self._current_value: float | None = None
 
     @property
-    def device_info(self):
-        """Return information about the device this entity belongs to."""
-        return get_device_info(self._device)
+    def native_value(self) -> float | None:
+        """Return the current value."""
+        return self._current_value
 
-    @property
-    def name(self) -> str:
-        """Return the display name of this entity."""
-        return self._attr_name
+    async def async_set_native_value(self, value: float) -> None:
+        """Set new value."""
+        # Clamp within allowed range
+        int_value = int(max(min(value, self.native_max_value), self.native_min_value))
+        await self._device.async_set_attribute(self._attribute_name, int_value)
 
-    @property
-    def has_entity_name(self) -> bool:
-        """Indicate that we are using the device name as the entity name."""
-        return True
+    async def async_added_to_hass(self) -> None:
+        await (
+            super().async_added_to_hass()
+        )  # Call parent to handle connection state callback
+        """Register callback."""
+        self._device.register_status_callback(self._update_state_from_device)
 
-    @property
-    def translation_key(self) -> str:
-        """Return the translation key to use in logbook."""
-        return self._attribute["name"].lower()
+    async def async_will_remove_from_hass(self) -> None:
+        """Unregister callback."""
+        await (
+            super().async_will_remove_from_hass()
+        )  # Call parent to handle connection state
+        self._device.remove_status_callback(self._update_state_from_device)
 
-
-async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up Jebao Pump number entities."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
-    attribute_models = hass.data[DOMAIN][entry.entry_id]["attribute_models"]
-
-    numbers = []
-    for device in coordinator.device_inventory:
-        LOGGER.debug("Device structure: %s", device)
-        product_key = device.get("product_key")
-        model = attribute_models.get(product_key)
-
-        if model:
-            for attr in model["attrs"]:
-                if attr["type"] == "status_writable" and attr["data_type"] == "uint8":
-                    numbers.append(JebaoPumpNumber(coordinator, device, attr))
-
-    async_add_entities(numbers)
+    @callback
+    def _update_state_from_device(self, status: DeviceStatus) -> None:
+        if self._attribute_name not in status.data:
+            return
+        self._current_value = float(status.data[self._attribute_name])
+        self.async_write_ha_state()

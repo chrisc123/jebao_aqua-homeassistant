@@ -1,88 +1,105 @@
+"""Platform for binary sensor entities for Jebao Aqua integration."""
+
+from __future__ import annotations
+
+import logging
+from typing import Any
+
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
+    BinarySensorEntityDescription,
 )
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from .const import DOMAIN, LOGGER
-from .helpers import (
-    get_device_info,
-    create_entity_name,
-    create_entity_id,
-    create_unique_id,
-    is_device_data_valid,
-    get_attribute_value,
-)
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from .entity import JebaoEntity
+from .gizwits_lan.device_status import DeviceStatus
+from .hub import JebaoDevice
+
+_LOGGER = logging.getLogger(__name__)
 
 
-class JebaoPumpSensor(CoordinatorEntity, BinarySensorEntity):
-    """Representation of a Jebao Pump Sensor."""
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
+    """Set up binary sensor entities for a given config entry."""
+    devices: list[JebaoDevice] = entry.runtime_data  # type: ignore
+    if not devices:
+        _LOGGER.warning("No Jebao devices found for entry %s", entry.title)
+        return
 
-    def __init__(self, coordinator, device, attribute):
-        super().__init__(coordinator)
-        self._device = device
-        self._attribute = attribute
-        device_id = device.get("did")
-        device_name = device.get("dev_alias") or device.get("did")
+    entities = []
+    for device in devices:
+        if not device.giz_device:
+            continue
 
-        # Use helper functions for consistent entity properties
-        self._attr_name = create_entity_name(device_name, attribute["display_name"])
-        self._attr_unique_id = create_unique_id(device_id, attribute["name"])
-        self.entity_id = create_entity_id(
-            "binary_sensor", device_name, attribute["name"]
+        # Get device config and allowed attributes
+        device_cfg = device.device_config
+        allowed_binary_sensor_attrs = set()
+        if device_cfg and "platforms" in device_cfg:
+            allowed_binary_sensor_attrs = set(
+                device_cfg["platforms"].get("binary_sensor", [])
+            )
+
+        # Create entities for each device's attributes
+        for attr_def in device.giz_device.all_attrs:
+            attr_name = attr_def["name"]
+            if attr_name not in allowed_binary_sensor_attrs:
+                continue
+            if attr_def.get("type") != "fault":
+                continue
+            if attr_def.get("data_type") != "bool":
+                continue
+
+            entities.append(JebaoFaultSensorEntity(entry, device, attr_def))
+
+    if entities:
+        async_add_entities(entities)
+
+
+class JebaoFaultSensorEntity(JebaoEntity, BinarySensorEntity):
+    """A binary sensor for fault bool attributes."""
+
+    def __init__(
+        self, entry: ConfigEntry, device: JebaoDevice, attr_def: dict[str, Any]
+    ) -> None:
+        """Initialize the fault binary sensor entity."""
+        self.entity_description = BinarySensorEntityDescription(
+            key=attr_def["name"].lower(),
+            name=attr_def.get("name"),
         )
+
+        super().__init__(entry, device, attr_def, "binary_sensor")
+        self._is_on = None
+
+    @property
+    def is_on(self) -> bool:
+        """Return True if fault is present."""
+        return self._is_on
 
     @property
     def device_class(self):
         """Return the class of this device."""
         return BinarySensorDeviceClass.PROBLEM
 
-    @property
-    def is_on(self):
-        """Return True if the binary sensor is on."""
-        device_data = self.coordinator.device_data.get(self._device["did"])
-        return get_attribute_value(device_data, self._attribute["name"]) or False
+    async def async_added_to_hass(self) -> None:
+        """Register callback when entity is added."""
+        await super().async_added_to_hass()  # Call parent to handle connection state
+        self._device.register_status_callback(self._update_state_from_device)
 
-    @property
-    def device_info(self):
-        """Return information about the device this entity belongs to."""
-        return get_device_info(self._device)
+    async def async_will_remove_from_hass(self) -> None:
+        """Unregister callbacks."""
+        await (
+            super().async_will_remove_from_hass()
+        )  # Call parent to handle connection state
+        self._device.remove_status_callback(self._update_state_from_device)
 
-    @property
-    def available(self) -> bool:
-        """Return if entity is available."""
-        device_data = self.coordinator.device_data.get(self._device["did"])
-        return is_device_data_valid(device_data)
-
-    @property
-    def name(self) -> str:
-        """Return the display name of this entity."""
-        return self._attr_name
-
-    @property
-    def has_entity_name(self) -> bool:
-        """Indicate that we are using the device name as the entity name."""
-        return True
-
-    @property
-    def translation_key(self) -> str:
-        """Return the translation key to use in logbook."""
-        return self._attribute["name"].lower()
-
-
-async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up Jebao Pump sensor entities."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
-    attribute_models = hass.data[DOMAIN][entry.entry_id]["attribute_models"]
-
-    sensors = []
-    for device in coordinator.device_inventory:  # Use device_inventory for the setup
-        LOGGER.debug("Device structure: %s", device)
-        product_key = device.get("product_key")
-        model = attribute_models.get(product_key)
-
-        if model:
-            for attr in model["attrs"]:
-                if attr["type"] == "fault" and attr["data_type"] == "bool":
-                    sensors.append(JebaoPumpSensor(coordinator, device, attr))
-
-    async_add_entities(sensors)
+    @callback
+    def _update_state_from_device(self, status: DeviceStatus) -> None:
+        if self._attribute_name not in status.data:
+            return
+        val = status.data[self._attribute_name]
+        self._is_on = bool(val)
+        self.async_write_ha_state()

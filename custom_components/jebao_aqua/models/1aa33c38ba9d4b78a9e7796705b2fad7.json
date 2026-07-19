@@ -1,8 +1,8 @@
 {
-  "name": "滴定泵_有AP校时",
+  "name": "4头滴定泵WiFi_BLE",
   "packetVersion": "0x00000004",
   "protocolType": "standard",
-  "product_key": "25c5b146791f465bbefdbfd312b9e8ea",
+  "product_key": "1aa33c38ba9d4b78a9e7796705b2fad7",
   "entities": [
     {
       "display_name": "机智云开发套件",
@@ -78,8 +78,8 @@
           "desc": "通道4手动开关"
         },
         {
-          "display_name": "定时开关1",
-          "name": "Timer1ON",
+          "display_name": "通道5",
+          "name": "channe5",
           "data_type": "bool",
           "position": {
             "byte_offset": 0,
@@ -89,6 +89,62 @@
           },
           "type": "status_writable",
           "id": 5,
+          "desc": "通道5手动开关"
+        },
+        {
+          "display_name": "通道6",
+          "name": "channe6",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 6
+          },
+          "type": "status_writable",
+          "id": 6,
+          "desc": "通道6手动开关"
+        },
+        {
+          "display_name": "通道7",
+          "name": "channe7",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 7
+          },
+          "type": "status_writable",
+          "id": 7,
+          "desc": "通道7手动开关"
+        },
+        {
+          "display_name": "通道8",
+          "name": "channe8",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 8
+          },
+          "type": "status_writable",
+          "id": 8,
+          "desc": "通道8手动开关"
+        },
+        {
+          "display_name": "定时开关1",
+          "name": "Timer1ON",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 9
+          },
+          "type": "status_writable",
+          "id": 9,
           "desc": "定时器1开关，0：关闭，1：定时"
         },
         {
@@ -99,10 +155,10 @@
             "byte_offset": 0,
             "unit": "bit",
             "len": 1,
-            "bit_offset": 6
+            "bit_offset": 10
           },
           "type": "status_writable",
-          "id": 6,
+          "id": 10,
           "desc": "定时器2开关，0：关闭，1：定时"
         },
         {
@@ -113,10 +169,10 @@
             "byte_offset": 0,
             "unit": "bit",
             "len": 1,
-            "bit_offset": 7
+            "bit_offset": 11
           },
           "type": "status_writable",
-          "id": 7,
+          "id": 11,
           "desc": "定时器3开关，0：关闭，1：定时"
         },
         {
@@ -127,11 +183,67 @@
             "byte_offset": 0,
             "unit": "bit",
             "len": 1,
-            "bit_offset": 8
+            "bit_offset": 12
           },
           "type": "status_writable",
-          "id": 8,
+          "id": 12,
           "desc": "定时器4开关，0：关闭，1：定时"
+        },
+        {
+          "display_name": "定时开关5",
+          "name": "Timer5ON",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 13
+          },
+          "type": "status_writable",
+          "id": 13,
+          "desc": "定时器5开关，0：关闭，1：定时"
+        },
+        {
+          "display_name": "定时开关6",
+          "name": "Timer6ON",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 14
+          },
+          "type": "status_writable",
+          "id": 14,
+          "desc": "定时器6开关，0：关闭，1：定时"
+        },
+        {
+          "display_name": "定时开关7",
+          "name": "Timer7ON",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 15
+          },
+          "type": "status_writable",
+          "id": 15,
+          "desc": "定时器7开关，0：关闭，1：定时"
+        },
+        {
+          "display_name": "定时开关8",
+          "name": "Timer8ON",
+          "data_type": "bool",
+          "position": {
+            "byte_offset": 0,
+            "unit": "bit",
+            "len": 1,
+            "bit_offset": 16
+          },
+          "type": "status_writable",
+          "id": 16,
+          "desc": "定时器8开关，0：关闭，1：定时"
         },
         {
           "display_name": "校准开关",
@@ -141,10 +253,10 @@
             "byte_offset": 0,
             "unit": "bit",
             "len": 1,
-            "bit_offset": 9
+            "bit_offset": 17
           },
           "type": "status_writable",
-          "id": 9,
+          "id": 17,
           "desc": "校准开关"
         },
         {
@@ -155,41 +267,25 @@
             "校准1",
             "校准2",
             "校准3",
-            "校准4"
+            "校准4",
+            "校准5",
+            "校准6",
+            "校准7",
+            "校准8"
           ],
           "position": {
             "byte_offset": 0,
             "unit": "bit",
-            "len": 2,
-            "bit_offset": 10
+            "len": 3,
+            "bit_offset": 18
           },
           "type": "status_writable",
-          "id": 10,
-          "desc": "0:校准1;1:校准2；2:校准3；3:校准4"
+          "id": 18,
+          "desc": "0:校准1;1:校准2；2:校准3；3:校准4;4:校准5;5:校准6；6:校准7；7:校准8"
         },
         {
-          "display_name": "间隙时间1",
-          "name": "IntervalT1",
-          "data_type": "uint8",
-          "position": {
-            "byte_offset": 2,
-            "unit": "byte",
-            "len": 1,
-            "bit_offset": 0
-          },
-          "uint_spec": {
-            "addition": 0,
-            "max": 30,
-            "ratio": 1,
-            "min": 0
-          },
-          "type": "status_writable",
-          "id": 11,
-          "desc": "通道1间隙时间"
-        },
-        {
-          "display_name": "间隙时间2",
-          "name": "IntervalT2",
+          "display_name": "头数量",
+          "name": "channelTTL",
           "data_type": "uint8",
           "position": {
             "byte_offset": 3,
@@ -199,17 +295,17 @@
           },
           "uint_spec": {
             "addition": 0,
-            "max": 30,
+            "max": 8,
             "ratio": 1,
-            "min": 0
+            "min": 1
           },
           "type": "status_writable",
-          "id": 12,
-          "desc": "通道2间隙时间"
+          "id": 19,
+          "desc": "头数量"
         },
         {
-          "display_name": "间隙时间3",
-          "name": "IntervalT3",
+          "display_name": "间隙时间1",
+          "name": "IntervalT1",
           "data_type": "uint8",
           "position": {
             "byte_offset": 4,
@@ -224,12 +320,12 @@
             "min": 0
           },
           "type": "status_writable",
-          "id": 13,
-          "desc": "通道3间隙时间"
+          "id": 20,
+          "desc": "通道1间隙时间"
         },
         {
-          "display_name": "间隙时间4",
-          "name": "IntervalT4",
+          "display_name": "间隙时间2",
+          "name": "IntervalT2",
           "data_type": "uint8",
           "position": {
             "byte_offset": 5,
@@ -244,15 +340,135 @@
             "min": 0
           },
           "type": "status_writable",
-          "id": 14,
+          "id": 21,
+          "desc": "通道2间隙时间"
+        },
+        {
+          "display_name": "间隙时间3",
+          "name": "IntervalT3",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 6,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 30,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 22,
+          "desc": "通道3间隙时间"
+        },
+        {
+          "display_name": "间隙时间4",
+          "name": "IntervalT4",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 7,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 30,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 23,
           "desc": "通道4间隙时间"
+        },
+        {
+          "display_name": "间隙时间5",
+          "name": "IntervalT5",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 8,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 30,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 24,
+          "desc": "通道5间隙时间"
+        },
+        {
+          "display_name": "间隙时间6",
+          "name": "IntervalT6",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 9,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 30,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 25,
+          "desc": "通道6间隙时间"
+        },
+        {
+          "display_name": "间隙时间7",
+          "name": "IntervalT7",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 10,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 30,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 26,
+          "desc": "通道7间隙时间"
+        },
+        {
+          "display_name": "间隙时间8",
+          "name": "IntervalT8",
+          "data_type": "uint8",
+          "position": {
+            "byte_offset": 11,
+            "unit": "byte",
+            "len": 1,
+            "bit_offset": 0
+          },
+          "uint_spec": {
+            "addition": 0,
+            "max": 30,
+            "ratio": 1,
+            "min": 0
+          },
+          "type": "status_writable",
+          "id": 27,
+          "desc": "通道8间隙时间"
         },
         {
           "display_name": "校准量",
           "name": "Calib1",
           "data_type": "uint8",
           "position": {
-            "byte_offset": 6,
+            "byte_offset": 12,
             "unit": "byte",
             "len": 1,
             "bit_offset": 0
@@ -264,7 +480,7 @@
             "min": 10
           },
           "type": "status_writable",
-          "id": 15,
+          "id": 28,
           "desc": "通道校准量"
         },
         {
@@ -272,13 +488,13 @@
           "name": "CH1SWTime",
           "data_type": "binary",
           "position": {
-            "byte_offset": 7,
+            "byte_offset": 13,
             "unit": "byte",
             "len": 96,
             "bit_offset": 0
           },
           "type": "status_writable",
-          "id": 16,
+          "id": 29,
           "desc": "通道1定时时间和流量"
         },
         {
@@ -286,13 +502,13 @@
           "name": "CH2SWTime",
           "data_type": "binary",
           "position": {
-            "byte_offset": 103,
+            "byte_offset": 109,
             "unit": "byte",
             "len": 96,
             "bit_offset": 0
           },
           "type": "status_writable",
-          "id": 17,
+          "id": 30,
           "desc": "通道2定时时间和流量"
         },
         {
@@ -300,13 +516,13 @@
           "name": "CH3SWTime",
           "data_type": "binary",
           "position": {
-            "byte_offset": 199,
+            "byte_offset": 205,
             "unit": "byte",
             "len": 96,
             "bit_offset": 0
           },
           "type": "status_writable",
-          "id": 18,
+          "id": 31,
           "desc": "通道3定时时间和流量"
         },
         {
@@ -314,27 +530,83 @@
           "name": "CH4SWTime",
           "data_type": "binary",
           "position": {
-            "byte_offset": 295,
+            "byte_offset": 301,
             "unit": "byte",
             "len": 96,
             "bit_offset": 0
           },
           "type": "status_writable",
-          "id": 19,
+          "id": 32,
           "desc": "通道4定时时间和流量"
+        },
+        {
+          "display_name": "CH5SWTime",
+          "name": "CH5SWTime",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 397,
+            "unit": "byte",
+            "len": 96,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 33,
+          "desc": "通道5定时时间和流量"
+        },
+        {
+          "display_name": "CH6SWTime",
+          "name": "CH6SWTime",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 493,
+            "unit": "byte",
+            "len": 96,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 34,
+          "desc": "通道6定时时间和流量"
+        },
+        {
+          "display_name": "CH7SWTime",
+          "name": "CH7SWTime",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 589,
+            "unit": "byte",
+            "len": 96,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 35,
+          "desc": "通道7定时时间和流量"
+        },
+        {
+          "display_name": "CH8SWTime",
+          "name": "CH8SWTime",
+          "data_type": "binary",
+          "position": {
+            "byte_offset": 685,
+            "unit": "byte",
+            "len": 96,
+            "bit_offset": 0
+          },
+          "type": "status_writable",
+          "id": 36,
+          "desc": "通道8定时时间和流量"
         },
         {
           "display_name": "日期数据",
           "name": "YMDData",
           "data_type": "binary",
           "position": {
-            "byte_offset": 391,
+            "byte_offset": 781,
             "unit": "byte",
             "len": 4,
             "bit_offset": 0
           },
           "type": "status_writable",
-          "id": 20,
+          "id": 37,
           "desc": "日期, Byte1年千位百位, byte2年十位个位, byte3月, byte4日"
         },
         {
@@ -342,13 +614,13 @@
           "name": "HMSData",
           "data_type": "binary",
           "position": {
-            "byte_offset": 395,
+            "byte_offset": 785,
             "unit": "byte",
             "len": 4,
             "bit_offset": 0
           },
           "type": "status_writable",
-          "id": 21,
+          "id": 38,
           "desc": "时间, Byte1空, byte2时, byte3分, byte4秒"
         },
         {
@@ -356,7 +628,7 @@
           "name": "time1",
           "data_type": "uint8",
           "position": {
-            "byte_offset": 399,
+            "byte_offset": 789,
             "unit": "byte",
             "len": 1,
             "bit_offset": 0
@@ -368,7 +640,7 @@
             "min": 10
           },
           "type": "status_readonly",
-          "id": 22,
+          "id": 39,
           "desc": "补给校准量所需时间,单位秒"
         },
         {
@@ -376,13 +648,13 @@
           "name": "OpenCircuit",
           "data_type": "bool",
           "position": {
-            "byte_offset": 400,
+            "byte_offset": 790,
             "unit": "bit",
             "len": 1,
             "bit_offset": 0
           },
           "type": "alert",
-          "id": 23,
+          "id": 40,
           "desc": "线路断开"
         },
         {
@@ -390,13 +662,13 @@
           "name": "Fault_UART",
           "data_type": "bool",
           "position": {
-            "byte_offset": 401,
+            "byte_offset": 791,
             "unit": "bit",
             "len": 1,
             "bit_offset": 0
           },
           "type": "fault",
-          "id": 24,
+          "id": 41,
           "desc": "模块与主板通讯不上"
         }
       ],
@@ -482,6 +754,58 @@
             "object": {
               "action": "entity0",
               "bind": [
+                "entity0.channe5"
+              ],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.channe5",
+            "title": "通道5"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.channe6"
+              ],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.channe6",
+            "title": "通道6"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.channe7"
+              ],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.channe7",
+            "title": "通道7"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.channe8"
+              ],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.channe8",
+            "title": "通道8"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": [
                 "entity0.Timer1ON"
               ],
               "perm": "W"
@@ -534,6 +858,58 @@
             "object": {
               "action": "entity0",
               "bind": [
+                "entity0.Timer5ON"
+              ],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.Timer5ON",
+            "title": "定时开关5"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.Timer6ON"
+              ],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.Timer6ON",
+            "title": "定时开关6"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.Timer7ON"
+              ],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.Timer7ON",
+            "title": "定时开关7"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.Timer8ON"
+              ],
+              "perm": "W"
+            },
+            "type": "QBooleanElement",
+            "key": "entity0.Timer8ON",
+            "title": "定时开关8"
+          },
+          {
+            "boolValue": false,
+            "object": {
+              "action": "entity0",
+              "bind": [
                 "entity0.CALSW"
               ],
               "perm": "W"
@@ -547,7 +923,11 @@
               "校准1",
               "校准2",
               "校准3",
-              "校准4"
+              "校准4",
+              "校准5",
+              "校准6",
+              "校准7",
+              "校准8"
             ],
             "object": {
               "action": "entity0",
@@ -559,6 +939,27 @@
             "type": "QRadioElement",
             "key": "entity0.CALSet",
             "title": "校准通道"
+          },
+          {
+            "title": "头数量",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.channelTTL"
+              ],
+              "uint_spec": {
+                "max": 8,
+                "step": 1,
+                "min": 1
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.channelTTL",
+            "maximumValue": 8,
+            "minimumValue": 1,
+            "type": "QFloatElement"
           },
           {
             "title": "间隙时间1",
@@ -645,6 +1046,90 @@
             "type": "QFloatElement"
           },
           {
+            "title": "间隙时间5",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.IntervalT5"
+              ],
+              "uint_spec": {
+                "max": 30,
+                "step": 1,
+                "min": 0
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.IntervalT5",
+            "maximumValue": 30,
+            "minimumValue": 0,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "间隙时间6",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.IntervalT6"
+              ],
+              "uint_spec": {
+                "max": 30,
+                "step": 1,
+                "min": 0
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.IntervalT6",
+            "maximumValue": 30,
+            "minimumValue": 0,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "间隙时间7",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.IntervalT7"
+              ],
+              "uint_spec": {
+                "max": 30,
+                "step": 1,
+                "min": 0
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.IntervalT7",
+            "maximumValue": 30,
+            "minimumValue": 0,
+            "type": "QFloatElement"
+          },
+          {
+            "title": "间隙时间8",
+            "bind": "floatValue:float",
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.IntervalT8"
+              ],
+              "uint_spec": {
+                "max": 30,
+                "step": 1,
+                "min": 0
+              },
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.IntervalT8",
+            "maximumValue": 30,
+            "minimumValue": 0,
+            "type": "QFloatElement"
+          },
+          {
             "title": "校准量",
             "bind": "floatValue:float",
             "object": {
@@ -722,6 +1207,66 @@
             },
             "value": 0,
             "key": "entity0.CH4SWTime",
+            "maxLength": 192,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "CH5SWTime",
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.CH5SWTime"
+              ],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.CH5SWTime",
+            "maxLength": 192,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "CH6SWTime",
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.CH6SWTime"
+              ],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.CH6SWTime",
+            "maxLength": 192,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "CH7SWTime",
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.CH7SWTime"
+              ],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.CH7SWTime",
+            "maxLength": 192,
+            "type": "QMultilineElement"
+          },
+          {
+            "keyboardType": "NumbersAndPunctuation",
+            "title": "CH8SWTime",
+            "object": {
+              "action": "entity0",
+              "bind": [
+                "entity0.CH8SWTime"
+              ],
+              "perm": "W"
+            },
+            "value": 0,
+            "key": "entity0.CH8SWTime",
             "maxLength": 192,
             "type": "QMultilineElement"
           },

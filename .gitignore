@@ -1,0 +1,32 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+
+# Home Assistant specific
+.storage
+.cloud
+.HA_VERSION
+
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Claude Code session tooling
+.claude/
+skills-lock.json

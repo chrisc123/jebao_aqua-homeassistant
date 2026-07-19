@@ -1,100 +1,100 @@
 # Home Assistant Custom Integration: Jebao Aquarium Pumps
 
-> [!IMPORTANT]
-> **A major new version is available for beta testing — see the [latest pre-release](https://github.com/chrisc123/jebao_aqua-homeassistant/releases)** (developed on the [`dev` branch](https://github.com/chrisc123/jebao_aqua-homeassistant/tree/dev)). It's a ground-up rework: fully local, push-based control by default (instant updates, no cloud), an optional cloud mode, support for the newer Wi-Fi+BLE (ESP32-C3) hardware, new device support including dosing pumps, and automatic migration from v0.1.x that preserves your entities and automations.
->
-> **Testers wanted — especially dosing pump owners** (MD-4.4 / Doser 2.4 / MD-4.5): doser support is community-contributed and I don't own one to test with, so real-hardware feedback is essential before this becomes the stable release. Please report results (good or bad) via [issues](https://github.com/chrisc123/jebao_aqua-homeassistant/issues).
->
-> **To install the beta via HACS:** open **Jebao Aqua** in HACS → **⋮** menu → **Redownload** → enable **Show beta versions** → select the latest beta, then restart Home Assistant. To revert, repeat and select the previous version.
-
 ![Logo](jebao-m-series-pump-controller.png)
 
-This custom integration for Home Assistant allows users to control and monitor certain models of Wi-Fi enabled Jebao Aquarium Wavemakers/Pumps. Currently tested with the M series devices (with white and purple controller), though in theory it should be possible to get working with any device that supports Wi-Fi and makes use of the "Jebao Aqua" app for control.
+This custom integration for Home Assistant allows you to control and monitor Wi-Fi enabled Jebao/Jecod aquarium devices — wavemakers, return/DC pumps, dosing pumps, and LED lights — anything set up through the "Jebao Aqua" app.
 
-The integration currently polls devices via the LAN for status updates but uses the Gizwits Cloud API for remote control.
-
-_Note: I'm not a developer. This code was almost entirely written by ChatGPT based on my packet captures, the Gizwits documentation and some resources from the mobile app APK. I now realise it doesn't conform to established practices for Home Assistant to directly interface with the API from an integration, but it does work!_
+By default the integration runs **fully locally** using push-based updates: state changes arrive instantly over your LAN with no cloud dependency. An optional **cloud mode** is available for setups where the devices are not reachable from Home Assistant over the local network (polls the Gizwits cloud every 30 seconds).
 
 ## Compatibility
-> [!IMPORTANT]
-> As of late 2024, it seems two different hardware versions of some model series may be available. The newer versions include support for Bluetooth (BLE) in addition to WiFi and use an ESP32C3 microcontroller rather than the legacy ESP8266.
-> The WiFi+BLE devices do not yet work with this plugin - I'm investigating what's changed in the communication protocol and hope to add support soon.
 
-| Device Model            | Compatibility  |
-|-------------------------|----------------|
-| Jebao MCP Series Crossflow Wavemaker | ✅ Tested and working |
-| Jebao MCP Series Crossflow Wavemaker | ✅ Tested and working |
-| Jebao MLW Series Wavemaker      | ✅ Tested and working |
-| Jebao SLW Series Wavemaker      | ⚠️ Added but not confirmed working |
-| Jebao EP Series Pump | ⚠️ Added but not confirmed working  |
-| Jebao Smart Doser 3.1 | ✅ Added by @jeffcybulski |
-| Jebao MD 4.4 Dosing Pump | ✅ Added by @jeffcybulski |
-| Jebao MD 2.4 Dosing Pump | ✅ Added by @joluan01 |
-| Any WiFi+Bluetooth enabled Jebao device | ❌ Not working but under investigation | 
-| Other Jeabo Pumps | Not tested |
+**Requires Home Assistant 2024.12 or newer.**
 
+Both hardware generations are supported:
 
-## Background
-* The pump control unit houses an Espressif ESP8266 microcontroller, this is running a version of the [Gizwits GAgent](https://docs.gizwits.com/en-us/DeviceDev/GAgent.html#Features) code.
-* Both the mobile app and pumps appear to communicate exclusively with Gizwits cloud - there is no indication of any Jebao specific infrastructure in use.
-* Gizwits is, apparently, "The largest IoT development platform in Asia" - The [Bestway/Lay-Z-Spa](https://github.com/cdpuk/ha-bestway) and [PH-803W pH Controller](https://github.com/dala318/python_ph803w) projects are a examples of other Home Assistant integrations that interact with Gizwits platform via cloud and local methods, respectively. 
-* TODO - To devices appear to use some form of unencrypted MQTT between device and cloud - have a feeling it _might_ be possible to reconfigure the devices to point to arbitrary MQTT server instead (as part of the onboarding process involves binding the devices to the appropriate regional (EU/US/Asia?) Gizwits cloud).
-* Explain 'bindings', 'datapoint', 'devdata' and 'control' API endpoints. 
-* Local interface on TCP/12416 - cloud helpfully provides payload structure
-  
+- **Legacy Wi-Fi devices** (ESP8266-based, white/purple controllers)
+- **Newer Wi-Fi + Bluetooth (BLE) devices** (ESP32-C3-based, sold from ~late 2024)
 
-## Why?
-Although these pumps are fairly quiet, I wanted integration with Home Assistant to be able to easily turn the flow rate (and consequently noise) down in certain circumstances. The fact we can also monitor for fault conditions on the pumps is also helpful. 
+| Device type | Examples | Status |
+|---|---|---|
+| Wavemakers | M/MW series, SLW, and the MLW / ALW / MCP / ELW family (incl. Wi-Fi+BLE) | Tested (MLW20/ALW20 user-confirmed; MCP/ELW share the same product platform, retests welcome) |
+| Return / DC pumps | EP series, MDP series, MDW series (incl. Wi-Fi+BLE) | Reported working by users |
+| Dosing pumps | MD-4.4 (incl. Wi-Fi+BLE), Doser 2.4 / 3.4 (4-channel), MD-4.5 (5-channel, Wi-Fi+BLE) | **Beta — see caution below** |
+| LED lights | Local-timer LED models (e.g. AL-150 family) | **Beta — recently fixed, testers wanted** |
+| 5th-generation "G" series | GLW, GMP, GOW, etc. | **Untested — owner feedback wanted!** |
+
+Identical rebadged Jebao hardware sold under other brand names also works — e.g. the **Aqua Medic DC Runner x.3 series** (supported since v0.4.4-beta).
+
+> [!NOTE]
+> **Do you own a 5th-generation "G" series device (GLW wavemaker, GMP pump, GOW crossflow, …)?** These are new and completely untested with this integration — nobody has reported yet whether they work. Please try the integration and [open an issue](https://github.com/chrisc123/jebao_aqua-homeassistant/issues) with your results either way. If the device isn't recognised, include the product key from the log (see below) — that's usually all that's needed to add support.
+
+> [!CAUTION]
+> **Dosing pump support is community-contributed and not tested by the maintainer** (I don't own a doser). The model definitions, protocol handling for these devices, and the dosing schedule sensors are based on pull requests and protocol captures from users who do ([#54](https://github.com/chrisc123/jebao_aqua-homeassistant/pull/54), [#49](https://github.com/chrisc123/jebao_aqua-homeassistant/pull/49)). Exercise caution: verify switches and schedules do what you expect before relying on them — a misbehaving doser can harm livestock. Feedback and issue reports from doser owners are very welcome.
+
+### Adding support for a new device
+
+If your device isn't recognised (log shows `Device definition not found`), support can usually be added quickly — the device's *product key* (a 32-character hex string) is all that's needed, since the full device definition can be fetched from the Gizwits API using it. Please [open an issue](https://github.com/chrisc123/jebao_aqua-homeassistant/issues) including the product key and your device's model name.
+
+**Where to find the product key:**
+
+- **In the error itself** — the `Device definition not found: .../models/<product_key>.json` log message contains it.
+- **In the discovery log** — enable debug logging for `custom_components.jebao_aqua` (Settings → Devices & Services → Jebao Aqua → Enable debug logging), reload the integration, and look for lines like `Found device: ip=... mac=... uid=... product_key=...`.
 
 ## Features
 
-- Control Jebao Aquarium Pumps remotely via the Gizwits API.
-- Poll device status locally for real-time updates (primarily so that we don't annoy Gizwits with excessive requests, but also provides faster response to control commands).
-- Supports various entities like switches, sensors, selectors, and numeric inputs for comprehensive control.
-- Does not support the native 'scheduling' features that the app has - just use HA instead.
-
-TODO:
-- LAN IP Auto discovery - this is easy to do at a protocol level, just need to figure out how to get a Home Assistant integration to listen for UDP packets on a given port.
-- Local Control - In theory it would be more robust to avoid interacting with the Gizwits API at all. Currently we use the local interface for _polling_ but not for _control_. Need to check: https://github.com/tancou/jebao-dosing-pump-md-4.4 and associated https://github.com/Apollon77/node-ph803w as now realise they have already done this...
+- Instant, push-based state updates over the LAN (no polling, no cloud) — or optional cloud mode where LAN access isn't possible.
+- Switches, mode selectors, flow/speed controls, and fault sensors per device.
+- Dosing pumps: per-channel schedule sensors showing the next upcoming dose and daily dose volume (read-only; schedules are still programmed in the app).
+- Automatic recovery when a device's IP address changes (e.g. DHCP lease renewal) — devices are re-discovered by their unique ID and reconnected.
+- Native app scheduling is not replicated (beyond enabling/disabling a programmed schedule) — Home Assistant automations are usually the better tool.
 
 ## Installation
 
-### Manual Installation
+1. Set the devices up with the Jebao Aqua app first, connected to a Wi-Fi network routable from your Home Assistant installation.
+2. Install via [HACS](https://hacs.xyz/) (or copy `custom_components/jebao_aqua/` into your config manually).
+3. Add the **Jebao Aqua** integration from the Home Assistant integrations dashboard.
+4. Choose your connection mode:
+   - **Local control (recommended):** devices on your network are discovered automatically; you can also add one manually by IP.
+   - **Cloud control:** sign in with your Jebao Aqua app account and devices are imported from the cloud.
 
-1. The pumps must already be setup with the Jebao Aqua app and connected to a Wi-Fi network that is routable from your Home Assistant installation.
-2. Note down the local IP addresses of your pumps using the app (from the individual pump control interface enter the "Settings" menu via icon in top right, then view "Device Information")
-3. Use HACS or clone the repo locally to install the integration code to /custom_components/
-4. Add the "Jebao Aqua Aquarium Pump" integration via Home Assistant integrations dashboard, you'll be prompted to enter the login details for the Jebao Aqua app. The integration should then discover the devices linked to your account and ask you to provide the local IP for each. 
+You can switch between local and cloud mode at any time from the integration's **Configure** menu — entities keep their identity across the switch.
 
-### Configuration
+### Beta versions
 
-TODO - Explain how to create the JSON file for your specific pump model (is this necessary. need to test with more models!), explain how the JSON for each pump model needs to be obtained from Gizwits '/app/datapoint' endpoint and which Chinese strings need to be translated. Or perhaps we can just bulk download these - we do know what the app tries to check...
+Pre-release versions are published as GitHub pre-releases and are **not** installed automatically. To try them in HACS: open the integration in HACS → ⋮ menu → **Redownload** → enable **Show beta versions** and pick the pre-release.
 
+## Removal
 
-## Usage
+1. Go to **Settings → Devices & Services**, open the **Jebao Aqua** integration, and delete it. This removes all its devices and entities, and deletes any stored data — including cloud login credentials if you used cloud mode.
+2. If installed via HACS, remove the repository from HACS to delete the integration files, then restart Home Assistant.
 
-Once installed and configured, the integration allows you to:
+The devices themselves are unaffected and continue to work with the Jebao Aqua app.
 
-- Turn pumps on and off.
-- Adjust flow, frequency settings, mode. 
-- Monitor status and any fault indicators.
+## Upgrading from v0.1.x
 
-## Unsupported device? Provide the product key
+v0.4.0 migrates old installs automatically: config entries, devices, entities, and their `entity_id`s are preserved, so automations and dashboards keep working. Installs that were running cloud-only (no LAN IPs configured) are migrated to the new cloud mode automatically. Cloud login credentials from v0.1.x are no longer used in local mode and are removed from storage during migration.
 
-If your device shows up but gets no entities (or you see `Invalid product key or missing attribute model` in the logs), support can usually be added quickly — all that's needed is the device's **product key**, a 32-character hex string that identifies the model. The full device definition can then be fetched from the Gizwits API using that key.
+## Background
 
-To find it:
+- The pump control unit houses an Espressif ESP8266 (newer models: ESP32-C3) running a version of the [Gizwits GAgent](https://docs.gizwits.com/en-us/DeviceDev/GAgent.html#Features) firmware.
+- Both the mobile app and pumps communicate with the Gizwits cloud — there is no Jebao-specific infrastructure — and the devices expose the standard Gizwits LAN protocol, which this integration speaks directly.
+- Gizwits is, apparently, "The largest IoT development platform in Asia" — the [Bestway/Lay-Z-Spa](https://github.com/cdpuk/ha-bestway) and [PH-803W pH Controller](https://github.com/dala318/python_ph803w) projects are examples of other Home Assistant integrations that interact with the Gizwits platform via cloud and local methods, respectively.
+- Comprehensive documentation on the Gizwits protocol is available from the [node-ph803w](https://github.com/Apollon77/node-ph803w/blob/main/PROTOCOL.md) project.
 
-1. Enable debug logging for the integration — either via **Settings → Devices & Services → Jebao Aqua → Enable debug logging**, or by adding to `configuration.yaml`:
-   ```yaml
-   logger:
-     logs:
-       custom_components.jebao_aqua: debug
-   ```
-2. Reload the integration and check the Home Assistant logs for your device — the product key appears in the device list output (look for `"product_key": "..."` next to your device's name) and in any `Invalid product key or missing attribute model for product key: ...` error.
-3. [Open an issue](https://github.com/chrisc123/jebao_aqua-homeassistant/issues) including the product key and your device's model name.
+## Why?
+
+Although these pumps are fairly quiet, I wanted integration with Home Assistant to be able to easily turn the flow rate (and consequently noise) down in certain circumstances. The fact we can also monitor for fault conditions on the pumps is also helpful.
 
 ## Troubleshooting
 
-If you encounter issues, enable Debug logging, and check the Home Assistant logs. You can also raise an issue in this repository.
+If you encounter issues, enable debug logging for `custom_components.jebao_aqua` and check the Home Assistant logs. You can also raise an issue in this repository.
 
+## Credits
+
+Device support and fixes contributed by the community, including
+[@franknh-design](https://github.com/franknh-design) and tewing (MD-4.5 doser),
+[@Sangoku](https://github.com/Sangoku) (dosing schedule sensors, MLW fixes),
+[@XavierTerrell](https://github.com/XavierTerrell) (cloud-mode fixes),
+[@cp296944](https://github.com/cp296944), [@rbickel](https://github.com/rbickel),
+[@jeffcybulski](https://github.com/jeffcybulski), [@gcosta74](https://github.com/gcosta74),
+and [@joluan01](https://github.com/joluan01).
