@@ -127,6 +127,10 @@ class JebaoSelectEntity(JebaoEntity, SelectEntity):
                 index = self._device_options.index(raw)
             elif raw in self._attr_options:
                 index = self._attr_options.index(raw)
+            elif raw.isdigit():
+                # Some firmware/cloud combinations report the index as a
+                # numeric string.
+                index = int(raw)
 
         self._current_option = (
             self._attr_options[index]
