@@ -8,6 +8,8 @@ By default the integration runs **fully locally** using push-based updates: stat
 
 ## Compatibility
 
+**Requires Home Assistant 2024.12 or newer.**
+
 Both hardware generations are supported:
 
 - **Legacy Wi-Fi devices** (ESP8266-based, white/purple controllers)
@@ -15,10 +17,16 @@ Both hardware generations are supported:
 
 | Device type | Examples | Status |
 |---|---|---|
-| Wavemakers | M/MW series, SLW, MLW series (incl. Wi-Fi+BLE) | Tested |
-| Return / DC pumps | EP series, MDP series (incl. Wi-Fi+BLE) | Reported working by users |
-| Dosing pumps | MD-4.4, Doser 2.4 (4-channel), MD-4.5 (5-channel, Wi-Fi+BLE) | **Beta — see caution below** |
-| LED lights | Local-timer LED models | Reported working by users |
+| Wavemakers | M/MW series, SLW, and the MLW / ALW / MCP / ELW family (incl. Wi-Fi+BLE) | Tested (MLW20/ALW20 user-confirmed; MCP/ELW share the same product platform, retests welcome) |
+| Return / DC pumps | EP series, MDP series, MDW series (incl. Wi-Fi+BLE) | Reported working by users |
+| Dosing pumps | MD-4.4 (incl. Wi-Fi+BLE), Doser 2.4 / 3.4 (4-channel), MD-4.5 (5-channel, Wi-Fi+BLE) | **Beta — see caution below** |
+| LED lights | Local-timer LED models (e.g. AL-150 family) | **Beta — recently fixed, testers wanted** |
+| 5th-generation "G" series | GLW, GMP, GOW, etc. | **Untested — owner feedback wanted!** |
+
+Identical rebadged Jebao hardware sold under other brand names also works — e.g. the **Aqua Medic DC Runner x.3 series** (supported since v0.4.4-beta).
+
+> [!NOTE]
+> **Do you own a 5th-generation "G" series device (GLW wavemaker, GMP pump, GOW crossflow, …)?** These are new and completely untested with this integration — nobody has reported yet whether they work. Please try the integration and [open an issue](https://github.com/chrisc123/jebao_aqua-homeassistant/issues) with your results either way. If the device isn't recognised, include the product key from the log (see below) — that's usually all that's needed to add support.
 
 > [!CAUTION]
 > **Dosing pump support is community-contributed and not tested by the maintainer** (I don't own a doser). The model definitions, protocol handling for these devices, and the dosing schedule sensors are based on pull requests and protocol captures from users who do ([#54](https://github.com/chrisc123/jebao_aqua-homeassistant/pull/54), [#49](https://github.com/chrisc123/jebao_aqua-homeassistant/pull/49)). Exercise caution: verify switches and schedules do what you expect before relying on them — a misbehaving doser can harm livestock. Feedback and issue reports from doser owners are very welcome.
