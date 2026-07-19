@@ -3,9 +3,21 @@
     "wavemaker_default": {
       "device_type": "wavemaker",
       "platforms": {
-        "switch": ["SwitchON", "PulseTide", "FeedSwitch", "TimerON"],
-        "number": ["Flow", "Frequency", "FeedTime"],
-        "select": ["Mode", "Linkage"],
+        "switch": [
+          "SwitchON",
+          "PulseTide",
+          "FeedSwitch",
+          "TimerON"
+        ],
+        "number": [
+          "Flow",
+          "Frequency",
+          "FeedTime"
+        ],
+        "select": [
+          "Mode",
+          "Linkage"
+        ],
         "binary_sensor": [
           "Fault_Overcurrent",
           "Fault_Overvoltage",
@@ -38,8 +50,15 @@
           "FeedSwitch",
           "FeedTimer"
         ],
-        "number": ["flow", "frequency", "FeedTime", "nightflow"],
-        "select": ["mode"],
+        "number": [
+          "flow",
+          "frequency",
+          "FeedTime",
+          "nightflow"
+        ],
+        "select": [
+          "mode"
+        ],
         "binary_sensor": [
           "Fault_Overcurrent",
           "Fault_Overvoltage",
@@ -54,9 +73,19 @@
     "returnpump_default": {
       "device_type": "returnpump",
       "platforms": {
-        "switch": ["SwitchON", "FeedSwitch", "TimerON", "Mode"],
-        "select": ["AutoMode"],
-        "number": ["Motor_Speed", "FeedTime"],
+        "switch": [
+          "SwitchON",
+          "FeedSwitch",
+          "TimerON",
+          "Mode"
+        ],
+        "select": [
+          "AutoMode"
+        ],
+        "number": [
+          "Motor_Speed",
+          "FeedTime"
+        ],
         "binary_sensor": [
           "Fault_Overcurrent",
           "Fault_Overvoltage",
@@ -80,9 +109,19 @@
     "35abf13fa5444553b4a7cd0d184f3430": {
       "inherits": "returnpump_default"
     },
+    "00276aa006684c05805c297f60058c3d": {
+      "inherits": "returnpump_default"
+    },
     "bd0febe99e724e3b8640ed955cd81972": {
-      "switch": ["Switch", "FeedSwitch", "TimerON"],
-      "number": ["Motor_Speed", "FeedTime"],
+      "switch": [
+        "Switch",
+        "FeedSwitch",
+        "TimerON"
+      ],
+      "number": [
+        "Motor_Speed",
+        "FeedTime"
+      ],
       "binary_sensor": [
         "Fault_Overcurrent",
         "Fault_Overvoltage",
@@ -96,8 +135,13 @@
     "cf4aaef856b84f6ea9cea29030eff19b": {
       "device_type": "light",
       "platforms": {
-        "switch": ["switch", "Timer"],
-        "select": ["mode"],
+        "switch": [
+          "switch",
+          "Timer"
+        ],
+        "select": [
+          "mode"
+        ],
         "light": [
           "color_blue1",
           "color_white",
@@ -114,15 +158,29 @@
           "color_red",
           "volor_violet"
         ],
-        "binary_sensor": ["OverTemp", "OverCurrent", "Fault_Fan", "Fault_UART"]
+        "binary_sensor": [
+          "OverTemp",
+          "OverCurrent",
+          "Fault_Fan",
+          "Fault_UART"
+        ]
       }
     },
     "031f8753d7ad47a4bf46d89b17f40282": {
       "device_type": "doser",
       "platforms": {
-        "switch": ["switch", "channe1", "Timer1ON"],
-        "number": ["IntervalT1"],
-        "binary_sensor": ["OpenCircuit", "Fault_UART"]
+        "switch": [
+          "switch",
+          "channe1",
+          "Timer1ON"
+        ],
+        "number": [
+          "IntervalT1"
+        ],
+        "binary_sensor": [
+          "OpenCircuit",
+          "Fault_UART"
+        ]
       }
     },
     "25c5b146791f465bbefdbfd312b9e8ea": {
@@ -139,8 +197,16 @@
           "Timer3ON",
           "Timer4ON"
         ],
-        "number": ["IntervalT1", "IntervalT2", "IntervalT3", "IntervalT4"],
-        "binary_sensor": ["OpenCircuit", "Fault_UART"]
+        "number": [
+          "IntervalT1",
+          "IntervalT2",
+          "IntervalT3",
+          "IntervalT4"
+        ],
+        "binary_sensor": [
+          "OpenCircuit",
+          "Fault_UART"
+        ]
       }
     },
     "5b3c136fd4b74f3fb2a366a254c76c9a": {
@@ -165,8 +231,13 @@
           "IntervalT4",
           "Calib1"
         ],
-        "select": ["CALSet"],
-        "binary_sensor": ["OpenCircuit", "Fault_UART"]
+        "select": [
+          "CALSet"
+        ],
+        "binary_sensor": [
+          "OpenCircuit",
+          "Fault_UART"
+        ]
       }
     },
     "1aa33c38ba9d4b78a9e7796705b2fad7": {
@@ -192,8 +263,13 @@
           "Calib1",
           "channelTTL"
         ],
-        "select": ["CALSet"],
-        "binary_sensor": ["OpenCircuit", "Fault_UART"]
+        "select": [
+          "CALSet"
+        ],
+        "binary_sensor": [
+          "OpenCircuit",
+          "Fault_UART"
+        ]
       }
     },
     "5ab6019f2dbb4ae7a42b48d2b8ce0530": {
@@ -213,9 +289,22 @@
           "Timer5ON",
           "CALSW"
         ],
-        "number": ["IntervalT1", "IntervalT2", "IntervalT3", "IntervalT4", "IntervalT5", "Calib1", "channelTTL"],
-        "select": ["CALSet"],
-        "binary_sensor": ["OpenCircuit", "Fault_UART"]
+        "number": [
+          "IntervalT1",
+          "IntervalT2",
+          "IntervalT3",
+          "IntervalT4",
+          "IntervalT5",
+          "Calib1",
+          "channelTTL"
+        ],
+        "select": [
+          "CALSet"
+        ],
+        "binary_sensor": [
+          "OpenCircuit",
+          "Fault_UART"
+        ]
       }
     }
   }
