@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import base64
 import json
 import logging
 from pathlib import Path
 import re
+from typing import Any
 
 import voluptuous as vol
 
@@ -31,10 +33,13 @@ _LOGGER = logging.getLogger(__name__)
 CONFIG_ENTRY_VERSION = 2
 # Service name exposed as jebao_aqua.set_doser_schedule
 SERVICE_SET_DOSER_SCHEDULE = "set_doser_schedule"
+SERVICE_ADJUST_DOSER_SCHEDULE_TOTAL = "adjust_doser_schedule_total"
 # CHxSWTime uses a fixed 96-byte payload in all known doser models.
 SCHEDULE_BYTES_LEN = 96
 # 96 bytes = 12 blocks * 8 bytes, each block holds 2 schedule slots.
 MAX_DOSER_SLOTS = 24
+MIN_DOSER_SLOT_ML = 1
+MAX_DOSER_SLOT_ML = 255
 
 
 def _validate_schedule_service_target(data: dict) -> dict:
@@ -45,6 +50,23 @@ def _validate_schedule_service_target(data: dict) -> dict:
     # For UID-only calls we cannot infer the channel, so require it explicitly.
     if data.get("device_uid") and not data.get("entity_id") and "channel" not in data:
         raise vol.Invalid("channel is required when entity_id is not provided")
+    return data
+
+
+def _validate_adjust_service_request(data: dict) -> dict:
+    """Validate request shape for doser total adjustments."""
+    if not data.get("device_uid") and not data.get("entity_id"):
+        raise vol.Invalid("Either device_uid or entity_id is required")
+
+    has_channel = "channel" in data
+    has_channels = "channels" in data
+    if has_channel and has_channels:
+        raise vol.Invalid("Use either channel or channels, not both")
+
+    has_delta_ml = "delta_ml" in data
+    has_delta_percent = "delta_percent" in data
+    if has_delta_ml == has_delta_percent:
+        raise vol.Invalid("Provide exactly one of delta_ml or delta_percent")
     return data
 
 
@@ -62,6 +84,28 @@ SET_DOSER_SCHEDULE_SCHEMA = vol.All(
         }
     ),
     _validate_schedule_service_target,
+)
+
+
+ADJUST_DOSER_SCHEDULE_TOTAL_SCHEMA = vol.All(
+    vol.Schema(
+        {
+            vol.Optional("device_uid"): cv.string,
+            vol.Optional("entity_id"): cv.entity_id,
+            vol.Optional("channel"): vol.All(vol.Coerce(int), vol.Range(min=1, max=8)),
+            vol.Optional("channels"): [
+                vol.All(vol.Coerce(int), vol.Range(min=1, max=8))
+            ],
+            vol.Optional("delta_ml"): vol.Coerce(int),
+            vol.Optional("delta_percent"): vol.Coerce(float),
+            vol.Optional("fill_empty_first", default=True): cv.boolean,
+            vol.Optional("enable_timer"): cv.boolean,
+            vol.Optional("interval_days"): vol.All(
+                vol.Coerce(int), vol.Range(min=0, max=30)
+            ),
+        }
+    ),
+    _validate_adjust_service_request,
 )
 
 
@@ -129,6 +173,180 @@ def _build_schedule_blob(slots: list[dict]) -> bytes:
         payload[base + 3] = ml
 
     return bytes(payload)
+
+
+def _schedule_to_bytes(raw: Any) -> bytes | None:
+    """Normalize a CHxSWTime value to bytes."""
+    if raw is None:
+        return None
+    if isinstance(raw, (bytes, bytearray)):
+        return bytes(raw)
+    if isinstance(raw, str):
+        value = raw.strip()
+        try:
+            return bytes.fromhex(value)
+        except ValueError:
+            try:
+                return base64.b64decode(value, validate=True)
+            except Exception:
+                return None
+    return None
+
+
+def _parse_schedule_from_attr(raw: Any) -> list[dict[str, int]]:
+    """Parse CHxSWTime payload into slot dictionaries sorted by time."""
+    data = _schedule_to_bytes(raw)
+    if not data or not any(data):
+        return []
+
+    parsed: list[dict[str, int]] = []
+    for i in range(0, min(len(data), SCHEDULE_BYTES_LEN) - 7, 8):
+        block = data[i : i + 8]
+        if not any(block):
+            break
+
+        for hour, minute, dose_ml in (
+            (block[0], block[1], block[3]),
+            (block[4], block[5], block[7]),
+        ):
+            if 0 <= hour <= 23 and 0 <= minute <= 59 and dose_ml > 0:
+                parsed.append(
+                    {"hour": int(hour), "minute": int(minute), "dose_ml": int(dose_ml)}
+                )
+
+    parsed.sort(key=lambda s: (s["hour"], s["minute"]))
+    return parsed
+
+
+def _pick_uniform_positions(total: int, pick: int) -> list[int]:
+    """Pick evenly-spaced positions across a fixed-size list."""
+    if pick <= 0 or total <= 0:
+        return []
+    if pick >= total:
+        return list(range(total))
+    return [int(i * total / pick) for i in range(pick)]
+
+
+def _new_slot_times(existing_slots: list[dict[str, int]], count: int) -> list[tuple[int, int]]:
+    """Return uniformly spaced empty slot times for newly created entries."""
+    used = {(slot["hour"], slot["minute"]) for slot in existing_slots}
+    candidates = [(hour, 0) for hour in range(24) if (hour, 0) not in used]
+    if count > len(candidates):
+        raise HomeAssistantError("Not enough empty slot times available")
+    positions = _pick_uniform_positions(len(candidates), count)
+    return [candidates[pos] for pos in positions]
+
+
+def _normalize_channels(
+    data: dict[str, Any], inferred_channel: int | None
+) -> list[int]:
+    """Resolve requested channels from channel/channels/entity inference."""
+    channels: list[int]
+    if data.get("channels"):
+        channels = [int(ch) for ch in data["channels"]]
+    elif data.get("channel") is not None:
+        channels = [int(data["channel"])]
+    elif inferred_channel is not None:
+        channels = [inferred_channel]
+    else:
+        raise HomeAssistantError(
+            "channel/channels is required when channel cannot be inferred from entity_id"
+        )
+
+    if inferred_channel is not None and data.get("channels"):
+        if inferred_channel not in channels:
+            raise HomeAssistantError(
+                "Selected entity channel does not match the provided channels"
+            )
+
+    # Keep order and remove duplicates.
+    unique_channels: list[int] = []
+    for ch in channels:
+        if ch not in unique_channels:
+            unique_channels.append(ch)
+    return unique_channels
+
+
+def _apply_volume_delta_to_slots(
+    current_slots: list[dict[str, int]],
+    delta_ml: int,
+    fill_empty_first: bool,
+) -> list[dict[str, int]]:
+    """Adjust slot doses by signed mL delta, preserving schedule ordering."""
+    slots = [dict(slot) for slot in current_slots]
+    if delta_ml == 0:
+        return slots
+
+    if delta_ml > 0:
+        remaining = delta_ml
+
+        if fill_empty_first and len(slots) < MAX_DOSER_SLOTS:
+            to_create = min(remaining, MAX_DOSER_SLOTS - len(slots))
+            for hour, minute in _new_slot_times(slots, to_create):
+                slots.append({"hour": hour, "minute": minute, "dose_ml": MIN_DOSER_SLOT_ML})
+            remaining -= to_create
+
+        if not slots:
+            raise HomeAssistantError("Could not allocate schedule slots for positive delta")
+
+        idx = 0
+        while remaining > 0:
+            progressed = False
+            for _ in range(len(slots)):
+                pos = idx % len(slots)
+                idx += 1
+                if slots[pos]["dose_ml"] >= MAX_DOSER_SLOT_ML:
+                    continue
+                slots[pos]["dose_ml"] += 1
+                remaining -= 1
+                progressed = True
+                if remaining == 0:
+                    break
+            if not progressed:
+                raise HomeAssistantError(
+                    "Cannot apply positive delta: all slots reached maximum dose"
+                )
+
+        slots.sort(key=lambda s: (s["hour"], s["minute"]))
+        return slots
+
+    removal = abs(delta_ml)
+    total_volume = sum(slot["dose_ml"] for slot in slots)
+    if removal > total_volume:
+        raise HomeAssistantError(
+            f"Cannot remove {removal} mL from schedule with total {total_volume} mL"
+        )
+
+    if not slots:
+        raise HomeAssistantError("Cannot apply negative delta to an empty schedule")
+
+    idx = 0
+    while removal > 0:
+        for _ in range(len(slots)):
+            pos = idx % len(slots)
+            idx += 1
+            if slots[pos]["dose_ml"] <= 0:
+                continue
+            slots[pos]["dose_ml"] -= 1
+            removal -= 1
+            if removal == 0:
+                break
+
+    slots = [slot for slot in slots if slot["dose_ml"] > 0]
+    slots.sort(key=lambda s: (s["hour"], s["minute"]))
+    return slots
+
+
+def _slots_to_service_payload(slots: list[dict[str, int]]) -> list[dict[str, int]]:
+    """Convert parsed slots back to the writer payload shape."""
+    return [
+        {
+            "hour": slot["hour"],
+            "minute": slot["minute"],
+            "dose_ml": slot["dose_ml"],
+        }
+        for slot in slots
+    ]
 
 
 def _resolve_target_from_entity_id(
@@ -208,9 +426,6 @@ async def _refresh_device_state(device: JebaoDevice | JebaoCloudDevice) -> None:
 
 def _async_register_services(hass: HomeAssistant) -> None:
     """Register integration-level services once."""
-    if hass.services.has_service(DOMAIN, SERVICE_SET_DOSER_SCHEDULE):
-        return
-
     async def _async_handle_set_doser_schedule(call: ServiceCall) -> None:
         # Validate and normalize service data once at entry.
         data = SET_DOSER_SCHEDULE_SCHEMA(dict(call.data))
@@ -278,18 +493,118 @@ def _async_register_services(hass: HomeAssistant) -> None:
         # Trigger a refresh so sensors reflect the new schedule quickly.
         await _refresh_device_state(device)
 
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_SET_DOSER_SCHEDULE,
-        _async_handle_set_doser_schedule,
-        schema=SET_DOSER_SCHEDULE_SCHEMA,
-    )
+    async def _async_handle_adjust_doser_schedule_total(call: ServiceCall) -> None:
+        """Adjust total doser volume by absolute mL or percentage."""
+        data = ADJUST_DOSER_SCHEDULE_TOTAL_SCHEMA(dict(call.data))
+        device_uid = data.get("device_uid")
+        inferred_channel: int | None = None
+
+        if data.get("entity_id"):
+            uid_from_entity, channel_from_entity = _resolve_target_from_entity_id(
+                hass, data["entity_id"]
+            )
+            if device_uid and device_uid != uid_from_entity:
+                raise HomeAssistantError(
+                    "device_uid does not match the selected entity_id device"
+                )
+            device_uid = uid_from_entity
+            inferred_channel = channel_from_entity
+
+        if not device_uid:
+            raise HomeAssistantError("Could not resolve target device")
+
+        channels = _normalize_channels(data, inferred_channel)
+        fill_empty_first = bool(data.get("fill_empty_first", True))
+
+        device = _find_device_by_uid(hass, device_uid)
+        attr_names = {
+            attr.get("name")
+            for attr in getattr(device.giz_device, "all_attrs", [])
+            if isinstance(attr, dict)
+        }
+
+        plan: list[dict[str, Any]] = []
+        for channel in channels:
+            schedule_attr = f"CH{channel}SWTime"
+            if schedule_attr not in attr_names:
+                raise HomeAssistantError(
+                    f"Device {device_uid} does not support {schedule_attr}"
+                )
+
+            current_slots = _parse_schedule_from_attr(device.get_attribute(schedule_attr))
+            current_total = sum(slot["dose_ml"] for slot in current_slots)
+
+            if "delta_ml" in data:
+                delta_ml = int(data["delta_ml"])
+            else:
+                delta_ml = int(round(current_total * float(data["delta_percent"]) / 100.0))
+
+            if delta_ml == 0:
+                raise HomeAssistantError(
+                    f"Computed delta is 0 mL for channel {channel}; no schedule update generated"
+                )
+
+            adjusted_slots = _apply_volume_delta_to_slots(
+                current_slots=current_slots,
+                delta_ml=delta_ml,
+                fill_empty_first=fill_empty_first,
+            )
+            payload_hex = _build_schedule_blob(_slots_to_service_payload(adjusted_slots)).hex()
+            plan.append(
+                {
+                    "channel": channel,
+                    "schedule_attr": schedule_attr,
+                    "payload_hex": payload_hex,
+                }
+            )
+
+            if "interval_days" in data:
+                interval_attr = f"IntervalT{channel}"
+                if interval_attr not in attr_names:
+                    raise HomeAssistantError(
+                        f"Device {device_uid} does not support {interval_attr}"
+                    )
+
+        # Execute writes only after all channels validated (all-or-nothing).
+        for item in plan:
+            await device.async_set_attribute(item["schedule_attr"], item["payload_hex"])
+
+            channel = item["channel"]
+            if "interval_days" in data:
+                await device.async_set_attribute(
+                    f"IntervalT{channel}", int(data["interval_days"])
+                )
+
+            if "enable_timer" in data:
+                timer_attr = f"Timer{channel}ON"
+                if timer_attr in attr_names:
+                    await device.async_set_attribute(timer_attr, bool(data["enable_timer"]))
+
+        await _refresh_device_state(device)
+
+    if not hass.services.has_service(DOMAIN, SERVICE_SET_DOSER_SCHEDULE):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SET_DOSER_SCHEDULE,
+            _async_handle_set_doser_schedule,
+            schema=SET_DOSER_SCHEDULE_SCHEMA,
+        )
+
+    if not hass.services.has_service(DOMAIN, SERVICE_ADJUST_DOSER_SCHEDULE_TOTAL):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_ADJUST_DOSER_SCHEDULE_TOTAL,
+            _async_handle_adjust_doser_schedule_total,
+            schema=ADJUST_DOSER_SCHEDULE_TOTAL_SCHEMA,
+        )
 
 
 def _async_unregister_services(hass: HomeAssistant) -> None:
     """Remove integration services when the last entry unloads."""
     if hass.services.has_service(DOMAIN, SERVICE_SET_DOSER_SCHEDULE):
         hass.services.async_remove(DOMAIN, SERVICE_SET_DOSER_SCHEDULE)
+    if hass.services.has_service(DOMAIN, SERVICE_ADJUST_DOSER_SCHEDULE_TOTAL):
+        hass.services.async_remove(DOMAIN, SERVICE_ADJUST_DOSER_SCHEDULE_TOTAL)
 
 
 def _did_to_uid(did: str) -> str:
