@@ -1,0 +1,165 @@
+set_doser_schedule:
+  name: Set doser schedule
+  description: >-
+    Write a full dosing schedule to one channel (CHxSWTime) using up to 24 slots.
+    Slots are encoded into the device 96-byte binary payload.
+  fields:
+    device_uid:
+      name: Device UID
+      description: >-
+        Target device UID. Optional when entity_id is provided.
+      example: "33333230313130343735363436303131"
+      selector:
+        text:
+    entity_id:
+      name: Entity ID
+      description: >-
+        Any jebao_aqua entity of the target device. Optional when device_uid is provided.
+        If this is a channel schedule/volume sensor, the channel is inferred automatically.
+      selector:
+        entity:
+          integration: jebao_aqua
+    channel:
+      name: Channel
+      description: >-
+        Doser channel number. Optional when entity_id points to a channel-specific
+        schedule/volume entity.
+      required: false
+      example: 1
+      selector:
+        number:
+          min: 1
+          max: 8
+          step: 1
+          mode: box
+    slots:
+      name: Slots
+      description: >-
+        List of up to 24 slot objects. Each slot accepts either time (HH:MM) + ml,
+        or hour + minute + ml. Empty list clears the schedule.
+      required: true
+      example:
+        - time: "08:00"
+          ml: 12
+        - hour: 20
+          minute: 30
+          dose_ml: 8
+      selector:
+        object:
+    enable_timer:
+      name: Enable channel timer
+      description: >-
+        Optional. When provided and supported, updates TimerXON for this channel.
+      required: false
+      example: true
+      selector:
+        boolean:
+    interval_days:
+      name: Interval days
+      description: >-
+        Optional. Updates IntervalT{channel} in the same call (0-30).
+      required: false
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 30
+          step: 1
+          mode: box
+
+adjust_doser_schedule_total:
+  name: Adjust doser schedule total
+  description: >-
+    Adjust the total dosed volume of one or more channels, then rewrite each
+    channel schedule (CHxSWTime). Positive deltas fill empty slots first,
+    then distribute increment round-robin.
+  fields:
+    device_uid:
+      name: Device UID
+      description: >-
+        Target device UID. Optional when entity_id is provided.
+      example: "33333230313130343735363436303131"
+      selector:
+        text:
+    entity_id:
+      name: Entity ID
+      description: >-
+        Any jebao_aqua entity of the target device. Optional when device_uid is provided.
+      selector:
+        entity:
+          integration: jebao_aqua
+    channel:
+      name: Single channel
+      description: >-
+        Target a single doser channel. Use either channel or channels.
+      required: false
+      example: 1
+      selector:
+        number:
+          min: 1
+          max: 8
+          step: 1
+          mode: box
+    channels:
+      name: Multiple channels
+      description: >-
+        Target multiple channels in one transactional request.
+      required: false
+      example: [1, 2, 3]
+      selector:
+        object:
+    delta_ml:
+      name: Delta mL
+      description: >-
+        Signed absolute adjustment in mL (e.g. +3 or -2).
+        Provide exactly one of delta_ml or delta_percent.
+      required: false
+      example: 3
+      selector:
+        number:
+          min: -1000
+          max: 1000
+          step: 1
+          mode: box
+    delta_percent:
+      name: Delta percent
+      description: >-
+        Signed relative adjustment in percent of current total
+        (e.g. 30 means +30%). Provide exactly one of delta_ml or delta_percent.
+      required: false
+      example: 30
+      selector:
+        number:
+          min: -100
+          max: 1000
+          step: 0.1
+          mode: box
+    fill_empty_first:
+      name: Fill empty slots first
+      description: >-
+        When true, positive deltas create new 1 mL slots before incrementing
+        existing slots.
+      required: false
+      example: true
+      selector:
+        boolean:
+    enable_timer:
+      name: Enable channel timer
+      description: >-
+        Optional. When provided and supported, updates TimerXON for each channel.
+      required: false
+      example: true
+      selector:
+        boolean:
+    interval_days:
+      name: Interval days
+      description: >-
+        Optional. Updates IntervalT{channel} for each channel (0-30).
+      required: false
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 30
+          step: 1
+          mode: box
