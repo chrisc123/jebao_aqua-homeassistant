@@ -5,10 +5,14 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
+import re
+
+import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.core import HomeAssistant, ServiceCall, callback
+from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 
 from .cloud import GizwitsCloudApi, JebaoCloudDevice, parse_channel_names
@@ -25,6 +29,267 @@ from .hub import JebaoDevice, _load_device_configs, async_discover_devices
 _LOGGER = logging.getLogger(__name__)
 
 CONFIG_ENTRY_VERSION = 2
+# Service name exposed as jebao_aqua.set_doser_schedule
+SERVICE_SET_DOSER_SCHEDULE = "set_doser_schedule"
+# CHxSWTime uses a fixed 96-byte payload in all known doser models.
+SCHEDULE_BYTES_LEN = 96
+# 96 bytes = 12 blocks * 8 bytes, each block holds 2 schedule slots.
+MAX_DOSER_SLOTS = 24
+
+
+def _validate_schedule_service_target(data: dict) -> dict:
+    """Validate target/channel requirements for schedule writes."""
+    if not data.get("device_uid") and not data.get("entity_id"):
+        raise vol.Invalid("Either device_uid or entity_id is required")
+
+    # For UID-only calls we cannot infer the channel, so require it explicitly.
+    if data.get("device_uid") and not data.get("entity_id") and "channel" not in data:
+        raise vol.Invalid("channel is required when entity_id is not provided")
+    return data
+
+
+SET_DOSER_SCHEDULE_SCHEMA = vol.All(
+    vol.Schema(
+        {
+            vol.Optional("device_uid"): cv.string,
+            vol.Optional("entity_id"): cv.entity_id,
+            vol.Optional("channel"): vol.All(vol.Coerce(int), vol.Range(min=1, max=8)),
+            vol.Required("slots"): [dict],
+            vol.Optional("enable_timer"): cv.boolean,
+            vol.Optional("interval_days"): vol.All(
+                vol.Coerce(int), vol.Range(min=0, max=30)
+            ),
+        }
+    ),
+    _validate_schedule_service_target,
+)
+
+
+def _parse_schedule_slot(slot: dict, index: int) -> tuple[int, int, int]:
+    """Validate and normalize a schedule slot entry."""
+    if not isinstance(slot, dict):
+        raise HomeAssistantError(f"Slot {index} must be an object")
+
+    ml_raw = slot.get("dose_ml", slot.get("ml"))
+    if ml_raw is None:
+        raise HomeAssistantError(f"Slot {index} requires ml or dose_ml")
+    try:
+        ml = int(ml_raw)
+    except (TypeError, ValueError) as exc:
+        raise HomeAssistantError(f"Slot {index} has invalid ml value") from exc
+    if not 1 <= ml <= 255:
+        raise HomeAssistantError(f"Slot {index} ml must be between 1 and 255")
+
+    time_raw = slot.get("time")
+    if time_raw is not None:
+        if not isinstance(time_raw, str) or ":" not in time_raw:
+            raise HomeAssistantError(f"Slot {index} time must be HH:MM")
+        hh, mm = time_raw.split(":", 1)
+        try:
+            hour = int(hh)
+            minute = int(mm)
+        except ValueError as exc:
+            raise HomeAssistantError(f"Slot {index} time must be HH:MM") from exc
+    else:
+        if "hour" not in slot or "minute" not in slot:
+            raise HomeAssistantError(
+                f"Slot {index} requires time or both hour and minute"
+            )
+        try:
+            hour = int(slot["hour"])
+            minute = int(slot["minute"])
+        except (TypeError, ValueError) as exc:
+            raise HomeAssistantError(
+                f"Slot {index} hour/minute must be integers"
+            ) from exc
+
+    if not 0 <= hour <= 23 or not 0 <= minute <= 59:
+        raise HomeAssistantError(f"Slot {index} has invalid time {hour:02d}:{minute:02d}")
+
+    return hour, minute, ml
+
+
+def _build_schedule_blob(slots: list[dict]) -> bytes:
+    """Encode up to 24 schedule slots into the CHxSWTime 96-byte payload."""
+    if len(slots) > MAX_DOSER_SLOTS:
+        raise HomeAssistantError(
+            f"Maximum {MAX_DOSER_SLOTS} slots are supported per channel"
+        )
+
+    payload = bytearray(SCHEDULE_BYTES_LEN)
+    for idx, slot in enumerate(slots):
+        hour, minute, ml = _parse_schedule_slot(slot, idx + 1)
+        # Two slots are packed per 8-byte block: [h,m,0,ml, h,m,0,ml].
+        pair = idx // 2
+        in_pair_offset = 0 if idx % 2 == 0 else 4
+        base = pair * 8 + in_pair_offset
+        payload[base] = hour
+        payload[base + 1] = minute
+        payload[base + 2] = 0
+        payload[base + 3] = ml
+
+    return bytes(payload)
+
+
+def _resolve_target_from_entity_id(
+    hass: HomeAssistant, entity_id: str
+) -> tuple[str, int | None]:
+    """Resolve target device UID and (when possible) channel from an entity."""
+    entity_registry = er.async_get(hass)
+    entry = entity_registry.async_get(entity_id)
+    if entry is None:
+        raise HomeAssistantError(f"Entity {entity_id} was not found")
+    if not entry.unique_id or "_" not in entry.unique_id:
+        raise HomeAssistantError(
+            f"Entity {entity_id} does not expose a parsable unique_id"
+        )
+    try:
+        uid, attr_name, _platform = entry.unique_id.rsplit("_", 2)
+    except ValueError as exc:
+        raise HomeAssistantError(
+            f"Entity {entity_id} does not expose a parsable unique_id"
+        ) from exc
+    if not uid:
+        raise HomeAssistantError(f"Could not extract device UID from {entity_id}")
+
+    # Infer channel from common doser attribute naming patterns so selecting an
+    # entity in the UI usually removes the need to manually set channel.
+    inferred_channel: int | None = None
+    channel_patterns = (
+        r"^CH([1-8])(?:Schedule|Volume)$",  # derived HA schedule/volume sensors
+        r"^CH([1-8])SWTime$",               # raw schedule datapoint
+        r"^channe([1-8])$",                 # model typo used by the device defs
+        r"^Timer([1-8])ON$",                # per-channel timer switch
+        r"^IntervalT([1-8])$",              # per-channel pause-days number
+    )
+    for pattern in channel_patterns:
+        match = re.match(pattern, attr_name)
+        if match:
+            inferred_channel = int(match.group(1))
+            break
+    return uid, inferred_channel
+
+
+def _get_loaded_devices(hass: HomeAssistant) -> list[JebaoDevice | JebaoCloudDevice]:
+    """Collect all currently loaded devices across config entries."""
+    devices: list[JebaoDevice | JebaoCloudDevice] = []
+    for entry in hass.config_entries.async_entries(DOMAIN):
+        if entry.runtime_data:
+            devices.extend(entry.runtime_data)
+    return devices
+
+
+def _find_device_by_uid(
+    hass: HomeAssistant, device_uid: str
+) -> JebaoDevice | JebaoCloudDevice:
+    """Return the loaded device matching the requested UID."""
+    for device in _get_loaded_devices(hass):
+        if getattr(device, "uid", None) == device_uid:
+            return device
+    raise HomeAssistantError(
+        f"Device UID {device_uid} is not loaded by the {DOMAIN} integration"
+    )
+
+
+async def _refresh_device_state(device: JebaoDevice | JebaoCloudDevice) -> None:
+    """Best-effort refresh so entities reflect schedule changes quickly."""
+    try:
+        if hasattr(device, "request_status_update"):
+            # Cloud wrapper and some device wrappers expose this directly.
+            await device.request_status_update()
+            return
+        giz_device = getattr(device, "giz_device", None)
+        if giz_device and hasattr(giz_device, "request_status_update"):
+            # LAN device path: refresh through underlying protocol device.
+            await giz_device.request_status_update()
+    except Exception as exc:
+        _LOGGER.debug("Could not refresh device status after schedule update: %s", exc)
+
+
+def _async_register_services(hass: HomeAssistant) -> None:
+    """Register integration-level services once."""
+    if hass.services.has_service(DOMAIN, SERVICE_SET_DOSER_SCHEDULE):
+        return
+
+    async def _async_handle_set_doser_schedule(call: ServiceCall) -> None:
+        # Validate and normalize service data once at entry.
+        data = SET_DOSER_SCHEDULE_SCHEMA(dict(call.data))
+        device_uid = data.get("device_uid")
+        channel = data.get("channel")
+
+        if data.get("entity_id"):
+            # Allow targeting by any integration entity from the same device,
+            # while auto-selecting the channel for CHx schedule/volume sensors.
+            uid_from_entity, channel_from_entity = _resolve_target_from_entity_id(
+                hass, data["entity_id"]
+            )
+            if device_uid and device_uid != uid_from_entity:
+                raise HomeAssistantError(
+                    "device_uid does not match the selected entity_id device"
+                )
+            device_uid = uid_from_entity
+
+            if channel_from_entity is not None:
+                if channel is not None and channel != channel_from_entity:
+                    raise HomeAssistantError(
+                        "Selected entity channel does not match the provided channel"
+                    )
+                channel = channel_from_entity
+
+        if not device_uid:
+            raise HomeAssistantError("Could not resolve target device")
+        if channel is None:
+            raise HomeAssistantError(
+                "channel is required when it cannot be inferred from entity_id"
+            )
+
+        attr_name = f"CH{channel}SWTime"
+        # Encode to hex so both LAN and cloud writers can consume it.
+        payload_hex = _build_schedule_blob(data["slots"]).hex()
+
+        device = _find_device_by_uid(hass, device_uid)
+        attr_names = {
+            attr.get("name")
+            for attr in getattr(device.giz_device, "all_attrs", [])
+            if isinstance(attr, dict)
+        }
+        if attr_name not in attr_names:
+            raise HomeAssistantError(
+                f"Device {device_uid} does not support {attr_name}"
+            )
+
+        # Main write: replace the full channel schedule in one command.
+        await device.async_set_attribute(attr_name, payload_hex)
+
+        if "interval_days" in data:
+            interval_attr = f"IntervalT{channel}"
+            if interval_attr not in attr_names:
+                raise HomeAssistantError(
+                    f"Device {device_uid} does not support {interval_attr}"
+                )
+            await device.async_set_attribute(interval_attr, int(data["interval_days"]))
+
+        if "enable_timer" in data:
+            timer_attr = f"Timer{channel}ON"
+            if timer_attr in attr_names:
+                # Optional convenience write to align timer mode with schedule changes.
+                await device.async_set_attribute(timer_attr, bool(data["enable_timer"]))
+
+        # Trigger a refresh so sensors reflect the new schedule quickly.
+        await _refresh_device_state(device)
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_SET_DOSER_SCHEDULE,
+        _async_handle_set_doser_schedule,
+        schema=SET_DOSER_SCHEDULE_SCHEMA,
+    )
+
+
+def _async_unregister_services(hass: HomeAssistant) -> None:
+    """Remove integration services when the last entry unloads."""
+    if hass.services.has_service(DOMAIN, SERVICE_SET_DOSER_SCHEDULE):
+        hass.services.async_remove(DOMAIN, SERVICE_SET_DOSER_SCHEDULE)
 
 
 def _did_to_uid(did: str) -> str:
@@ -176,8 +441,13 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up a config entry."""
     if entry.data.get(CONF_MODE, MODE_LOCAL) == MODE_CLOUD:
-        return await _async_setup_cloud(hass, entry)
-    return await _async_setup_local(hass, entry)
+        setup_ok = await _async_setup_cloud(hass, entry)
+    else:
+        setup_ok = await _async_setup_local(hass, entry)
+
+    if setup_ok:
+        _async_register_services(hass)
+    return setup_ok
 
 
 async def _async_setup_cloud(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -425,6 +695,13 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         for device in devices:
             await device.async_disconnect()
         entry.runtime_data = None
+
+        other_loaded = any(
+            e.entry_id != entry.entry_id and e.runtime_data
+            for e in hass.config_entries.async_entries(DOMAIN)
+        )
+        if not other_loaded:
+            _async_unregister_services(hass)
 
     return unload_ok
 

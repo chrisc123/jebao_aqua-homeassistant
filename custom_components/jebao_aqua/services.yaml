@@ -1,0 +1,68 @@
+set_doser_schedule:
+  name: Set doser schedule
+  description: >-
+    Write a full dosing schedule to one channel (CHxSWTime) using up to 24 slots.
+    Slots are encoded into the device 96-byte binary payload.
+  fields:
+    device_uid:
+      name: Device UID
+      description: >-
+        Target device UID. Optional when entity_id is provided.
+      example: "33333230313130343735363436303131"
+      selector:
+        text:
+    entity_id:
+      name: Entity ID
+      description: >-
+        Any jebao_aqua entity of the target device. Optional when device_uid is provided.
+        If this is a channel schedule/volume sensor, the channel is inferred automatically.
+      selector:
+        entity:
+          integration: jebao_aqua
+    channel:
+      name: Channel
+      description: >-
+        Doser channel number. Optional when entity_id points to a channel-specific
+        schedule/volume entity.
+      required: false
+      example: 1
+      selector:
+        number:
+          min: 1
+          max: 8
+          step: 1
+          mode: box
+    slots:
+      name: Slots
+      description: >-
+        List of up to 24 slot objects. Each slot accepts either time (HH:MM) + ml,
+        or hour + minute + ml. Empty list clears the schedule.
+      required: true
+      example:
+        - time: "08:00"
+          ml: 12
+        - hour: 20
+          minute: 30
+          dose_ml: 8
+      selector:
+        object:
+    enable_timer:
+      name: Enable channel timer
+      description: >-
+        Optional. When provided and supported, updates TimerXON for this channel.
+      required: false
+      example: true
+      selector:
+        boolean:
+    interval_days:
+      name: Interval days
+      description: >-
+        Optional. Updates IntervalT{channel} in the same call (0-30).
+      required: false
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 30
+          step: 1
+          mode: box
