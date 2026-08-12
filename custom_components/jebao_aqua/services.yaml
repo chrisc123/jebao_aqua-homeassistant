@@ -70,9 +70,8 @@ set_doser_schedule:
 adjust_doser_schedule_total:
   name: Adjust doser schedule total
   description: >-
-    Adjust the total dosed volume of one or more channels, then rewrite each
-    channel schedule (CHxSWTime). Positive deltas fill empty slots first,
-    then distribute increment round-robin.
+    Adjust or replace the total dosed volume of one or more channels, then
+    rewrite each channel schedule (CHxSWTime).
   fields:
     device_uid:
       name: Device UID
@@ -112,7 +111,7 @@ adjust_doser_schedule_total:
       name: Delta mL
       description: >-
         Signed absolute adjustment in mL (e.g. +3 or -2).
-        Provide exactly one of delta_ml or delta_percent.
+        Provide exactly one of delta_ml, delta_percent, or total_ml_per_cycle.
       required: false
       example: 3
       selector:
@@ -125,7 +124,8 @@ adjust_doser_schedule_total:
       name: Delta percent
       description: >-
         Signed relative adjustment in percent of current total
-        (e.g. 30 means +30%). Provide exactly one of delta_ml or delta_percent.
+        (e.g. 30 means +30%).
+        Provide exactly one of delta_ml, delta_percent, or total_ml_per_cycle.
       required: false
       example: 30
       selector:
@@ -134,11 +134,39 @@ adjust_doser_schedule_total:
           max: 1000
           step: 0.1
           mode: box
+    total_ml_per_cycle:
+      name: Total mL per cycle
+      description: >-
+        Replace the channel schedule with a new uniform 24-hour distribution
+        whose total equals this value.
+        Provide exactly one of delta_ml, delta_percent, or total_ml_per_cycle.
+      required: false
+      example: 10
+      selector:
+        number:
+          min: 1
+          max: 6120
+          step: 1
+          mode: box
+    delay_between_channels_min:
+      name: Delay between channels (minutes)
+      description: >-
+        Optional. Applies only when using channels with at least 2 entries.
+        Channel 2 starts this many minutes after channel 1, channel 3 after
+        channel 2, and so on (with 24h wrap-around).
+      required: false
+      example: 15
+      selector:
+        number:
+          min: 0
+          max: 1439
+          step: 1
+          mode: box
     fill_empty_first:
       name: Fill empty slots first
       description: >-
-        When true, positive deltas create new 1 mL slots before incrementing
-        existing slots.
+        When true, positive delta adjustments create new 1 mL slots before
+        incrementing existing slots. Ignored when total_ml_per_cycle is used.
       required: false
       example: true
       selector:

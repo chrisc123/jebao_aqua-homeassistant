@@ -47,6 +47,7 @@ SCHEDULE_BYTES_LEN = 96
 MAX_DOSER_SLOTS = 24
 MIN_DOSER_SLOT_ML = 1
 MAX_DOSER_SLOT_ML = 255
+MAX_TOTAL_ML_PER_CYCLE = MAX_DOSER_SLOTS * MAX_DOSER_SLOT_ML
 
 
 def _validate_schedule_service_target(data: dict) -> dict:
@@ -72,8 +73,18 @@ def _validate_adjust_service_request(data: dict) -> dict:
 
     has_delta_ml = "delta_ml" in data
     has_delta_percent = "delta_percent" in data
-    if has_delta_ml == has_delta_percent:
-        raise vol.Invalid("Provide exactly one of delta_ml or delta_percent")
+    has_total_ml_per_cycle = "total_ml_per_cycle" in data
+    selected_modes = int(has_delta_ml) + int(has_delta_percent) + int(has_total_ml_per_cycle)
+    if selected_modes != 1:
+        raise vol.Invalid(
+            "Provide exactly one of delta_ml, delta_percent, or total_ml_per_cycle"
+        )
+
+    if "delay_between_channels_min" in data and "channels" not in data:
+        raise vol.Invalid("delay_between_channels_min requires channels")
+
+    if "delay_between_channels_min" in data and len(data.get("channels", [])) < 2:
+        raise vol.Invalid("delay_between_channels_min requires at least two channels")
     return data
 
 
@@ -105,6 +116,13 @@ ADJUST_DOSER_SCHEDULE_TOTAL_SCHEMA = vol.All(
             ],
             vol.Optional("delta_ml"): vol.Coerce(int),
             vol.Optional("delta_percent"): vol.Coerce(float),
+            vol.Optional("total_ml_per_cycle"): vol.All(
+                vol.Coerce(int),
+                vol.Range(min=1, max=MAX_TOTAL_ML_PER_CYCLE),
+            ),
+            vol.Optional("delay_between_channels_min"): vol.All(
+                vol.Coerce(int), vol.Range(min=0, max=1439)
+            ),
             vol.Optional("fill_empty_first", default=True): cv.boolean,
             vol.Optional("enable_timer"): cv.boolean,
             vol.Optional("interval_days"): vol.All(
@@ -259,6 +277,50 @@ def _slots_to_service_payload(slots: list[dict[str, int]]) -> list[dict[str, int
     return _alg_slots_to_service_payload(slots)
 
 
+def _build_uniform_total_slots(total_ml: int) -> list[dict[str, int]]:
+    """Create a uniform 24h schedule that sums to total_ml."""
+    if total_ml < 1:
+        raise HomeAssistantError("total_ml_per_cycle must be at least 1")
+
+    slot_count = min(total_ml, MAX_DOSER_SLOTS)
+    times = _new_slot_times([], slot_count)
+
+    base_ml = total_ml // slot_count
+    remainder = total_ml % slot_count
+    slots: list[dict[str, int]] = []
+    for idx, (hour, minute) in enumerate(times):
+        dose_ml = base_ml + (1 if idx < remainder else 0)
+        if dose_ml < MIN_DOSER_SLOT_ML or dose_ml > MAX_DOSER_SLOT_ML:
+            raise HomeAssistantError(
+                "total_ml_per_cycle cannot be represented with current slot limits"
+            )
+        slots.append({"hour": hour, "minute": minute, "dose_ml": dose_ml})
+    slots.sort(key=lambda s: (s["hour"], s["minute"]))
+    return slots
+
+
+def _shift_slots_minutes(
+    slots: list[dict[str, int]], offset_min: int
+) -> list[dict[str, int]]:
+    """Shift all slot times by offset minutes with 24h wrap-around."""
+    if offset_min == 0:
+        return [dict(slot) for slot in slots]
+
+    shifted: list[dict[str, int]] = []
+    offset = offset_min % 1440
+    for slot in slots:
+        total_min = (slot["hour"] * 60 + slot["minute"] + offset) % 1440
+        shifted.append(
+            {
+                "hour": total_min // 60,
+                "minute": total_min % 60,
+                "dose_ml": slot["dose_ml"],
+            }
+        )
+    shifted.sort(key=lambda s: (s["hour"], s["minute"]))
+    return shifted
+
+
 def _resolve_target_from_entity_id(
     hass: HomeAssistant, entity_id: str
 ) -> tuple[str, int | None]:
@@ -404,7 +466,7 @@ def _async_register_services(hass: HomeAssistant) -> None:
         await _refresh_device_state(device)
 
     async def _async_handle_adjust_doser_schedule_total(call: ServiceCall) -> None:
-        """Adjust total doser volume by absolute mL or percentage."""
+        """Adjust or replace doser schedules for one or more channels."""
         data = ADJUST_DOSER_SCHEDULE_TOTAL_SCHEMA(dict(call.data))
         device_uid = data.get("device_uid")
         inferred_channel: int | None = None
@@ -425,6 +487,7 @@ def _async_register_services(hass: HomeAssistant) -> None:
 
         channels = _normalize_channels(data, inferred_channel)
         fill_empty_first = bool(data.get("fill_empty_first", True))
+        delay_between_channels_min = int(data.get("delay_between_channels_min", 0))
 
         device = _find_device_by_uid(hass, device_uid)
         attr_names = {
@@ -434,31 +497,45 @@ def _async_register_services(hass: HomeAssistant) -> None:
         }
 
         plan: list[dict[str, Any]] = []
-        for channel in channels:
+        for index, channel in enumerate(channels):
             schedule_attr = f"CH{channel}SWTime"
             if schedule_attr not in attr_names:
                 raise HomeAssistantError(
                     f"Device {device_uid} does not support {schedule_attr}"
                 )
 
-            current_slots = _parse_schedule_from_attr(device.get_attribute(schedule_attr))
-            current_total = sum(slot["dose_ml"] for slot in current_slots)
-
-            if "delta_ml" in data:
-                delta_ml = int(data["delta_ml"])
+            if "total_ml_per_cycle" in data:
+                adjusted_slots = _build_uniform_total_slots(int(data["total_ml_per_cycle"]))
             else:
-                delta_ml = int(round(current_total * float(data["delta_percent"]) / 100.0))
+                current_slots = _parse_schedule_from_attr(
+                    device.get_attribute(schedule_attr)
+                )
+                current_total = sum(slot["dose_ml"] for slot in current_slots)
 
-            if delta_ml == 0:
-                raise HomeAssistantError(
-                    f"Computed delta is 0 mL for channel {channel}; no schedule update generated"
+                if "delta_ml" in data:
+                    delta_ml = int(data["delta_ml"])
+                else:
+                    delta_ml = int(
+                        round(current_total * float(data["delta_percent"]) / 100.0)
+                    )
+
+                if delta_ml == 0:
+                    raise HomeAssistantError(
+                        f"Computed delta is 0 mL for channel {channel}; no schedule update generated"
+                    )
+
+                adjusted_slots = _apply_volume_delta_to_slots(
+                    current_slots=current_slots,
+                    delta_ml=delta_ml,
+                    fill_empty_first=fill_empty_first,
                 )
 
-            adjusted_slots = _apply_volume_delta_to_slots(
-                current_slots=current_slots,
-                delta_ml=delta_ml,
-                fill_empty_first=fill_empty_first,
-            )
+            if len(channels) > 1 and delay_between_channels_min > 0:
+                adjusted_slots = _shift_slots_minutes(
+                    adjusted_slots,
+                    offset_min=(index * delay_between_channels_min),
+                )
+
             payload_hex = _build_schedule_blob(_slots_to_service_payload(adjusted_slots)).hex()
             plan.append(
                 {
