@@ -306,6 +306,34 @@
           "Fault_UART"
         ]
       }
+    },
+      "0696a19599bc484f8e1866f5ccf4ee7e": {
+      "device_type": "wavemaker",
+      "platforms": {
+        "switch": [
+          "SwitchON",
+          "TimerON"
+        ],
+        "number": [
+          "Mode",
+          "Flow",
+          "Frequency",
+          "FeedTime",
+          "AutoMode",
+          "AutoFlow",
+          "AutoFreq",
+          "AutoFeedTime"
+        ],
+        "binary_sensor": [
+          "Fault_Overcurrent",
+          "Fault_Overvoltage",
+          "Fault_OverTemp",
+          "Fault_Undervoltage",
+          "Fault_Lockedrotor",
+          "Fault_no_liveload",
+          "Fault_UART"
+        ]
+      }
     }
   }
 }
