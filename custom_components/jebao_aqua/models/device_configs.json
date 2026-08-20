@@ -38,6 +38,33 @@
     "f0d844ab0d4947ac9527a286160bc705": {
       "inherits": "wavemaker_default"
     },
+    "50dbc92221fd4d33ae69a1fedd43b555": {
+      "device_type": "wavemaker",
+      "platforms": {
+        "switch": [
+          "SwitchON",
+          "TimerON"
+        ],
+        "number": [
+          "Mode",
+          "Flow",
+          "Frequency",
+          "FeedTime"
+        ],
+        "select": [
+          "Linkage"
+        ],
+        "binary_sensor": [
+          "Fault_Overcurrent",
+          "Fault_Overvoltage",
+          "Fault_OverTemp",
+          "Fault_Undervoltage",
+          "Fault_Lockedrotor",
+          "Fault_no_liveload",
+          "Fault_UART"
+        ]
+      }
+    },
     "f65982cb65da43baa0c722c84dd2740b": {
       "device_type": "wavemaker",
       "platforms": {
