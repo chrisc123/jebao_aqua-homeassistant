@@ -220,6 +220,7 @@
       },
       "mode": {
         "state": {
+          "pulse_wave": "Pulse Wave",
           "night": "Night",
           "timed": "Timed",
           "constant_flow": "Constant Flow",
@@ -230,7 +231,12 @@
           "sine_wave": "Sine Wave",
           "daytime": "Daytime",
           "square_wave": "Square Wave",
-          "random_wave": "Random Wave"
+          "random_wave": "Random Wave",
+          "tide": "Tide",
+          "nutrient_transport": "Nutrient Transport",
+          "circulation": "Circulation",
+          "feeding": "Feeding",
+          "custom_wave": "Custom Wave"
         }
       }
     },

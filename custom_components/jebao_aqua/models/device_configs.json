@@ -46,14 +46,27 @@
           "TimerON"
         ],
         "number": [
-          "Mode",
           "Flow",
           "Frequency",
           "FeedTime"
         ],
         "select": [
+          "Mode",
           "Linkage"
         ],
+        "select_value_maps": {
+          "Mode": {
+            "0": "pulse_wave",
+            "1": "sine_wave",
+            "2": "constant_flow",
+            "3": "random_wave",
+            "4": "tide",
+            "5": "nutrient_transport",
+            "6": "circulation",
+            "7": "feeding",
+            "8": "custom_wave"
+          }
+        },
         "binary_sensor": [
           "Fault_Overcurrent",
           "Fault_Overvoltage",

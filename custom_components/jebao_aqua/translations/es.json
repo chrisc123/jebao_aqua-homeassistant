@@ -220,6 +220,7 @@
       },
       "mode": {
         "state": {
+          "pulse_wave": "Onda pulsante",
           "night": "Noche",
           "timed": "Programado",
           "constant_flow": "Flujo constante",
@@ -230,7 +231,12 @@
           "sine_wave": "Onda sinusoidal",
           "daytime": "Día",
           "square_wave": "Onda cuadrada",
-          "random_wave": "Onda aleatoria"
+          "random_wave": "Onda aleatoria",
+          "tide": "Marea",
+          "nutrient_transport": "Transporte de nutrientes",
+          "circulation": "Circulación",
+          "feeding": "Alimentación",
+          "custom_wave": "Onda personalizada"
         }
       }
     },

@@ -160,10 +160,16 @@
     "select": {
       "mode": {
         "state": {
+          "pulse_wave": "Pulse Wave",
           "square_wave": "Square Wave",
           "sine_wave": "Sine Wave",
           "random_wave": "Random Wave",
           "constant_flow": "Constant Flow",
+          "tide": "Tide",
+          "nutrient_transport": "Nutrient Transport",
+          "circulation": "Circulation",
+          "feeding": "Feeding",
+          "custom_wave": "Custom Wave",
           "night": "Night",
           "timed": "Timed",
           "manual": "Manual",
