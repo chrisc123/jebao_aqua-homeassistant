@@ -215,7 +215,9 @@
         "state": {
           "primary": "Principal",
           "secondary": "Secundario",
-          "independent": "Independiente"
+          "independent": "Independiente",
+          "synchronous_secondary": "Secundario síncrono",
+          "asynchronous_secondary": "Secundario asíncrono"
         }
       },
       "mode": {

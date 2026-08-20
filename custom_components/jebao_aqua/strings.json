@@ -183,7 +183,9 @@
         "state": {
           "independent": "Independent",
           "primary": "Primary",
-          "secondary": "Secondary"
+          "secondary": "Secondary",
+          "synchronous_secondary": "Synchronous Secondary",
+          "asynchronous_secondary": "Asynchronous Secondary"
         }
       },
       "automode": {

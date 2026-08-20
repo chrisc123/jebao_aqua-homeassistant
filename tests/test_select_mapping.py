@@ -18,6 +18,13 @@ assert SPEC and SPEC.loader
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 SelectValueMap = MODULE.SelectValueMap
+CONST_SPEC = importlib.util.spec_from_file_location(
+    "jebao_const", MODULE_PATH.with_name("const.py")
+)
+assert CONST_SPEC and CONST_SPEC.loader
+CONST_MODULE = importlib.util.module_from_spec(CONST_SPEC)
+CONST_SPEC.loader.exec_module(CONST_MODULE)
+ENUM_OPTION_SLUGS = CONST_MODULE.ENUM_OPTION_SLUGS
 
 
 class SelectValueMapTest(unittest.TestCase):
@@ -36,6 +43,25 @@ class SelectValueMapTest(unittest.TestCase):
         self.assertEqual("sine_wave", mapping.option_for_value("1"))
         self.assertEqual("sine_wave", mapping.option_for_value("正弦造浪"))
         self.assertEqual("sine_wave", mapping.option_for_value("sine_wave"))
+
+    def test_gmp40_linkage_options_use_stable_slugs(self) -> None:
+        """GMP-40 synchronous and asynchronous secondaries are translated."""
+        mapping = SelectValueMap.from_enum(
+            ["独立", "主机", "同步从机", "异步从机"],
+            ENUM_OPTION_SLUGS,
+        )
+
+        self.assertEqual(
+            [
+                "independent",
+                "primary",
+                "synchronous_secondary",
+                "asynchronous_secondary",
+            ],
+            mapping.options,
+        )
+        self.assertEqual(2, mapping.value_for_option("synchronous_secondary"))
+        self.assertEqual("asynchronous_secondary", mapping.option_for_value(3))
 
     def test_configured_numeric_values_are_sorted_and_bidirectional(self) -> None:
         """Configured mappings provide stable options and device write values."""

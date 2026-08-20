@@ -25,6 +25,8 @@ ENUM_OPTION_SLUGS = {
     "定时": "timed",
     "主机": "primary",
     "从机": "secondary",
+    "同步从机": "synchronous_secondary",
+    "异步从机": "asynchronous_secondary",
     "独立": "independent",
     "校准1": "calibration_1",
     "校准2": "calibration_2",

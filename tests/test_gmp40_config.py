@@ -20,6 +20,12 @@ MODE_OPTIONS = {
     "7": "feeding",
     "8": "custom_wave",
 }
+LINKAGE_OPTIONS = {
+    "independent",
+    "primary",
+    "synchronous_secondary",
+    "asynchronous_secondary",
+}
 PRODUCT_KEY = "50dbc92221fd4d33ae69a1fedd43b555"
 
 
@@ -74,6 +80,19 @@ class Gmp40ConfigTest(unittest.TestCase):
             states = load_json(path)["entity"]["select"]["mode"]["state"]
             with self.subTest(path=path):
                 self.assertLessEqual(set(MODE_OPTIONS.values()), states.keys())
+
+    def test_linkage_options_have_translations(self) -> None:
+        """Every GMP-40 linkage option is present in each locale."""
+        translation_files = (
+            INTEGRATION / "strings.json",
+            INTEGRATION / "translations" / "en.json",
+            INTEGRATION / "translations" / "es.json",
+        )
+
+        for path in translation_files:
+            states = load_json(path)["entity"]["select"]["linkage"]["state"]
+            with self.subTest(path=path):
+                self.assertLessEqual(LINKAGE_OPTIONS, states.keys())
 
 
 if __name__ == "__main__":
