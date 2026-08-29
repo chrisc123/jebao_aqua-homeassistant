@@ -196,6 +196,7 @@
           "sine_wave": "Sine Wave",
           "square_wave": "Square Wave",
           "random_wave": "Random Wave",
+          "pulse_wave": "Pulse Wave",
           "auto": "Auto"
         }
       },

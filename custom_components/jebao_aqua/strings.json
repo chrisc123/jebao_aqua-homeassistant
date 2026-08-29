@@ -195,6 +195,7 @@
           "sine_wave": "Sine Wave",
           "random_wave": "Random Wave",
           "constant_flow": "Constant Flow",
+          "pulse_wave": "Pulse Wave",
           "feeding": "Feeding",
           "auto": "Auto"
         }
