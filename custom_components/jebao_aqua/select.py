@@ -14,6 +14,7 @@ from .const import ENUM_OPTION_SLUGS
 from .entity import JebaoEntity
 from .gizwits_lan.device_status import DeviceStatus
 from .hub import JebaoDevice
+from .select_mapping import SelectValueMap
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,34 +33,75 @@ async def async_setup_entry(
         if not device.giz_device:
             continue
 
-        # Get device config and allowed attributes
+        # Most selects are native Gizwits enums. Some devices expose mode-like
+        # values as uint8; select_value_maps represents those as HA selects.
         device_cfg = device.device_config
-        allowed_select_attrs = set()
+        allowed_select_attrs: set[str] = set()
+        select_value_maps: dict[str, Any] = {}
         if device_cfg and "platforms" in device_cfg:
-            allowed_select_attrs = set(device_cfg["platforms"].get("select", []))
+            platforms = device_cfg["platforms"]
+            allowed_select_attrs = set(platforms.get("select", []))
+            raw_value_maps = platforms.get("select_value_maps", {})
+            if isinstance(raw_value_maps, dict):
+                select_value_maps = raw_value_maps
+            else:
+                _LOGGER.warning(
+                    "Invalid select_value_maps config for device %s",
+                    device.product_key,
+                )
 
         # Create entities for each device's attributes
         for attr_def in device.giz_device.all_attrs:
             attr_name = attr_def["name"]
             if attr_name not in allowed_select_attrs:
                 continue
-            if attr_def.get("data_type") != "enum":
-                continue
-            if not attr_def.get("enum"):
-                _LOGGER.debug("Enum attribute %s has no enum list, skipping", attr_name)
+            if attr_def.get("data_type") == "enum":
+                if not attr_def.get("enum"):
+                    _LOGGER.debug(
+                        "Enum attribute %s has no enum list, skipping", attr_name
+                    )
+                    continue
+                entities.append(JebaoSelectEntity(entry, device, attr_def))
                 continue
 
-            entities.append(JebaoSelectEntity(entry, device, attr_def))
+            if (
+                attr_def.get("data_type") == "uint8"
+                and attr_def.get("type") == "status_writable"
+                and attr_name in select_value_maps
+            ):
+                try:
+                    value_map = SelectValueMap.from_config(
+                        select_value_maps[attr_name]
+                    )
+                except ValueError as err:
+                    _LOGGER.warning(
+                        "Invalid select value map for %s: %s", attr_name, err
+                    )
+                    continue
+                entities.append(
+                    JebaoSelectEntity(entry, device, attr_def, value_map=value_map)
+                )
+                continue
+
+            _LOGGER.debug(
+                "Select attribute %s has unsupported data type %s, skipping",
+                attr_name,
+                attr_def.get("data_type"),
+            )
 
     if entities:
         async_add_entities(entities)
 
 
 class JebaoSelectEntity(JebaoEntity, SelectEntity):
-    """A select entity for a writable enum attribute."""
+    """A select entity for an enum or configured numeric value map."""
 
     def __init__(
-        self, entry: ConfigEntry, device: JebaoDevice, attr_def: dict[str, Any]
+        self,
+        entry: ConfigEntry,
+        device: JebaoDevice,
+        attr_def: dict[str, Any],
+        value_map: SelectValueMap | None = None,
     ) -> None:
         """Initialize the select entity."""
         # Create the select specific entity description first
@@ -70,13 +112,12 @@ class JebaoSelectEntity(JebaoEntity, SelectEntity):
 
         super().__init__(entry, device, attr_def, "select")
 
-        # The device speaks native enum values (Chinese strings, addressed by
-        # index); HA option keys must be [a-z0-9-_]+ slugs so they can be
-        # translated. Unknown values fall back to the raw string.
-        self._device_options: list[str] = attr_def["enum"]
-        self._attr_options = [
-            ENUM_OPTION_SLUGS.get(value, value) for value in self._device_options
-        ]
+        # Native enums are addressed by their integer index. Configured uint8
+        # selects use their explicit integer-to-option mapping instead.
+        self._value_map = value_map or SelectValueMap.from_enum(
+            attr_def["enum"], ENUM_OPTION_SLUGS
+        )
+        self._attr_options = self._value_map.options
         self._current_option: str | None = None
 
     @property
@@ -86,14 +127,13 @@ class JebaoSelectEntity(JebaoEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         """User selected a new option from the dropdown."""
-        if option not in self._attr_options:
+        value = self._value_map.value_for_option(option)
+        if value is None:
             _LOGGER.warning(
                 "Option '%s' not in valid list %s", option, self._attr_options
             )
             return
-        # Map to integer index
-        index_val = self._attr_options.index(option)
-        await self._device.async_set_attribute(self._attribute_name, index_val)
+        await self._device.async_set_attribute(self._attribute_name, value)
 
     async def async_added_to_hass(self) -> None:
         """Register callback."""
@@ -116,25 +156,7 @@ class JebaoSelectEntity(JebaoEntity, SelectEntity):
         if self._attribute_name not in status.data:
             return
 
-        raw = status.data[self._attribute_name]
-        index: int | None = None
-        if isinstance(raw, bool):
-            index = None
-        elif isinstance(raw, (int, float)):
-            index = int(raw)
-        elif isinstance(raw, str):
-            if raw in self._device_options:
-                index = self._device_options.index(raw)
-            elif raw in self._attr_options:
-                index = self._attr_options.index(raw)
-            elif raw.isdigit():
-                # Some firmware/cloud combinations report the index as a
-                # numeric string.
-                index = int(raw)
-
-        self._current_option = (
-            self._attr_options[index]
-            if index is not None and 0 <= index < len(self._attr_options)
-            else None
+        self._current_option = self._value_map.option_for_value(
+            status.data[self._attribute_name]
         )
         self.async_write_ha_state()
