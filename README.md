@@ -18,7 +18,7 @@ Both hardware generations are supported:
 | Device type | Examples | Status |
 |---|---|---|
 | Wavemakers | M/MW series, SLW, and the MLW / ALW / MCP / ELW family (incl. Wi-Fi+BLE) | Tested (MLW20/ALW20 user-confirmed; MCP/ELW share the same product platform, retests welcome) |
-| Return / DC pumps | EP series, MDP series, MDW series (incl. Wi-Fi+BLE) | Reported working by users |
+| Return / DC pumps | EP series, MDP series, MDW series, GDP series (incl. Wi-Fi+BLE) | GDP-5500 user-confirmed; reported working by other users |
 | Dosing pumps | MD-4.4 (incl. Wi-Fi+BLE), Doser 2.4 / 3.4 (4-channel), MD-4.5 (5-channel, Wi-Fi+BLE) | **Beta — see caution below** |
 | LED lights | Local-timer LED models (e.g. AL-150 family) | **Beta — recently fixed, testers wanted** |
 | 5th-generation "G" series | GLW, GMP, GOW, etc. | GMP-40 user-confirmed; other models need testing |

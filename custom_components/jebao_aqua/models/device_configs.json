@@ -347,23 +347,41 @@
         ]
       }
     },
-      "0696a19599bc484f8e1866f5ccf4ee7e": {
-      "device_type": "wavemaker",
+    "0696a19599bc484f8e1866f5ccf4ee7e": {
+      "device_type": "returnpump",
       "platforms": {
         "switch": [
           "SwitchON",
           "TimerON"
         ],
         "number": [
-          "Mode",
           "Flow",
           "Frequency",
           "FeedTime",
-          "AutoMode",
           "AutoFlow",
           "AutoFreq",
           "AutoFeedTime"
         ],
+        "select": [
+          "Mode",
+          "AutoMode"
+        ],
+        "select_value_maps": {
+          "Mode": {
+            "0": "constant_flow",
+            "1": "pulse_wave",
+            "2": "sine_wave",
+            "3": "random_wave",
+            "4": "feeding"
+          },
+          "AutoMode": {
+            "0": "constant_flow",
+            "1": "pulse_wave",
+            "2": "sine_wave",
+            "3": "random_wave",
+            "4": "feeding"
+          }
+        },
         "binary_sensor": [
           "Fault_Overcurrent",
           "Fault_Overvoltage",

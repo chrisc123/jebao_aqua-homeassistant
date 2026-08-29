@@ -196,6 +196,7 @@
           "sine_wave": "Onda sinusoidal",
           "square_wave": "Onda cuadrada",
           "random_wave": "Onda aleatoria",
+          "pulse_wave": "Onda pulsante",
           "auto": "Automático"
         }
       },
