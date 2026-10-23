@@ -2,7 +2,7 @@
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
-Home Assistant custom integration for [Jebao](https://www.jebao-aqua.com/) Wi-Fi enabled aquarium wavemakers, pumps, and dosing pumps — with local LAN polling and Gizwits cloud control.
+Home Assistant custom integration for [Jebao](https://www.jebao-aqua.com/) Wi-Fi enabled aquarium wavemakers, pumps, and dosing pumps — with local LAN polling, verified MCP150 local control, and Gizwits cloud fallback.
 
 ## How It Works
 
@@ -11,39 +11,69 @@ Jebao Wi-Fi devices use the **Gizwits IoT platform** under the hood.
 | Capability | How it works |
 |---|---|
 | Device discovery | Bound to your Jebao Aqua / Gizwits account via cloud API |
-| State polling | Local LAN (TCP port 12416) — fast, no cloud needed for reads |
-| Commands (on/off, mode, flow) | Gizwits cloud API |
+| State polling | Local LAN (TCP port 12416), with cloud fallback on failure |
+| Commands (on/off, mode, flow) | Verified MCP150: local LAN first, then cloud fallback; other models: cloud |
 
-**Cloud credentials are required** to link devices and send control commands. Once set up, status updates are read locally.
+**Cloud credentials are still required** for setup/startup device discovery and cloud fallback. Once set up, supported MCP150 commands and normal status updates use the LAN.
 
 ## Supported Devices
 
 > [!IMPORTANT]
-> As of late 2024, some model series ship in two hardware variants. The newer variant adds Bluetooth (BLE) alongside Wi-Fi and uses an ESP32C3 microcontroller instead of the legacy ESP8266. **WiFi+BLE devices are not yet supported** — protocol investigation is ongoing.
+> As of late 2024, some model series ship in two hardware variants. The newer variant adds Bluetooth (BLE) alongside Wi-Fi and uses an ESP32C3 microcontroller instead of the legacy ESP8266. **The MCP150 product key listed below has verified LAN support; other WiFi+BLE variants remain unverified and are not generally supported.**
 
 | Status | Device | Type |
 |---|---|---|
 | ✅ Confirmed | Jebao MCP Series Crossflow Wavemaker | Pump |
+| ✅ Confirmed | MCP150 ESP32-C3 (`54114ccdac1e41c0bb17e222887c07ba`), including local commands | Pump |
 | ✅ Confirmed | Jebao MLW Series Wavemaker | Pump |
 | ✅ Confirmed | Jebao Smart Doser 3.1 | Dosing pump |
 | ✅ Confirmed | Jebao MD 4.4 Dosing Pump | Dosing pump |
 | ✅ Confirmed | Jebao MD 2.4 Dosing Pump | Dosing pump |
 | ⚠️ Untested | Jebao SLW Series Wavemaker | Pump |
 | ⚠️ Untested | Jebao EP Series Pump | Pump |
-| ❌ Not working | Any WiFi+Bluetooth (BLE) Jebao device | — |
+| ❌ Unsupported | Other unverified WiFi+Bluetooth (BLE) Jebao variants | — |
 
 **Legend:** ✅ tested and confirmed working — ⚠️ implemented but untested — ❌ not yet supported
 
 ## Features
 
 - **Local LAN polling** — device state is read directly over your network every 2 s; no cloud polling during normal operation
-- **Cloud control** — on/off, flow rate, frequency, and mode changes sent via the Gizwits API
+- **Local-first MCP150 control** — verified commands use LAN, with automatic Gizwits cloud fallback; other models retain cloud control
 - **Multi-region support** — EU, US, and CN Gizwits endpoints automatically selected by country
 - **Pump control** — switch entities for power and other boolean states
 - **Flow & frequency** — numeric slider entities for fine-grained speed control
 - **Mode selection** — select entities for operating modes (wave, constant, pulse, etc.)
 - **Fault monitoring** — sensor and binary sensor entities expose error/fault states reported by the device
 - **No scheduling lock-in** — native app schedules are not imported; use Home Assistant automations instead
+
+### MCP150 local commands
+
+Local-first control is enabled automatically when a LAN IP is known and the
+device product key is `54114ccdac1e41c0bb17e222887c07ba`. It was tested on an
+MCP150 with ESP32-C3 Wi-Fi firmware `04D30Q29`.
+
+All nine existing controls are supported:
+
+- **Switches:** power, pulse/tide, feeding, and timer.
+- **Selections:** all four modes and all three linkage options.
+- **Numbers:** flow, frequency, and feeding time.
+
+Commands verify the device identity, preserve unselected values, and confirm the
+requested settings over a separate TCP connection. Reads and writes are
+serialized per device. A timeout, protocol error, or unconfirmed change triggers
+cloud fallback; invalid values are rejected rather than retried. If cloud
+control also fails, Home Assistant reports a service error.
+
+**Native timer:** this pump's own timer can immediately overwrite manual settings.
+For example, Flow reverted to its scheduled value with `TimerON` enabled, but
+persisted when the timer was disabled. Turn off the device's Timer switch before
+manual control when needed. Normal integration commands never disable it
+automatically, and cloud fallback cannot be assumed to override a native schedule.
+
+Devices without a LAN IP and other product keys continue using cloud commands.
+This does not provide fully offline startup or add local dosing/schedule writes.
+See [the development guide](DEV.md#standalone-mcp150-lan-control-experiment)
+for the reversible hardware probe.
 
 ## Installation
 
@@ -109,4 +139,3 @@ Code contributions are welcome. Key files:
 ---
 
 MIT
-

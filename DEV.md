@@ -66,7 +66,7 @@ This enables verbose output from the integration (all `LOGGER.debug(...)` calls 
 | **Login/Auth** | The config flow (`config_flow.py`) calls the Gizwits API. Check logs for `Login response status` and error codes. |
 | **Device models** | `__init__.py` loads JSON model files from `models/`. If your pump's `product_key` doesn't match any model file, entities won't appear. |
 | **LAN polling** | The integration polls devices locally on **TCP port 12416** (`const.py`). Your HA host must be on the same network/VLAN as the pumps. |
-| **Cloud control** | Control commands go through Gizwits cloud API. Token expiry or regional mismatch (EU/US/CN) will cause failures. |
+| **Control commands** | Verified MCP150 commands try LAN first; unsupported devices and failed/unconfirmed LAN commands use Gizwits cloud. Token expiry or regional mismatch affects the cloud path. |
 | **Coordinator updates** | The `DataUpdateCoordinator` refreshes every **2 seconds** (`const.py`). `UpdateFailed` exceptions in logs indicate polling issues. |
 
 ---
@@ -107,7 +107,9 @@ You can then set breakpoints in any file under `custom_components/jebao_aqua/`.
 
 ---
 
-## 6. Testing Without Real Hardware
+## 6. Testing
+
+### Without real hardware
 
 If you don't have pumps available, you can mock the API layer. A quick approach:
 
@@ -118,6 +120,69 @@ async def get_device_data(self, device_id):
 ```
 
 ---
+
+### Standalone MCP150 LAN control experiment
+
+The standard-library-only [MCP150 probe](scripts/mcp150_local.py) loads the
+integration's shared [LAN client](custom_components/jebao_aqua/local.py)
+without importing Home Assistant. It accepts only product key
+`54114ccdac1e41c0bb17e222887c07ba`; other devices are rejected before login.
+It does not use cloud credentials.
+
+Verified on an MCP150 with ESP32-C3 Wi-Fi firmware `04D30Q29`: all nine HA
+controls, both boolean states, all four modes, and all three linkage options.
+The full test made 12 temporary changes with independent-connection verification and
+restoration after each. Native schedules and fault status stayed unchanged.
+Numeric controls were tested with neighboring values, not every possible value;
+encoding limits are covered by automated tests. This is evidence for this
+device/firmware, not all Jebao variants. Cloud/app verification remains manual.
+
+```bash
+# Read status only (the default; no settings are written)
+python3 scripts/mcp150_local.py 192.168.50.42
+
+# Requires the pump's native timer OFF; changes/restores only Flow
+python3 scripts/mcp150_local.py 192.168.50.42 --test-flow
+
+# Allow more time to observe the temporary setting in the Jebao app
+python3 scripts/mcp150_local.py 192.168.50.42 --test-flow --hold 10
+
+# WARNING: temporarily disables/restores the timer; tests power/feeding/linkage
+python3 scripts/mcp150_local.py 192.168.50.42 --test-all --hold 0.5
+```
+
+Each write flags only the selected attributes in the 64-bit mask, copying the
+current 400-byte writable block to preserve unselected values. The Flow-only
+test checks unrelated bytes except the device clock. The full test checks
+schedules/faults and restores any related exposed settings the device changes.
+Both changes and restoration must also be confirmed over a separate TCP
+connection; an immediate same-session value alone is not sufficient.
+Matching request serial numbers ensure read-back is fresh. Do not change settings
+from the app or automations while testing. Linkage tests may affect paired pumps.
+
+Restoration is attempted over a fresh connection even after an error or Ctrl+C.
+If restoration cannot be verified, the script exits unsuccessfully and prints
+the original settings to restore manually. Keep the pump/app accessible during
+testing; a disconnected device or a forcibly terminated process cannot be
+guaranteed to restore. Never treat a successful TCP send as a successful test:
+the script reports success only after both changed and restored values are read.
+
+The device's native timer was found to overwrite a manual Flow change immediately:
+with `TimerON=true`, an immediate response showed 99 but independent reads showed
+100 again. With the timer off, 99 persisted across repeated independent reads.
+The Flow-only probe therefore refuses an enabled timer. The full probe disables
+it temporarily, tests all controls, and restores the user's original timer setting
+even after an error. Normal integration commands do **not** disable it
+automatically. Turn off Timer in HA before manual control when necessary;
+cloud fallback cannot be assumed to defeat a native schedule.
+
+The integration runs this same bounded socket client in a worker thread so
+network I/O does not block Home Assistant's event loop. Its coordinator shares
+one lock per device between polling and commands, publishes confirmed local
+status immediately, and resets LAN backoff after a successful local command.
+Unconfirmed local commands fall back to the existing cloud API; failure of both
+paths is a service error, not a successful update. Other product keys retain
+their existing cloud-control and LAN-polling paths.
 
 ## 7. Authentication Flow
 

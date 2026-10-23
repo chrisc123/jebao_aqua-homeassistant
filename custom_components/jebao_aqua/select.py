@@ -54,7 +54,7 @@ class JebaoPumpSelect(CoordinatorEntity, SelectEntity):
         """Change the selected option."""
         # Convert the English description back to the enum value for the API call
         enum_value = self._option_mapping.get(option)
-        await self.coordinator.api.control_device(
+        await self.coordinator.async_control_device(
             self._device["did"], {self._attribute["name"]: enum_value}
         )
         await self.coordinator.async_request_refresh()

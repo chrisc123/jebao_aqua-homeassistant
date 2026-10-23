@@ -50,7 +50,7 @@ class JebaoPumpNumber(CoordinatorEntity, NumberEntity):
 
     async def async_set_native_value(self, value: float):
         """Set new value."""
-        await self.coordinator.api.control_device(
+        await self.coordinator.async_control_device(
             self._device["did"], {self._attribute["name"]: value}
         )
         await self.coordinator.async_request_refresh()

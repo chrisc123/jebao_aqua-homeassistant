@@ -2,7 +2,7 @@ import asyncio
 import json
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.config_entries import ConfigEntries  # Add this import
 import async_timeout
@@ -14,6 +14,7 @@ from .const import DOMAIN, PLATFORMS, UPDATE_INTERVAL, LOGGER, GIZWITS_API_URLS,
 from .api import GizwitsApi, AuthenticationError
 from .discovery import discover_devices
 from .helpers import is_device_data_valid  # Add this import
+from .local import InvalidCommand, ProbeError as LocalControlError, supports_local_control
 
 PLATFORMS = ["switch", "binary_sensor", "select", "number"]
 
@@ -255,6 +256,49 @@ class GizwitsDataUpdateCoordinator(DataUpdateCoordinator):
             if data:
                 LOGGER.debug(f"Got data for device {device_id}: {data}")
             return data
+
+    async def async_control_device(self, device_id: str, attributes: dict) -> None:
+        """Prefer verified LAN commands, falling back to cloud when unconfirmed."""
+        if device_id not in self._device_update_locks:
+            self._device_update_locks[device_id] = asyncio.Lock()
+        async with self._device_update_locks[device_id]:
+            device = next(
+                (item for item in self.device_inventory if item.get("did") == device_id),
+                None,
+            )
+            if (
+                device and device.get("lan_ip")
+                and supports_local_control(device.get("product_key"), attributes)
+            ):
+                try:
+                    data = await self.api.control_local_device(
+                        device["lan_ip"], device["product_key"], device_id, attributes,
+                    )
+                except InvalidCommand as error:
+                    raise HomeAssistantError(str(error)) from error
+                except (OSError, LocalControlError) as error:
+                    LOGGER.warning(
+                        "Local command unconfirmed for %s: %s; falling back to cloud",
+                        device_id, error,
+                    )
+                else:
+                    if is_device_data_valid(data) and data.get("did") == device_id:
+                        self._lan_failure_counts[device_id] = 0
+                        self.device_data = {**self.device_data, device_id: data}
+                        self.async_set_updated_data(self.device_data)
+                        LOGGER.debug("Command confirmed locally for %s", device_id)
+                        return
+                    LOGGER.warning(
+                        "Invalid local command response for %s; falling back to cloud",
+                        device_id,
+                    )
+
+            try:
+                result = await self.api.control_device(device_id, attributes)
+            except AuthenticationError as error:
+                raise HomeAssistantError(f"Cloud authentication failed: {error}") from error
+            if result is None:
+                raise HomeAssistantError(f"Cloud control failed for device {device_id}")
 
     async def _async_update_data(self):
         """Fetch the latest status for each device."""

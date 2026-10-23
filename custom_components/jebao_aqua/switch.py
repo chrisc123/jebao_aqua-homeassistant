@@ -41,7 +41,7 @@ class JebaoPumpSwitch(CoordinatorEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs):
         """Turn the switch on."""
-        await self.coordinator.api.control_device(
+        await self.coordinator.async_control_device(
             self._device["did"], {self._attribute["name"]: True}
         )
         await asyncio.sleep(3)  # Wait for 3 seconds
@@ -49,7 +49,7 @@ class JebaoPumpSwitch(CoordinatorEntity, SwitchEntity):
 
     async def async_turn_off(self, **kwargs):
         """Turn the switch off."""
-        await self.coordinator.api.control_device(
+        await self.coordinator.async_control_device(
             self._device["did"], {self._attribute["name"]: False}
         )
         await asyncio.sleep(3)  # Wait for 3 seconds
