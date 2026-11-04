@@ -1,6 +1,8 @@
 # Home Assistant Custom Integration: Jebao Aquarium Pumps
 
-![Logo](jebao-m-series-pump-controller.png)
+<img width="2752" height="1536" alt="jebao banner integration" src="https://github.com/user-attachments/assets/512b28df-111c-411e-b3b7-8e097eebfd1b" />
+
+
 
 This custom integration for Home Assistant allows you to control and monitor Wi-Fi enabled Jebao/Jecod aquarium devices — wavemakers, return/DC pumps, dosing pumps, and LED lights — anything set up through the "Jebao Aqua" app.
 
