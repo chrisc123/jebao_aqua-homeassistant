@@ -7,6 +7,7 @@ from typing import Any
 
 from homeassistant.components.number import NumberEntity, NumberEntityDescription
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -61,14 +62,22 @@ class JebaoNumberEntity(JebaoEntity, NumberEntity):
     ) -> None:
         """Initialize the number entity."""
         uint_spec = attr_def.get("uint_spec") or {}
+        # The model's range can be wider than what the device runs at
+        limits = device.device_config.get("number_limits", {}).get(attr_def["name"], {})
 
         # Create the number specific entity description
         self.entity_description = NumberEntityDescription(
             key=attr_def["name"].lower(),
             name=attr_def.get("name"),
-            native_min_value=uint_spec.get("min", 0),
-            native_max_value=uint_spec.get("max", 255),
+            native_min_value=limits.get("min", uint_spec.get("min", 0)),
+            native_max_value=limits.get("max", uint_spec.get("max", 255)),
             native_step=1 / uint_spec.get("ratio", 1) if uint_spec.get("ratio") else 1,
+            # A setting of the feed, not something to run the pump with
+            entity_category=(
+                EntityCategory.CONFIG
+                if device.program_control and attr_def["name"] == "FeedTime"
+                else None
+            ),
         )
 
         super().__init__(entry, device, attr_def, "number")

@@ -11,6 +11,7 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntityDescription,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -73,6 +74,10 @@ class JebaoFaultSensorEntity(JebaoEntity, BinarySensorEntity):
 
         super().__init__(entry, device, attr_def, "binary_sensor")
         self._is_on = None
+        if device.program_control:
+            # The pump's status sensor sums these up
+            self._attr_entity_category = EntityCategory.DIAGNOSTIC
+            self._attr_entity_registry_enabled_default = False
 
     @property
     def is_on(self) -> bool:

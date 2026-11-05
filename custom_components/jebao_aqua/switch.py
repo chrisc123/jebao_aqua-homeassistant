@@ -8,13 +8,30 @@ from typing import Any
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+import voluptuous as vol
 
 from .entity import JebaoEntity
 from .gizwits_lan.device_status import DeviceStatus
 from .hub import JebaoDevice
+from .pump_program import schedule_attributes
 
 _LOGGER = logging.getLogger(__name__)
+
+SERVICE_SET_SCHEDULE = "set_schedule"
+SLOT_SCHEMA = vol.Schema(
+    {
+        vol.Required("start"): cv.string,
+        vol.Required("end"): cv.string,
+        vol.Optional("mode", default="run"): vol.In(["run", "feed", "off"]),
+        vol.Optional("speed"): vol.All(vol.Coerce(int), vol.Range(min=30, max=100)),
+    }
+)
+SET_SCHEDULE_SCHEMA = {
+    vol.Required("slots"): vol.All(cv.ensure_list, [SLOT_SCHEMA], vol.Length(max=48)),
+    vol.Optional("enable"): cv.boolean,
+}
 
 
 async def async_setup_entry(
@@ -52,6 +69,10 @@ async def async_setup_entry(
     if entities:
         async_add_entities(entities)
 
+    entity_platform.async_get_current_platform().async_register_entity_service(
+        SERVICE_SET_SCHEDULE, SET_SCHEDULE_SCHEMA, "async_set_schedule"
+    )
+
 
 class JebaoSwitchEntity(JebaoEntity, SwitchEntity):
     """A switch entity for a writable bool attribute."""
@@ -69,16 +90,30 @@ class JebaoSwitchEntity(JebaoEntity, SwitchEntity):
 
         super().__init__(entry, device, attr_def, "switch")
         self._is_on = False
+        self._status: dict[str, Any] = {}
 
     @property
     def is_on(self) -> bool:
         return self._is_on
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Return the schedule, on the switch that runs it."""
+        if self._device.program_control and self._attribute_name == "TimerON":
+            return schedule_attributes(self._status)
+        return None
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         await self._device.async_set_attribute(self._attribute_name, True)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         await self._device.async_set_attribute(self._attribute_name, False)
+
+    async def async_set_schedule(
+        self, slots: list[dict[str, Any]], enable: bool | None = None
+    ) -> None:
+        """Replace the pump's schedule (the set_schedule service)."""
+        await self._device.async_set_schedule(slots, enable)
 
     async def async_added_to_hass(self) -> None:
         """Register callback when entity is added."""
@@ -99,4 +134,5 @@ class JebaoSwitchEntity(JebaoEntity, SwitchEntity):
             return  # attribute not in this status update
         val = status.data[self._attribute_name]
         self._is_on = bool(val)
+        self._status = status.data
         self.async_write_ha_state()

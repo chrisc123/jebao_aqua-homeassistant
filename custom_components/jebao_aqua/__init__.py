@@ -8,8 +8,9 @@ from pathlib import Path
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers import device_registry as dr, entity_registry as er
+from homeassistant.helpers.event import async_track_time_change
 
 from .cloud import GizwitsCloudApi, JebaoCloudDevice, parse_channel_names
 from .const import (
@@ -343,6 +344,7 @@ async def _async_setup_local(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             mac=device_data.get("mac"),
             firmware_version=device_data.get("firmware_version"),
             name=device_data.get("name"),
+            passcode=device_data.get("passcode"),
         )
 
         try:
@@ -369,6 +371,9 @@ async def _async_setup_local(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         if device.giz_device is not None:
             devices.append(device)
+            if device.passcode != device_data.get("passcode"):
+                device_data["passcode"] = device.passcode
+                devices_updated = True
 
     if devices_updated:
         new_data = dict(entry.data)
@@ -395,8 +400,18 @@ async def _async_setup_local(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             data["devices"] = new_list
             hass.config_entries.async_update_entry(entry, data=data)
 
+    # Devices only give out their passcode for a while after power-up.
+    def _persist_passcode(uid: str, passcode: str) -> None:
+        data = dict(entry.data)
+        data["devices"] = [
+            {**dev, "passcode": passcode} if dev.get("uid") == uid else dev
+            for dev in data.get("devices", [])
+        ]
+        hass.config_entries.async_update_entry(entry, data=data)
+
     for device in devices:
         device.set_ip_changed_callback(_persist_ip_change)
+        device.set_passcode_callback(_persist_passcode)
 
     entry.runtime_data = devices
 
@@ -412,6 +427,27 @@ async def _async_setup_local(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _LOGGER.error(
                 "Failed to get initial status from device at %s: %s", device.ip, exc
             )
+
+    # A pump's schedule runs on its own clock, which nothing else sets. Daily, to
+    # pick up DST changes.
+    clocked = [device for device in devices if device.program_control]
+
+    async def _sync_clocks(_now=None) -> None:
+        for device in clocked:
+            if not device.available:
+                continue
+            try:
+                await device.async_sync_clock()
+            except HomeAssistantError as err:
+                _LOGGER.warning("Couldn't set the clock of %s: %s", device.ip, err)
+
+    if clocked:
+        entry.async_on_unload(
+            async_track_time_change(hass, _sync_clocks, hour=3, minute=17, second=0)
+        )
+        entry.async_create_background_task(
+            hass, _sync_clocks(), f"jebao_aqua_clock_{entry.entry_id}"
+        )
 
     return True
 
