@@ -13,3 +13,6 @@ class PasscodeError(GizwitsError):
 
 class LoginError(GizwitsError):
     """Raised when login handshake fails after receiving passcode."""
+
+class LoginRefusedError(LoginError):
+    """Raised when the device answers a login with a non-zero result (wrong passcode)."""

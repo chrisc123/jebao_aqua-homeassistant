@@ -25,11 +25,13 @@
         "description": "No devices were found automatically. Enter the IP address of a Jebao device. Additional devices can then be added from the integration page in HA.",
         "data": {
           "ip": "Device IP Address",
-          "name": "Name (optional)"
+          "name": "Name (optional)",
+          "passcode": "Passcode (optional)"
         },
         "data_description": {
           "ip": "The device's IP address on your network, e.g. 192.168.1.50. Consider giving the device a DHCP reservation in your router.",
-          "name": "Optional friendly name for this device in Home Assistant."
+          "name": "Optional friendly name for this device in Home Assistant.",
+          "passcode": "Only needed for a device that won't give out its passcode because it has been on for a while. Leave empty, or power-cycle the device first."
         }
       },
       "user": {
@@ -246,6 +248,9 @@
       },
       "intervalt4": {
         "name": "Interval T4"
+      },
+      "motor_speed": {
+        "name": "Speed"
       }
     },
     "light": {
@@ -286,6 +291,17 @@
       },
       "volor_violet": {
         "name": "Violet"
+      },
+      "clock_last_set": {
+        "name": "Pump clock last set"
+      },
+      "pump_status": {
+        "name": "Status"
+      }
+    },
+    "button": {
+      "set_clock": {
+        "name": "Set pump clock"
       }
     }
   },
@@ -327,6 +343,22 @@
       "invalid_response": "The Gizwits cloud service response did not include a login token.",
       "auth": "Login failed. Check your email address and password.",
       "no_devices": "No devices are bound to this Gizwits account."
+    }
+  },
+  "services": {
+    "set_schedule": {
+      "name": "Set schedule",
+      "description": "Replace a pump's own daily schedule. Target its Scheduler switch.",
+      "fields": {
+        "slots": {
+          "name": "Slots",
+          "description": "Up to 48 slots with start, end, mode (run, feed or off) and speed (30-100). They can't overlap; an empty list clears the schedule."
+        },
+        "enable": {
+          "name": "Enable",
+          "description": "Start or stop the schedule afterwards. Leave out to keep it as it is."
+        }
+      }
     }
   }
 }

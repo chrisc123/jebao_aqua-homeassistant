@@ -1,0 +1,17 @@
+set_schedule:
+  target:
+    entity:
+      integration: jebao_aqua
+      domain: switch
+  fields:
+    slots:
+      required: true
+      example: >-
+        [{"start": "08:00", "end": "20:00", "mode": "run", "speed": 70},
+         {"start": "20:00", "end": "08:00", "mode": "run", "speed": 40}]
+      selector:
+        object:
+    enable:
+      required: false
+      selector:
+        boolean:

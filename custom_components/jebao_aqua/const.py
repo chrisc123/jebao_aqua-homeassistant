@@ -3,7 +3,7 @@
 DOMAIN = "jebao_aqua"
 
 # List of platforms that will be set up if the device has relevant datapoints.
-PLATFORMS = ["light", "sensor", "number", "select", "switch", "binary_sensor"]
+PLATFORMS = ["light", "sensor", "number", "select", "switch", "binary_sensor", "button"]
 
 # Device enum values (Chinese, from the Gizwits datapoint definitions) mapped
 # to stable slugs used as select options. HA requires option/translation keys
@@ -37,6 +37,15 @@ ENUM_OPTION_SLUGS = {
     "校准7": "calibration_7",
     "校准8": "calibration_8",
 }
+
+# Local port for LAN connections, the same for every device, so a reconnect replaces
+# our previous session on the device instead of leaving a stale one in a slot. It is
+# below the ephemeral range Linux picks random ports from.
+LOCAL_PORT = 32416
+
+# How long a device can be out of touch before its entities go unavailable. These
+# devices' Wi-Fi often drops for under a minute.
+OFFLINE_GRACE = 90.0
 
 # Connection mode: fully local (LAN push, default) or fully cloud (Gizwits API).
 CONF_MODE = "mode"

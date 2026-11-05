@@ -46,7 +46,9 @@ If your device isn't recognised (log shows `Device definition not found`), suppo
 - Switches, mode selectors, flow/speed controls, and fault sensors per device.
 - Dosing pumps: per-channel schedule sensors showing the next upcoming dose and daily dose volume (read-only; schedules are still programmed in the app).
 - Automatic recovery when a device's IP address changes (e.g. DHCP lease renewal) — devices are re-discovered by their unique ID and reconnected.
-- Native app scheduling is not replicated (beyond enabling/disabling a programmed schedule) — Home Assistant automations are usually the better tool.
+- MDP-style return pumps (product keys `6a5c47b3…` and `02039876…`) run their own daily schedule: the `jebao_aqua.set_schedule` service programs it, the Scheduler switch shows its slots and current mode in its attributes, and a button and a daily sync set the pump's clock, which it runs on. A single Status sensor shows OK or the faults; the per-fault sensors are disabled by default on these pumps. On other devices, native app scheduling is not replicated (beyond enabling/disabling a programmed schedule) — Home Assistant automations are usually the better tool.
+- A **Jebao pump** dashboard card for those pumps, in the card picker with no resource to add: status, power, speed, feeding with its minutes, and a schedule editor with a 24-hour bar. A schedule that a feed interrupted starts again when the feed ends.
+- Devices keep working after a dropped connection, long after they stop giving out their passcode: it's remembered, and can be entered when adding a device by IP. Entities stay available through Wi-Fi drops of up to 90 seconds.
 
 ## Installation
 
