@@ -28,6 +28,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required("ip"): str,
         vol.Optional("name", default=""): str,
+        vol.Optional("passcode"): str,
     }
 )
 
@@ -229,6 +230,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             "mac": mac,
                             "firmware_version": dev.get("firmware_version"),
                             "name": friendly_name or None,
+                            "passcode": user_input.get("passcode", "").strip() or None,
                         }
 
                         if existing_entry:
@@ -396,8 +398,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if uid in existing_devices:
                 # Update existing device, keeping fields discovery doesn't
                 # know about (e.g. the configured name)
-                if existing_devices[uid].get("name"):
-                    device_data["name"] = existing_devices[uid]["name"]
+                for key in ("name", "passcode"):
+                    if existing_devices[uid].get(key):
+                        device_data[key] = existing_devices[uid][key]
                 updated_devices.append(device_data)
             else:
                 # New device found

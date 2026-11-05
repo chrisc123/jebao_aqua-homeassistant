@@ -23,13 +23,15 @@
       "manual": {
         "data": {
           "ip": "Device IP Address",
-          "name": "Name (optional)"
+          "name": "Name (optional)",
+          "passcode": "Passcode (optional)"
         },
         "description": "No devices were found automatically. Enter the IP address of a Jebao device. Additional devices can then be added from the integration page in HA.",
         "title": "Manual Configuration",
         "data_description": {
           "ip": "The device's IP address on your network, e.g. 192.168.1.50. Consider giving the device a DHCP reservation in your router.",
-          "name": "Optional friendly name for this device in Home Assistant."
+          "name": "Optional friendly name for this device in Home Assistant.",
+          "passcode": "Only needed for a device that won't give out its passcode because it has been on for a while. Leave empty, or power-cycle the device first."
         }
       },
       "user": {

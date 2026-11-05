@@ -10,7 +10,9 @@ from pathlib import Path
 from typing import Any
 
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 
+from .const import LOCAL_PORT, OFFLINE_GRACE
 from .gizwits_lan import DeviceManager, DeviceStatus, GizwitsError
 
 _LOGGER = logging.getLogger(__name__)
@@ -161,6 +163,7 @@ class JebaoDevice:
         mac: str | None = None,
         firmware_version: str | None = None,
         name: str | None = None,
+        passcode: str | None = None,
     ) -> None:
         """Initialize the JebaoDevice wrapper."""
         self.hass = hass
@@ -170,6 +173,7 @@ class JebaoDevice:
         self.mac = mac
         self.firmware_version = firmware_version
         self.name = name
+        self.passcode = passcode
         # Channel number -> user-assigned name (only known via the cloud;
         # populated in cloud mode, empty for LAN-only setups).
         self.channel_names: dict[int, str] = {}
@@ -178,7 +182,19 @@ class JebaoDevice:
         self._status_callbacks: set[Callable[[DeviceStatus], None]] = set()
         self._connection_callbacks: set[Callable[[bool], None]] = set()
         self._ip_changed_callback: Callable[[str, str], None] | None = None
+        self._passcode_callback: Callable[[str, str], None] | None = None
         self._rediscovery_task: asyncio.Task | None = None
+        self._offline_timer: asyncio.TimerHandle | None = None
+
+    def set_passcode_callback(self, callback: Callable[[str, str], None]) -> None:
+        """Register a callback(uid, passcode) invoked when a passcode is learned."""
+        self._passcode_callback = callback
+
+    def _handle_passcode(self, passcode: str) -> None:
+        """Keep a passcode the device gave us, for logging in after its window shuts."""
+        self.passcode = passcode
+        if self._passcode_callback and self.uid:
+            self._passcode_callback(self.uid, passcode)
 
     def set_ip_changed_callback(self, callback: Callable[[str, str], None]) -> None:
         """Register a callback(uid, new_ip) invoked when rediscovery finds a new IP."""
@@ -199,8 +215,13 @@ class JebaoDevice:
         # May raise FileNotFoundError when no definition exists - let that
         # propagate, the caller has to skip this device.
         self.giz_device = await manager.create_device(
-            ip=self.ip, product_key=self.product_key, port=12416
+            ip=self.ip,
+            product_key=self.product_key,
+            port=12416,
+            passcode=self.passcode,
+            local_port=LOCAL_PORT,
         )
+        self.giz_device.passcode_callback = self._handle_passcode
         self.giz_device.add_connection_callback(self._handle_connection_state)
         self.giz_device.add_status_callback(self._handle_status_update)
 
@@ -223,6 +244,7 @@ class JebaoDevice:
 
     async def async_disconnect(self) -> None:
         """Disconnect from device."""
+        self._cancel_offline_timer()
         if self.giz_device:
             # Remove our callbacks first so the disconnect notification does
             # not restart the rediscovery loop.
@@ -307,10 +329,32 @@ class JebaoDevice:
         """Handle connection state changes from gizwits device."""
         if connected:
             self._stop_rediscovery()
-        else:
-            # Lost connection: the connection manager retries the current IP;
-            # rediscovery handles the case where the IP itself changed.
-            self._start_rediscovery()
+            self._cancel_offline_timer()
+            self._notify_connection(True)
+            return
+
+        # Lost connection: the connection manager retries the current IP;
+        # rediscovery handles the case where the IP itself changed.
+        self._start_rediscovery()
+        if self._offline_timer is None:
+            self._offline_timer = self.hass.loop.call_later(
+                OFFLINE_GRACE, self._handle_offline_grace_over
+            )
+
+    def _cancel_offline_timer(self) -> None:
+        """Forget a pending switch to unavailable."""
+        if self._offline_timer is not None:
+            self._offline_timer.cancel()
+            self._offline_timer = None
+
+    def _handle_offline_grace_over(self) -> None:
+        """Mark the entities unavailable: this isn't just a short Wi-Fi drop."""
+        self._offline_timer = None
+        _LOGGER.warning("Lost contact with Jebao device at %s", self.ip)
+        self._notify_connection(False)
+
+    def _notify_connection(self, connected: bool) -> None:
+        """Tell the entities whether the device is available."""
         for callback in self._connection_callbacks:
             try:
                 callback(connected)
@@ -368,7 +412,10 @@ class JebaoDevice:
                 "Cannot set attribute %s; device is not connected", attr_name
             )
             return
-        await self.giz_device.set_device_attribute(attr_name, value)
+        try:
+            await self.giz_device.set_device_attribute(attr_name, value)
+        except (GizwitsError, RuntimeError) as err:
+            raise HomeAssistantError(f"Device at {self.ip}: {err}") from err
 
     def __repr__(self) -> str:
         return f"<JebaoDevice ip={self.ip}, connected={bool(self.giz_device)}, product_key={self.product_key}>"
