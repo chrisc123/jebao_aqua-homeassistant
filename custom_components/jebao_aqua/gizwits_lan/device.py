@@ -1,13 +1,14 @@
 # gizwits_lan/device.py
 
 import asyncio
+import errno
 import logging
 import struct
 import time
 import socket  # Add this import
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
-from .errors import PasscodeError, LoginError, ProtocolError
+from .errors import PasscodeError, LoginError, LoginRefusedError, ProtocolError
 from .protocol import (
     build_prefix_and_command,
     parse_response_prefix,
@@ -19,6 +20,10 @@ from .device_status import DeviceStatus
 from .connection import Connection
 
 logger = logging.getLogger(__name__)
+
+# Ask for the full status this often. Devices only push on change, and it isn't
+# known that they do so for everything (front panel, schedule steps).
+STATUS_REFRESH_INTERVAL = 60.0
 
 def need_swapped_16bits(all_attrs) -> bool:
     for a in all_attrs:
@@ -58,13 +63,19 @@ class Device:
         port: TCP port (default 12416)
         product_key: Device model identifier
         attributes: List of attribute definitions from product JSON
+        passcode: The device's passcode, if known (see _do_connect)
+        local_port: Connect from this port (see _open_connection)
     """
 
     def __init__(self, ip: str, port: int = 12416, product_key: str = "",
-                 attributes=None):
+                 attributes=None, passcode: Optional[str] = None,
+                 local_port: Optional[int] = None):
         self.ip = ip
         self.port = port
         self.product_key = product_key
+        self.passcode = passcode
+        self.local_port = local_port
+        self.passcode_callback: Optional[Callable[[str], None]] = None
 
         self.all_attrs = attributes or []
         self.writable_attrs = [a for a in self.all_attrs if a.get("type") == "status_writable"]
@@ -172,49 +183,121 @@ class Device:
         """Stop connection management and disconnect."""
         await self._connection.stop()
 
-    async def _do_connect(self) -> bool:
-        """Full connection sequence including login."""
+    async def _open_connection(self):
+        """Open the TCP connection, from local_port if one is set.
+
+        Devices have few session slots (GAgent's source says 8; an MDP-15000 had 7)
+        and don't expire a session, so one whose close got lost, which is common on
+        their weak Wi-Fi, holds its slot until the device drops off Wi-Fi or is power
+        cycled. Enough of those and every login is refused. A session is identified
+        by its ports, so connecting from the same port hits the stale one: the device
+        answers for the old session, the OS resets it, and the connect goes through
+        about a second later, even with every slot full.
+
+        SO_LINGER 0 makes every close a reset, which leaves no TIME_WAIT to block the
+        next connection from this port.
+        """
+        if self.local_port is None:
+            return await asyncio.open_connection(self.ip, self.port)
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            # Open TCP connection with timeout
-            try:
-                self.reader, self.writer = await asyncio.wait_for(
-                    asyncio.open_connection(self.ip, self.port),
-                    timeout=3.0  # 3 second timeout for initial connection
-                )
-            except (asyncio.TimeoutError, ConnectionRefusedError, OSError) as e:
-                logger.info("Device %s not reachable: %s", self.ip, str(e))
+            sock.setblocking(False)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+            sock.bind(("", self.local_port))
+            await asyncio.get_running_loop().sock_connect(sock, (self.ip, self.port))
+            return await asyncio.open_connection(sock=sock)
+        except OSError as e:
+            sock.close()
+            if e.errno not in (errno.EADDRINUSE, errno.EADDRNOTAVAIL):
+                raise
+            logger.warning("Port %d is taken, connecting to %s from a random port",
+                           self.local_port, self.ip)
+            return await asyncio.open_connection(self.ip, self.port)
+        except BaseException:
+            sock.close()
+            raise
+
+    async def _open_session(self) -> bool:
+        """Open the TCP connection and start reading from it."""
+        try:
+            self.reader, self.writer = await asyncio.wait_for(
+                self._open_connection(),
+                timeout=5.0  # Clearing a stale session takes about a second of this
+            )
+        except (asyncio.TimeoutError, ConnectionRefusedError, OSError) as e:
+            logger.info("Device %s not reachable: %s", self.ip, str(e))
+            return False
+
+        self._read_task = asyncio.create_task(
+            self._read_loop(),
+            name=f"read_loop_{self.ip}"
+        )
+
+        # Allow read loop to start briefly
+        await asyncio.sleep(0.1)
+        return True
+
+    async def _request_passcode(self) -> bytes:
+        """Ask the device for its passcode (cmd=0x06 -> expects cmd=0x07)."""
+        passcode = await self._send_command_no_seq(0x06, 0x07, b"", 5.0)
+        if len(passcode) < 2:
+            raise PasscodeError("No passcode length in cmd=07 payload")
+
+        length_reported = struct.unpack(">H", passcode[:2])[0]
+        if length_reported == 0:
+            raise PasscodeError(
+                "Device won't give out its passcode: it only does for a while after "
+                "power-up. Power-cycle it to add it, after which it is remembered"
+            )
+        return passcode[2:2+length_reported]
+
+    async def _login(self, passcode: bytes) -> None:
+        """Log in (cmd=0x08 -> expects cmd=0x09) on an open session."""
+        payload = struct.pack(">H", len(passcode)) + passcode
+        login_resp = await self._send_command_no_seq(0x08, 0x09, payload, 5.0)
+        if not login_resp:
+            raise LoginError("No response received to login request (cmd=09)")
+        if login_resp[0] != 0:
+            logger.error("Login failed - got response code %d (expected 0)", login_resp[0])
+            raise LoginRefusedError(f"Login handshake failed with code {login_resp[0]}")
+
+    async def _do_connect(self) -> bool:
+        """Full connection sequence including login.
+
+        The passcode is fixed, but the Wi-Fi module only hands it out for a while
+        after power-up (GAgent's binding window; after that it answers with an empty
+        passcode and hangs up). Login itself works any time. So once the passcode is
+        known, log in with it directly, and only ask if the device refuses it (it
+        hangs up then too, so that takes a new session). Any other failure says
+        nothing about the passcode and isn't worth another of the device's sessions.
+        """
+        try:
+            # Never leave a session open behind us; it would hold one of the slots
+            await self._do_disconnect()
+
+            passcode = self.passcode.encode("ascii") if self.passcode else None
+            if not await self._open_session():
                 return False
-            
-            # Start read loop
-            if self._read_task is None or self._read_task.done():
-                self._read_task = asyncio.create_task(
-                    self._read_loop(), 
-                    name=f"read_loop_{self.ip}"
-                )
+            try:
+                if passcode is None:
+                    passcode = await self._request_passcode()
+                await self._login(passcode)
+            except LoginRefusedError:
+                if self.passcode is None:
+                    raise
+                logger.warning("Device %s refused its known passcode, asking for it", self.ip)
+                await self._do_disconnect()
+                if not await self._open_session():
+                    return False
+                passcode = await self._request_passcode()
+                await self._login(passcode)
 
-            # Allow read loop to start briefly
-            await asyncio.sleep(0.1)
-
-            # Request passcode (cmd=0x06 -> expects cmd=0x07)
-            passcode = await self._send_command_no_seq(0x06, 0x07, b"", 5.0)
-            if len(passcode) < 2:
-                raise PasscodeError("No passcode length in cmd=07 payload")
-            
-            length_reported = struct.unpack(">H", passcode[:2])[0]
-            if length_reported == 0:
-                raise PasscodeError("Device not in binding mode or passcode=0")
-            passcode_bytes = passcode[2:2+length_reported]
-
-            # Build login payload from passcode
-            payload = struct.pack(">H", len(passcode_bytes)) + passcode_bytes
-
-            # Send login (cmd=0x08 -> expects cmd=0x09)
-            login_resp = await self._send_command_no_seq(0x08, 0x09, payload, 5.0)
-            if not login_resp:
-                raise LoginError("No response received to login request (cmd=09)")
-            if login_resp[0] != 0:
-                logger.error("Login failed - got response code %d (expected 0)", login_resp[0])
-                raise LoginError(f"Login handshake failed with code {login_resp[0]}")
+            if passcode.decode("ascii") != self.passcode:
+                self.passcode = passcode.decode("ascii")
+                if self.passcode_callback:
+                    self.passcode_callback(self.passcode)
 
             # Mark as connected and set initial pong time
             self._connected = True
@@ -225,6 +308,7 @@ class Device:
 
             # Get initial status
             if not await self.request_status_update():
+                await self._do_disconnect()
                 return False
 
             logger.info("Successfully connected to device %s", self.ip)
@@ -252,20 +336,24 @@ class Device:
             except Exception:
                 pass
         # Reset the streams to None
+        self._read_task = None
         self.reader = None
         self.writer = None
 
     async def _do_ping(self) -> bool:
         """Perform a single ping and wait for pong."""
         try:
+            if self.current_status and self.current_status.age() >= STATUS_REFRESH_INTERVAL:
+                await self.request_status_update()
+
             cmd_15 = build_prefix_and_command(b"\x00\x15", b"")
             last_pong = self.last_pong
             
             self.writer.write(cmd_15)
             await self.writer.drain()
             
-            # Wait up to pong_timeout for response
-            for _ in range(3):  # Try up to 3 times
+            # These round trips take a few hundred ms on a weak signal
+            for _ in range(30):
                 await asyncio.sleep(0.1)
                 if self.last_pong > last_pong:
                     return True
@@ -406,6 +494,11 @@ class Device:
         finally:
             logger.debug("read_loop exiting for %s", self.ip)
             self._connected = False  # Clear connection state when read loop exits
+            # Nothing is coming for these; don't leave them to time out
+            for fut in self._pending_requests.values():
+                if not fut.done():
+                    fut.set_exception(ProtocolError("Connection closed"))
+            self._pending_requests.clear()
 
     def _try_extract_one_packet(self, buffer: bytearray):
         if len(buffer) < 4:

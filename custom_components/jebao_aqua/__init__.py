@@ -343,6 +343,7 @@ async def _async_setup_local(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             mac=device_data.get("mac"),
             firmware_version=device_data.get("firmware_version"),
             name=device_data.get("name"),
+            passcode=device_data.get("passcode"),
         )
 
         try:
@@ -369,6 +370,9 @@ async def _async_setup_local(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         if device.giz_device is not None:
             devices.append(device)
+            if device.passcode != device_data.get("passcode"):
+                device_data["passcode"] = device.passcode
+                devices_updated = True
 
     if devices_updated:
         new_data = dict(entry.data)
@@ -395,8 +399,18 @@ async def _async_setup_local(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             data["devices"] = new_list
             hass.config_entries.async_update_entry(entry, data=data)
 
+    # Devices only give out their passcode for a while after power-up.
+    def _persist_passcode(uid: str, passcode: str) -> None:
+        data = dict(entry.data)
+        data["devices"] = [
+            {**dev, "passcode": passcode} if dev.get("uid") == uid else dev
+            for dev in data.get("devices", [])
+        ]
+        hass.config_entries.async_update_entry(entry, data=data)
+
     for device in devices:
         device.set_ip_changed_callback(_persist_ip_change)
+        device.set_passcode_callback(_persist_passcode)
 
     entry.runtime_data = devices
 

@@ -38,6 +38,15 @@ ENUM_OPTION_SLUGS = {
     "校准8": "calibration_8",
 }
 
+# Local port for LAN connections, the same for every device, so a reconnect replaces
+# our previous session on the device instead of leaving a stale one in a slot. It is
+# below the ephemeral range Linux picks random ports from.
+LOCAL_PORT = 32416
+
+# How long a device can be out of touch before its entities go unavailable. These
+# devices' Wi-Fi often drops for under a minute.
+OFFLINE_GRACE = 90.0
+
 # Connection mode: fully local (LAN push, default) or fully cloud (Gizwits API).
 CONF_MODE = "mode"
 MODE_LOCAL = "local"

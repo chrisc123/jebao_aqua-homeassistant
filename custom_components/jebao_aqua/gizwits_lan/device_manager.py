@@ -147,6 +147,9 @@ class DeviceManager:
                             
                         mac, offset = parse_varlen_field(payload, offset)
                         if mac:
+                            # 6 bytes, or 12 ASCII hex characters on some modules
+                            if len(mac) == 12:
+                                mac = bytes.fromhex(mac.decode('ascii'))
                             device_info['mac'] = mac.hex(':')
                             
                         fw_ver, offset = parse_varlen_field(payload, offset)
@@ -196,7 +199,9 @@ class DeviceManager:
         logger.info("Discovery completed, found %d device(s)", len(devices))
         return list(devices.values())
 
-    async def create_device(self, ip: str, product_key: str, port: int = 12416) -> Device:
+    async def create_device(self, ip: str, product_key: str, port: int = 12416,
+                            passcode: Optional[str] = None,
+                            local_port: Optional[int] = None) -> Device:
         """
         Create a Device instance.
 
@@ -204,6 +209,8 @@ class DeviceManager:
             ip: IP address of the device
             product_key: Product key identifying the device model
             port: Port to connect to (default 12416)
+            passcode: The device's passcode, if known
+            local_port: Port to connect from (see Device._open_connection)
 
         Returns:
             Device instance (not connected)
@@ -213,7 +220,7 @@ class DeviceManager:
         """
         all_attrs = await self._load_device_definition(product_key)
         return Device(ip=ip, port=port, product_key=product_key,
-                     attributes=all_attrs)
+                     attributes=all_attrs, passcode=passcode, local_port=local_port)
 
     async def _load_device_definition(self, product_key: str) -> List[dict]:
         """
