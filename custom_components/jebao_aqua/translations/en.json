@@ -263,6 +263,20 @@
       },
       "volor_violet": {
         "name": "Violet"
+      },
+      "schedule_mode": {
+        "name": "Schedule mode",
+        "state": {
+          "off": "Stopped",
+          "run": "Running",
+          "feed": "Feeding"
+        }
+      },
+      "schedule_slots": {
+        "name": "Schedule slots"
+      },
+      "clock_last_set": {
+        "name": "Pump clock last set"
       }
     },
     "switch": {
@@ -328,6 +342,27 @@
       },
       "calsw": {
         "name": "Calibration Mode"
+      }
+    },
+    "button": {
+      "set_clock": {
+        "name": "Set pump clock"
+      }
+    }
+  },
+  "services": {
+    "set_schedule": {
+      "name": "Set schedule",
+      "description": "Replace a pump's own daily schedule. Target its Scheduler switch.",
+      "fields": {
+        "slots": {
+          "name": "Slots",
+          "description": "Up to 48 slots with start, end, mode (run, feed or off) and speed (30-100). They can't overlap; an empty list clears the schedule."
+        },
+        "enable": {
+          "name": "Enable",
+          "description": "Start or stop the schedule afterwards. Leave out to keep it as it is."
+        }
       }
     }
   }

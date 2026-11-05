@@ -263,6 +263,7 @@ class JebaoCloudDevice:
         self.mac: str | None = None
         self.firmware_version: str | None = None
         self.device_config: dict = {}
+        self.program_control = False  # LAN only
         self.all_attrs: list[dict] = []
         self.channel_names: dict[int, str] = {}
         self._data: dict[str, Any] = {}

@@ -8,8 +8,9 @@ from pathlib import Path
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers import device_registry as dr, entity_registry as er
+from homeassistant.helpers.event import async_track_time_change
 
 from .cloud import GizwitsCloudApi, JebaoCloudDevice, parse_channel_names
 from .const import (
@@ -426,6 +427,27 @@ async def _async_setup_local(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _LOGGER.error(
                 "Failed to get initial status from device at %s: %s", device.ip, exc
             )
+
+    # A pump's schedule runs on its own clock, which nothing else sets. Daily, to
+    # pick up DST changes.
+    clocked = [device for device in devices if device.program_control]
+
+    async def _sync_clocks(_now=None) -> None:
+        for device in clocked:
+            if not device.available:
+                continue
+            try:
+                await device.async_sync_clock()
+            except HomeAssistantError as err:
+                _LOGGER.warning("Couldn't set the clock of %s: %s", device.ip, err)
+
+    if clocked:
+        entry.async_on_unload(
+            async_track_time_change(hass, _sync_clocks, hour=3, minute=17, second=0)
+        )
+        entry.async_create_background_task(
+            hass, _sync_clocks(), f"jebao_aqua_clock_{entry.entry_id}"
+        )
 
     return True
 

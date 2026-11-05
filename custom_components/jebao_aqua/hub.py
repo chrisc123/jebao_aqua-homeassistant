@@ -11,9 +11,17 @@ from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.util import dt as dt_util
 
 from .const import LOCAL_PORT, OFFLINE_GRACE
 from .gizwits_lan import DeviceManager, DeviceStatus, GizwitsError
+from .pump_program import (
+    clock_updates,
+    command_updates,
+    parse_slots,
+    schedule_on_updates,
+    schedule_updates,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -399,6 +407,11 @@ class JebaoDevice:
             return False
         return self.giz_device.available
 
+    @property
+    def program_control(self) -> bool:
+        """Return True if commands and the schedule work as in pump_program.py."""
+        return bool(self.device_config.get("program_control"))
+
     def get_attribute(self, attr_name: str) -> Any:
         """Retrieve current attribute value from the device's status dict."""
         if not self.giz_device:
@@ -412,8 +425,51 @@ class JebaoDevice:
                 "Cannot set attribute %s; device is not connected", attr_name
             )
             return
+        updates = {attr_name: value}
+        if self.program_control:
+            if attr_name == "TimerON" and value:
+                await self.async_sync_clock()  # The schedule runs on it
+            updates = command_updates(
+                attr_name, value, self.giz_device.attributes, self._local_now()
+            )
+        await self._async_write(updates)
+
+    async def async_sync_clock(self) -> None:
+        """Set the device's clock to Home Assistant's local time."""
+        await self._async_write(clock_updates(self._local_now()))
+
+    async def async_set_schedule(
+        self, slots: list[dict[str, Any]], enable: bool | None = None
+    ) -> None:
+        """Replace the device's schedule, then start or stop it if asked to."""
+        if not self.program_control:
+            raise HomeAssistantError(f"{self.name or self.ip} has no schedule to set")
         try:
-            await self.giz_device.set_device_attribute(attr_name, value)
+            parsed = parse_slots(slots)
+            updates = schedule_updates(parsed)
+        except (KeyError, ValueError) as err:
+            raise HomeAssistantError(f"Invalid schedule: {err}") from err
+
+        running = bool(self.get_attribute("TimerON"))
+        if enable or (enable is None and running):
+            await self.async_sync_clock()
+        await self._async_write(updates)
+        if enable or (enable is None and running):
+            # Like the app: with the schedule on, say which slot is active
+            await self._async_write(schedule_on_updates(parsed, self._local_now()))
+        elif enable is False:
+            await self.async_set_attribute("TimerON", False)
+
+    @staticmethod
+    def _local_now() -> Any:
+        return dt_util.now().replace(tzinfo=None)
+
+    async def _async_write(self, updates: dict[str, Any]) -> None:
+        """Write datapoints in one frame."""
+        if not self.giz_device:
+            raise HomeAssistantError(f"Device at {self.ip} is not connected")
+        try:
+            await self.giz_device.set_multiple_attributes(updates)
         except (GizwitsError, RuntimeError) as err:
             raise HomeAssistantError(f"Device at {self.ip}: {err}") from err
 

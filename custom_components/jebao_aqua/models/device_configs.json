@@ -137,11 +137,40 @@
         ]
       }
     },
+    "returnpump_program": {
+      "device_type": "returnpump",
+      "program_control": true,
+      "number_limits": {
+        "Motor_Speed": {
+          "min": 30
+        }
+      },
+      "platforms": {
+        "switch": [
+          "SwitchON",
+          "FeedSwitch",
+          "TimerON"
+        ],
+        "number": [
+          "Motor_Speed",
+          "FeedTime"
+        ],
+        "binary_sensor": [
+          "Fault_Overcurrent",
+          "Fault_Overvoltage",
+          "Fault_OverTemp",
+          "Fault_Undervoltage",
+          "Fault_Lockedrotor",
+          "Fault_no_liveload",
+          "Fault_UART"
+        ]
+      }
+    },
     "6a5c47b3ea364ecb841b47f5997a1775": {
-      "inherits": "returnpump_default"
+      "inherits": "returnpump_program"
     },
     "02039876751049deb404d1d89221ec4b": {
-      "inherits": "returnpump_default"
+      "inherits": "returnpump_program"
     },
     "954b3e52aa5141539dfcaa2fff6c9e7f": {
       "inherits": "returnpump_default"

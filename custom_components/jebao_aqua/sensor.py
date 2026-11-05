@@ -7,11 +7,13 @@ import logging
 from typing import Any
 
 from homeassistant.components.sensor import (
+    SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
@@ -20,6 +22,7 @@ from homeassistant.util.color import value_to_brightness  # Add this import
 from .entity import JebaoEntity
 from .gizwits_lan.device_status import DeviceStatus
 from .hub import JebaoDevice
+from .pump_program import SlotMode, read_clock, read_schedule
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -104,6 +107,11 @@ async def async_setup_entry(
         device_type = device_cfg.get("device_type")
         platforms_cfg = device_cfg.get("platforms", {})
 
+        if device.program_control:
+            entities.append(JebaoScheduleModeSensor(entry, device))
+            entities.append(JebaoScheduleSlotsSensor(entry, device))
+            entities.append(JebaoPumpClockSensor(entry, device))
+
         if device_type == "light":
             allowed_sensor_attrs = set(platforms_cfg.get("sensor", []))
             for attr_def in device.giz_device.all_attrs:
@@ -130,6 +138,83 @@ async def async_setup_entry(
 
     if entities:
         async_add_entities(entities)
+
+
+class JebaoProgramSensor(JebaoEntity, SensorEntity):
+    """Base for the sensors of a pump's schedule."""
+
+    key: str
+
+    def __init__(self, entry: ConfigEntry, device: JebaoDevice) -> None:
+        """Initialize the sensor."""
+        super().__init__(entry, device, {"name": self.key}, "sensor")
+        self._status: dict[str, Any] = {}
+
+    async def async_added_to_hass(self) -> None:
+        """Register callback when entity is added."""
+        await super().async_added_to_hass()
+        self._device.register_status_callback(self._update_state_from_device)
+
+    async def async_will_remove_from_hass(self) -> None:
+        """Unregister callback when entity is removed."""
+        await super().async_will_remove_from_hass()
+        self._device.remove_status_callback(self._update_state_from_device)
+
+    @callback
+    def _update_state_from_device(self, status: DeviceStatus) -> None:
+        self._status = status.data
+        self.async_write_ha_state()
+
+
+class JebaoScheduleModeSensor(JebaoProgramSensor):
+    """What the running schedule is doing."""
+
+    key = "schedule_mode"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = [mode.name.lower() for mode in SlotMode]
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the current slot's mode, if the schedule is on."""
+        mode = self._status.get("AutoMode")
+        if not self._status.get("TimerON") or mode not in tuple(SlotMode):
+            return None
+        return SlotMode(mode).name.lower()
+
+
+class JebaoScheduleSlotsSensor(JebaoProgramSensor):
+    """How many slots the schedule has; they're in its attributes."""
+
+    key = "schedule_slots"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def _slots(self) -> list:
+        return [slot for slot in read_schedule(self._status) if slot is not None]
+
+    @property
+    def native_value(self) -> int:
+        """Return the number of slots in use."""
+        return len(self._slots())
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the schedule, in the form set_schedule takes."""
+        return {"slots": [slot.as_dict() for slot in self._slots()]}
+
+
+class JebaoPumpClockSensor(JebaoProgramSensor):
+    """What the pump's clock was last set to (it reads back that, not the time)."""
+
+    key = "clock_last_set"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+
+    @property
+    def native_value(self) -> Any:
+        """Return the time it was set to."""
+        clock = read_clock(self._status)
+        return clock and clock.replace(tzinfo=dt_util.get_default_time_zone())
 
 
 class JebaoLightLevelSensor(JebaoEntity, SensorEntity):

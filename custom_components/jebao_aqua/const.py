@@ -3,7 +3,7 @@
 DOMAIN = "jebao_aqua"
 
 # List of platforms that will be set up if the device has relevant datapoints.
-PLATFORMS = ["light", "sensor", "number", "select", "switch", "binary_sensor"]
+PLATFORMS = ["light", "sensor", "number", "select", "switch", "binary_sensor", "button"]
 
 # Device enum values (Chinese, from the Gizwits datapoint definitions) mapped
 # to stable slugs used as select options. HA requires option/translation keys
