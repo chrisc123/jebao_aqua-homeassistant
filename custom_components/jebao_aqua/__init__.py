@@ -6,11 +6,15 @@ import json
 import logging
 from pathlib import Path
 
+from homeassistant.components.frontend import add_extra_js_url
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.event import async_track_time_change
+from homeassistant.helpers.typing import ConfigType
 
 from .cloud import GizwitsCloudApi, JebaoCloudDevice, parse_channel_names
 from .const import (
@@ -26,6 +30,20 @@ from .hub import JebaoDevice, _load_device_configs, async_discover_devices
 _LOGGER = logging.getLogger(__name__)
 
 CONFIG_ENTRY_VERSION = 2
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+CARD_FILE = Path(__file__).parent / "frontend" / "jebao-pump-card.js"
+CARD_URL = f"/{DOMAIN}/jebao-pump-card.js"
+
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Serve the pump card and load it in the frontend, so it needs no resource."""
+    await hass.http.async_register_static_paths(
+        [StaticPathConfig(CARD_URL, str(CARD_FILE), True)]
+    )
+    # Browsers cache it hard; a new file needs a new URL
+    version = await hass.async_add_executor_job(lambda: int(CARD_FILE.stat().st_mtime))
+    add_extra_js_url(hass, f"{CARD_URL}?v={version}")
+    return True
 
 
 def _did_to_uid(did: str) -> str:

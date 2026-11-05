@@ -116,14 +116,15 @@ class ScheduleSlot:
             )
         )
 
-    def _minutes(self) -> tuple[int, int]:
+    def minutes(self) -> tuple[int, int]:
+        """Start and end as minutes of the day; an end of 00:00 is 24:00."""
         start = self.start_hour * 60 + self.start_minute
         end = self.end_hour * 60 + self.end_minute
         return start, end or 24 * 60
 
     def covers(self, hour: int, minute: int) -> bool:
         """Whether the slot is active at this time of day."""
-        start, end = self._minutes()
+        start, end = self.minutes()
         now = hour * 60 + minute
         if start < end:
             return start <= now < end
@@ -188,7 +189,8 @@ def schedule_updates(slots: Sequence[ScheduleSlot]) -> dict[str, bytes]:
     if len(slots) > SCHEDULE_SLOTS:
         raise ValueError(f"A schedule has at most {SCHEDULE_SLOTS} slots")
     for slot in slots:
-        if (slot.start_hour, slot.start_minute) == (slot.end_hour % 24, slot.end_minute):
+        start, end = slot.minutes()
+        if start == end:
             raise ValueError(f"Slot {slot.start}-{slot.end} has no length")
         if slot.mode == SlotMode.RUN and not MIN_SPEED <= slot.speed <= MAX_SPEED:
             raise ValueError(f"Slot speed must be {MIN_SPEED}-{MAX_SPEED}")
@@ -246,6 +248,41 @@ def command_updates(
     elif attr_name == "FeedTime":
         return {"FeedTime": value, "FeedSwitch": bool(status.get("FeedSwitch"))}
     return {attr_name: value}
+
+
+class ScheduleResume:
+    """Turns a schedule back on after a feed.
+
+    Starting a feed turns the schedule off, as in the app, and nothing turns it back on.
+    Unlike the app, resume it when the feed ends, by itself or by being stopped. This
+    follows the pump's status, since a feed ends on the pump's own timer.
+    """
+
+    def __init__(self) -> None:
+        """Start with nothing to resume."""
+        self._armed = False
+        self._feeding = False
+
+    def arm(self) -> None:
+        """A feed is starting while the schedule runs."""
+        self._armed = True
+        self._feeding = False
+
+    def cancel(self) -> None:
+        """Someone chose what the schedule does, so leave it alone."""
+        self._armed = False
+
+    def update(self, feeding: bool) -> bool:
+        """Follow a status; True when it's time to resume the schedule."""
+        if not self._armed:
+            return False
+        if feeding:
+            self._feeding = True
+            return False
+        if self._feeding:
+            self._armed = False
+            return True
+        return False
 
 
 def read_faults(status: Mapping[str, Any]) -> list[str]:

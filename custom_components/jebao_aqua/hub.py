@@ -16,6 +16,7 @@ from homeassistant.util import dt as dt_util
 from .const import LOCAL_PORT, OFFLINE_GRACE
 from .gizwits_lan import DeviceManager, DeviceStatus, GizwitsError
 from .pump_program import (
+    ScheduleResume,
     clock_updates,
     command_updates,
     parse_slots,
@@ -193,6 +194,7 @@ class JebaoDevice:
         self._passcode_callback: Callable[[str, str], None] | None = None
         self._rediscovery_task: asyncio.Task | None = None
         self._offline_timer: asyncio.TimerHandle | None = None
+        self._schedule_resume = ScheduleResume()
 
     def set_passcode_callback(self, callback: Callable[[str, str], None]) -> None:
         """Register a callback(uid, passcode) invoked when a passcode is learned."""
@@ -327,6 +329,10 @@ class JebaoDevice:
     def _handle_status_update(self, status: DeviceStatus) -> None:
         """Internal callback from giz_device when status changes. Notify all entity listeners."""
         _LOGGER.debug("Device status update from %s => %s", self.ip, status.data)
+        if self._schedule_resume.update(bool(status.data.get("FeedSwitch"))):
+            self.hass.async_create_background_task(
+                self._async_resume_schedule(), f"jebao_aqua_resume_{self.ip}"
+            )
         for cb in self._status_callbacks:
             try:
                 cb(status)
@@ -427,12 +433,23 @@ class JebaoDevice:
             return
         updates = {attr_name: value}
         if self.program_control:
+            if attr_name == "TimerON":
+                self._schedule_resume.cancel()
+            elif attr_name == "FeedSwitch" and value and self.get_attribute("TimerON"):
+                self._schedule_resume.arm()
             if attr_name == "TimerON" and value:
                 await self.async_sync_clock()  # The schedule runs on it
             updates = command_updates(
                 attr_name, value, self.giz_device.attributes, self._local_now()
             )
         await self._async_write(updates)
+
+    async def _async_resume_schedule(self) -> None:
+        """Turn the schedule back on after a feed."""
+        try:
+            await self.async_set_attribute("TimerON", True)
+        except HomeAssistantError as err:
+            _LOGGER.warning("Couldn't resume the schedule of %s: %s", self.ip, err)
 
     async def async_sync_clock(self) -> None:
         """Set the device's clock to Home Assistant's local time."""
@@ -450,6 +467,7 @@ class JebaoDevice:
         except (KeyError, ValueError) as err:
             raise HomeAssistantError(f"Invalid schedule: {err}") from err
 
+        self._schedule_resume.cancel()
         running = bool(self.get_attribute("TimerON"))
         if enable or (enable is None and running):
             await self.async_sync_clock()

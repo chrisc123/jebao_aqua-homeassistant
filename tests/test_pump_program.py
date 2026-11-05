@@ -183,6 +183,28 @@ class ScheduleTest(unittest.TestCase):
             with self.subTest(slots=slots), self.assertRaises(ValueError):
                 pump.schedule_updates(pump.parse_slots(slots))
 
+    def test_whole_day_slot_is_allowed(self) -> None:
+        for end in ("00:00", "24:00"):
+            slots = pump.parse_slots([{"start": "00:00", "end": end, "speed": 100}])
+            self.assertIn("AutoTime00", pump.schedule_updates(slots))
+
+    def test_schedule_resumes_when_the_feed_ends(self) -> None:
+        resume = pump.ScheduleResume()
+        self.assertFalse(resume.update(False))
+        resume.arm()
+        self.assertFalse(resume.update(False))  # A status from before the feed
+        self.assertFalse(resume.update(True))
+        self.assertFalse(resume.update(True))
+        self.assertTrue(resume.update(False))
+        self.assertFalse(resume.update(False))
+
+    def test_cancelled_resume_does_nothing(self) -> None:
+        resume = pump.ScheduleResume()
+        resume.arm()
+        resume.update(True)
+        resume.cancel()
+        self.assertFalse(resume.update(False))
+
     def test_attributes_while_running(self) -> None:
         status = {
             "TimerON": True,
