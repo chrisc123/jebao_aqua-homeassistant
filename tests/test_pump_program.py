@@ -183,6 +183,29 @@ class ScheduleTest(unittest.TestCase):
             with self.subTest(slots=slots), self.assertRaises(ValueError):
                 pump.schedule_updates(pump.parse_slots(slots))
 
+    def test_attributes_while_running(self) -> None:
+        status = {
+            "TimerON": True,
+            "AutoMode": 1,
+            pump.slot_name(0): bytes((8, 0, 20, 0, 1, 70)),
+        }
+        self.assertEqual(
+            {
+                "current_mode": "run",
+                "slots": [{"start": "08:00", "end": "20:00", "mode": "run", "speed": 70}],
+            },
+            pump.schedule_attributes(status),
+        )
+        status["TimerON"] = False
+        self.assertIsNone(pump.schedule_attributes(status)["current_mode"])
+
+    def test_faults(self) -> None:
+        self.assertEqual([], pump.read_faults({"Fault_Overcurrent": False}))
+        self.assertEqual(
+            ["Pump stall", "Running dry"],
+            pump.read_faults({"Fault_Lockedrotor": True, "Fault_no_liveload": True}),
+        )
+
     def test_clock_round_trip(self) -> None:
         when = datetime(2026, 11, 5, 3, 17, 9)
         self.assertEqual(when, pump.read_clock(pump.clock_updates(when)))

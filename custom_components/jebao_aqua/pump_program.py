@@ -39,6 +39,17 @@ UNUSED_SLOT = b"\xee" * SLOT_SIZE
 MIN_SPEED = 30
 MAX_SPEED = 100
 
+# Fault datapoints, in the app's words
+FAULTS = {
+    "Fault_Overcurrent": "Overcurrent",
+    "Fault_Overvoltage": "Overvoltage",
+    "Fault_OverTemp": "Overtemperature",
+    "Fault_Undervoltage": "Undervoltage",
+    "Fault_Lockedrotor": "Pump stall",
+    "Fault_no_liveload": "Running dry",
+    "Fault_UART": "Wi-Fi module link fault",
+}
+
 
 class SlotMode(IntEnum):
     """What the pump does in a slot (the AutoMode datapoint)."""
@@ -235,6 +246,21 @@ def command_updates(
     elif attr_name == "FeedTime":
         return {"FeedTime": value, "FeedSwitch": bool(status.get("FeedSwitch"))}
     return {attr_name: value}
+
+
+def read_faults(status: Mapping[str, Any]) -> list[str]:
+    """The faults a status reports."""
+    return [label for name, label in FAULTS.items() if status.get(name)]
+
+
+def schedule_attributes(status: Mapping[str, Any]) -> dict[str, Any]:
+    """The schedule's slots and, while it runs, what it's doing."""
+    mode = status.get("AutoMode")
+    running = status.get("TimerON") and mode in tuple(SlotMode)
+    return {
+        "current_mode": SlotMode(mode).name.lower() if running else None,
+        "slots": [slot.as_dict() for slot in read_schedule(status) if slot is not None],
+    }
 
 
 def clock_updates(when: datetime) -> dict[str, bytes]:

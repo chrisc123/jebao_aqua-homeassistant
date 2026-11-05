@@ -22,7 +22,7 @@ from homeassistant.util.color import value_to_brightness  # Add this import
 from .entity import JebaoEntity
 from .gizwits_lan.device_status import DeviceStatus
 from .hub import JebaoDevice
-from .pump_program import SlotMode, read_clock, read_schedule
+from .pump_program import read_clock, read_faults
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -108,8 +108,7 @@ async def async_setup_entry(
         platforms_cfg = device_cfg.get("platforms", {})
 
         if device.program_control:
-            entities.append(JebaoScheduleModeSensor(entry, device))
-            entities.append(JebaoScheduleSlotsSensor(entry, device))
+            entities.append(JebaoPumpStatusSensor(entry, device))
             entities.append(JebaoPumpClockSensor(entry, device))
 
         if device_type == "light":
@@ -166,40 +165,22 @@ class JebaoProgramSensor(JebaoEntity, SensorEntity):
         self.async_write_ha_state()
 
 
-class JebaoScheduleModeSensor(JebaoProgramSensor):
-    """What the running schedule is doing."""
+class JebaoPumpStatusSensor(JebaoProgramSensor):
+    """Whether the pump is OK and, if it isn't, what's wrong, in one place."""
 
-    key = "schedule_mode"
-    _attr_device_class = SensorDeviceClass.ENUM
-    _attr_options = [mode.name.lower() for mode in SlotMode]
+    key = "pump_status"
 
     @property
     def native_value(self) -> str | None:
-        """Return the current slot's mode, if the schedule is on."""
-        mode = self._status.get("AutoMode")
-        if not self._status.get("TimerON") or mode not in tuple(SlotMode):
+        """Return OK or the faults."""
+        if not self._status:
             return None
-        return SlotMode(mode).name.lower()
-
-
-class JebaoScheduleSlotsSensor(JebaoProgramSensor):
-    """How many slots the schedule has; they're in its attributes."""
-
-    key = "schedule_slots"
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
-
-    def _slots(self) -> list:
-        return [slot for slot in read_schedule(self._status) if slot is not None]
+        return ", ".join(read_faults(self._status)) or "OK"
 
     @property
-    def native_value(self) -> int:
-        """Return the number of slots in use."""
-        return len(self._slots())
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return the schedule, in the form set_schedule takes."""
-        return {"slots": [slot.as_dict() for slot in self._slots()]}
+    def icon(self) -> str:
+        """Return an icon that stands out when there's a fault."""
+        return "mdi:alert-circle" if read_faults(self._status) else "mdi:check-circle-outline"
 
 
 class JebaoPumpClockSensor(JebaoProgramSensor):

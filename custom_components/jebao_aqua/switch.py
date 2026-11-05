@@ -15,6 +15,7 @@ import voluptuous as vol
 from .entity import JebaoEntity
 from .gizwits_lan.device_status import DeviceStatus
 from .hub import JebaoDevice
+from .pump_program import schedule_attributes
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -89,10 +90,18 @@ class JebaoSwitchEntity(JebaoEntity, SwitchEntity):
 
         super().__init__(entry, device, attr_def, "switch")
         self._is_on = False
+        self._status: dict[str, Any] = {}
 
     @property
     def is_on(self) -> bool:
         return self._is_on
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Return the schedule, on the switch that runs it."""
+        if self._device.program_control and self._attribute_name == "TimerON":
+            return schedule_attributes(self._status)
+        return None
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         await self._device.async_set_attribute(self._attribute_name, True)
@@ -125,4 +134,5 @@ class JebaoSwitchEntity(JebaoEntity, SwitchEntity):
             return  # attribute not in this status update
         val = status.data[self._attribute_name]
         self._is_on = bool(val)
+        self._status = status.data
         self.async_write_ha_state()

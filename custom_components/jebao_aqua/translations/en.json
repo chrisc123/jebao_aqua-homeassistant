@@ -187,6 +187,9 @@
       },
       "nightflow": {
         "name": "Night Flow"
+      },
+      "motor_speed": {
+        "name": "Speed"
       }
     },
     "select": {
@@ -264,19 +267,11 @@
       "volor_violet": {
         "name": "Violet"
       },
-      "schedule_mode": {
-        "name": "Schedule mode",
-        "state": {
-          "off": "Stopped",
-          "run": "Running",
-          "feed": "Feeding"
-        }
-      },
-      "schedule_slots": {
-        "name": "Schedule slots"
-      },
       "clock_last_set": {
         "name": "Pump clock last set"
+      },
+      "pump_status": {
+        "name": "Status"
       }
     },
     "switch": {
